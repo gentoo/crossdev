@@ -1,6 +1,5 @@
 # Copyright 2008 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
 
 # -solar
 
@@ -24,9 +23,3 @@ install:
 	sed -i -e s@__TOPDIR__@$(SITE)@g $(DESTDIR)/$(SITE)/config.site
 	mv $(DESTDIR)/$(SITE)/config.site $(DESTDIR)/$(PREFIX)/share/
 	( cd $(DESTDIR)/$(PREFIX)/share/crossdev/etc && ln -sf $(PORTDIR)/profiles/embedded make.profile )
-
-uninstall:
-	@for x in $(FNAMES) ; do rm -f $(DESTDIR)/$(PREFIX)/bin/$$x ; done
-
-dist:
-	cd ../ ; tar jcvf crossdev-wrappers-`date -u +%Y%m%d`.tar.bz2 crossdev-wrappers
