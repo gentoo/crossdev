@@ -1,0 +1,19 @@
+#!/bin/bash
+# Copyright 2008 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+# -solar
+
+[[ $CHOST == "" ]] && { echo "CHOST is not set" ; exit 1 ; }
+
+export CBUILD=$(portageq envvar CBUILD)
+export SYSROOT="/usr/${CHOST}"
+export PORTAGE_CONFIGROOT="/usr/${CHOST}"
+
+FAKEROOT=
+if [[ $(id -u) != 0 ]]; then
+	[[ $(type -p fakeroot) != "" ]] && FAKEROOT=fakeroot
+fi
+
+${FAKEROOT} emerge -q "$@"

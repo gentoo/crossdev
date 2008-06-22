@@ -1,0 +1,47 @@
+#!/bin/bash
+
+TOPDIR=__TOPDIR__
+
+config_site_arch() {
+	local host=$(echo ${CHOST/-/ } | awk '{print $1}')
+
+	[[ ${host/arm.*eb/} != ${host} ]] && host=armeb
+	[[ ${host/arm/} != ${host} ]] && [[ ${host} != armeb ]] && host=arm
+
+	[[ ${host/mips.*el/} != ${host} ]] && host=mipsel
+
+	#[[ ${host/i[4-5]/6} != ${host} ]] && host=i686
+
+	echo ${host}
+}
+
+config_site_names() {
+	local site_arch=$(config_site_arch)
+	local sites=""
+	local x
+
+	[[ ${CHOST/-linux-/} != $CHOST ]] && sites="${sites} linux"
+	[[ ${CHOST/darwin/} != $CHOST ]] && sites="${sites} darwin"
+
+	[[ ${CHOST/-linux-uclibc/} != $CHOST ]] && sites="${sites} ${site_arch}-linux-uclibc linux-uclibc"
+	[[ ${CHOST/-linux-gnu/} != $CHOST ]] && sites="${sites} ${site_arch}-linux-gnu linux-gnu"
+
+	[[ ${CHOST/-linux-uclibceabi/} != $CHOST ]] && sites="${sites} ${site_arch}-linux-uclibceabi linux-uclibceabi"
+	[[ ${CHOST/-linux-gnueabi/} != $CHOST ]] && sites="${sites} ${site_arch}-linux-gnueabi linux-gnueabi"
+
+	for x in ${CHOST} ${sites} ${site}; do
+		[[ -e ${TOPDIR}/$x ]] && echo ${TOPDIR}/$x
+	done
+}
+
+if [[ ${CHOST} != "" ]]; then
+	sites="$(config_site_names)"
+	if [[ ${sites} != "" ]]; then
+		for site in ${sites}; do
+			echo "$(basename $0): loading site script $site"
+			. ${site}
+		done
+	fi
+	unset site
+	unset sites
+fi

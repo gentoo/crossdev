@@ -1,0 +1,4 @@
+# We have `fork', but it always fails.  Don't trust Autoconf to be
+# smart enough to detect that...
+ac_cv_func_fork=no
+ac_cv_func_vfork=no

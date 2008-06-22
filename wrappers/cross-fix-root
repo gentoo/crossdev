@@ -1,0 +1,48 @@
+#!/bin/bash
+# Copyright 2008 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+# - solar
+
+CROSS_ROOT=""
+[[ $1 != "" ]] && [ -e /usr/$1 ] && CROSS_ROOT="/usr/$1"
+[[ -e ${CROSS_ROOT} ]] || exit 0
+
+function strip_path() {
+        echo $1 | grep -Eo "[^\/]+$"
+}
+
+function re_safe() {
+        echo $1 | gawk '{ gsub("/","\\/"); print }'
+}
+
+fix_la_files() {
+	count=0
+	for LA in $(find $CROSS_ROOT/usr/lib/ -iname *.la); do
+		[ -e $LA ] || continue
+		count=$(($count+1))
+		sed  -i -e "s;libdir='/usr/lib';libdir='$CROSS_ROOT/usr/lib';" \
+			-e s@" /usr/lib"@" ${CROSS_ROOT}/usr/lib"@g $LA
+		[[ $? != 0 ]] && printf "FAIL $LA or $CROSS_ROOT FAILED sucka\n"
+	done
+	return $count
+}
+
+fix_pc_files() {
+	count=0
+	for PC in $CROSS_ROOT/usr/lib/pkgconfig/*.pc; do
+		[ -e $PC ] || continue
+		sed -i -e "s/^prefix\\=\\/usr$/prefix\=$(re_safe "$CROSS_ROOT")\\/usr/" $PC
+		count=$(($count+1))
+		[[ $? != 0 ]] && printf "Fixing $PC for $CROSS_ROOT FAILED sucka\n"
+	done
+	return $count
+}
+
+fix_la_files ${CROSS_ROOT}
+la_count=$?
+fix_pc_files ${CROSS_ROOT}
+pc_count=$?
+:
+( . /sbin/functions.sh ; einfo "Scanned/Fixed $pc_count "'*'".pc and $la_count "'*'".la files" )

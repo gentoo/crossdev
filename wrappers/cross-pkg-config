@@ -1,0 +1,52 @@
+#!/bin/sh
+# Copyright 2008 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+# -solar
+# Also uses vapier's code from uclinux-dist 
+
+if [[ "x$ROOT" == "x" ]]; then
+	exit 1
+fi
+
+# Helper functions.  So very helpful.
+#
+msg_to_stderr() { echo "cross-pkg-config: $*" 1>&2 ; }
+warn() { msg_to_stderr "warning: $*" ; }
+error() {
+	msg_to_stderr "error: $*"
+	exit 1
+}
+
+
+SYSROOT="$ROOT"
+export PKG_CONFIG_LIBDIR="${SYSROOT}/usr/lib/pkgconfig"
+unset PKG_CONFIG_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS PKG_CONFIG_ALLOW_SYSTEM_LIBS
+#export PKG_CONFIG_DEBUG_SPEW="yes" #enable for debug
+
+#
+# Sanity check the output to catch common errors that do not
+# cause failures until much later on.
+#
+output=$(pkg-config "$@")
+ret=$?
+case " ${output} " in
+	*" -L/usr/lib "*|*" -L/usr/local/lib "*|\
+	*" -L /usr/lib "*|*" -L /usr/local/lib "*|\
+	*" -L/usr/lib64 "*|*" -L/usr/local/lib64 "*|\
+	*" -L /usr/lib64 "*|*" -L /usr/local/lib64 "*)
+		warn "### falling down so here is a dump state ######"
+		pkg-config --debug "$@" 1>&2
+		warn "### end of dump ###############################"
+		error "host -L paths detected: ${output}"
+		;;
+	*" -I/usr/include"*|*" -I/usr/local/include"*)
+		warn "### falling down so here is a dump state ######"
+		pkg-config --debug "$@" 1>&2
+		warn "### end of dump ###############################"
+		error "host -I paths detected: ${output}"
+		;;
+esac
+[ -n "${output}" ] && echo "${output}"
+exit ${ret}

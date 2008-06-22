@@ -1,0 +1,82 @@
+#!/bin/bash
+# Copyright 2008 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+# - solar
+
+cross_wrap_etc() {
+	local chost=$1
+	cp -a __PREFIX__/share/crossdev/etc /usr/$chost/
+
+	conf=/usr/$chost/etc/make.conf
+
+	if [[ ${chost:0:1} == "i" ]] && [[ ${chost:3:4} == "86" ]]; then
+		ARCH=x86
+	fi
+
+	if [[ ${chost:0:3} == "arm" ]]; then
+		E_MACHINE=EM_ARM
+		ARCH=arm
+		echo 'UCLIBC_CPU_DEFAULT="GENERIC_ARM"' >> ${conf}
+	fi
+
+	[[ $E_MACHINE != "" ]] && sed -i -e s/'#E_MACHINE=__E_MACHINE__'/E_MACHINE=${E_MACHINE}/g ${conf}
+	[[ $ARCH != "" ]] && sed -i -e s/__ARCH__/${ARCH}/g ${conf}
+	sed -i -e s/__CHOST__/${chost}/g -e s/__CBUILD__/${CBUILD}/g ${conf}
+	echo MAKEOPTS=-j$(cat /proc/cpuinfo | grep processor| wc -l) >> ${conf}
+	[[ ${overlay} != "" ]] && echo PORTDIR_OVERLAY=\"${overlay}\" >> ${conf}
+}
+
+cross_init() {
+	bn=$(basename $0)
+	[[ $bn != emerge-wrapper ]] && { echo "I wont understand things" ; exit 1; }
+	dn=$(dirname $(readlink -f $0))
+	chosts=$(gcc-config -l | awk '{print $2}'| grep -- -| cut -d '-' -f 1-4| sort -u)
+	cd $dn || { echo "Failed to cd to $dn" ; exit 1; }
+	export overlay=$(portageq envvar PORTDIR_OVERLAY)
+
+	for chost in $chosts; do
+		[[ $chost == $CBUILD ]] && continue
+		[[ $(type -p ${chost}-gcc) == "" ]] && continue
+		echo " * Setting up symlinks for $chost"
+		ln -sf emerge-wrapper emerge-${chost}
+		ln -sf emerge-wrapper ${chost}-emerge
+		ln -sf cross-pkg-config ${chost}-pkg-config
+		if [ -d /usr/${chost} ] ; then
+			if [[ ! -d /usr/${chost}/etc/ ]]; then
+				echo " * Setting up cross basics in /usr/${chost}/etc"
+				cross_wrap_etc $chost
+			fi
+		fi
+	done
+}
+
+# CBUILD must be the first thing we export
+export CBUILD=$(portageq envvar CBUILD)
+
+if [[ $1 == "--init" ]]; then
+	cross_init
+	exit 0
+fi
+
+CHOST=$(basename $0)
+CHOST=${CHOST/-emerge}
+CHOST=${CHOST/emerge-}
+export CHOST
+
+if [[ $CHOST == wrapper ]]; then
+	if [[ $1 == "--target" ]]; then
+		export CHOST=$2
+		shift 2
+	else
+		echo "After running this program with the --init option as root"
+		echo "you can call it directly like emerge-wrapper --target CHOST <emerge options>"
+		echo "or using the emerge-CHOST wrappers"
+		exit 1
+	fi
+fi
+
+[[ $(type -p ${CHOST}-gcc) == "" ]] && { echo "You need to 'crossdev $CHOST' first" ; exit 1; }
+
+cross-emerge "$@"
