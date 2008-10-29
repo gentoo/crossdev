@@ -25,6 +25,8 @@ cross_wrap_etc() {
 	[[ $ARCH != "" ]] && sed -i -e s/__ARCH__/${ARCH}/g ${conf}
 	sed -i -e s/__CHOST__/${chost}/g -e s/__CBUILD__/${CBUILD}/g ${conf}
 	echo MAKEOPTS=-j$(cat /proc/cpuinfo | grep processor| wc -l) >> ${conf}
+	[[ ${portdir} != "" ]] && echo PORTDIR=\"${portdir}\" >> ${conf}
+	[[ ${distdir} != "" ]] && echo DISTDIR=\"${distdir}\" >> ${conf}
 	[[ ${overlay} != "" ]] && echo PORTDIR_OVERLAY=\"${overlay}\" >> ${conf}
 }
 
@@ -35,6 +37,8 @@ cross_init() {
 	chosts=$(gcc-config -l | awk '{print $2}'| grep -- -| cut -d '-' -f 1-4| sort -u)
 	cd $dn || { echo "Failed to cd to $dn" ; exit 1; }
 	export overlay=$(portageq envvar PORTDIR_OVERLAY)
+	export portdir=$(portageq envvar PORTDIR)
+	export distdir=$(portageq envvar DISTDIR)
 
 	for chost in $chosts; do
 		[[ $chost == $CBUILD ]] && continue
