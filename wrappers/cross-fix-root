@@ -1,48 +1,60 @@
-#!/bin/bash
+#!/bin/sh
 # Copyright 2008 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-# - solar
+#
+# fix library perms, mung paths in pkg-config files, libtool linker scripts,
+# and random -config scripts to point to our build directory, and cross-compile
+# symlinks for the -config scripts as autotool packages will search for
+# prefixed -config scripts when cross-compiling.  note: the ugly ln/mv is to
+# work around a possible race condition if multiple make jobs are generating
+# the same symlink at the same time.  a `mv` is "atomic" (it uses rename())
+# while a `ln` is actually unlink();symlink();.
+#
 
-CROSS_ROOT=""
-[[ $1 != "" ]] && [ -e /usr/$1 ] && CROSS_ROOT="/usr/$1"
-[[ -e ${CROSS_ROOT} ]] || exit 0
+LIBDIR="usr/lib"
+SYSROOT=${SYSROOT:-${ROOT:-${STAGEDIR}}}
+CROSS_BINDIR=""
+if [ -n "${ROOTDIR}" ] ; then
+	# uClinux-dist mojo
+	CROSS_BINDIR="${ROOTDIR}/tools"
+fi
+CROSS_PREFIX=${CROSS_COMPILE}
+if [ -n "$1" ] && [ -e "/usr/$1" ] ; then
+	SYSROOT="/usr/$1"
+	CROSS_BINDIR="/usr/bin"
+	CROSS_PREFIX="$1-"
+fi
 
-function strip_path() {
-        echo $1 | grep -Eo "[^\/]+$"
-}
+cd "${SYSROOT}" || exit 1
 
-function re_safe() {
-        echo $1 | gawk '{ gsub("/","\\/"); print }'
-}
+if [ -d "${LIBDIR}" ] ; then
+	find "./${LIBDIR}/" -name 'lib*.so*' -print0 | xargs -0 -r chmod 755
+	find "./${LIBDIR}/" -name 'lib*.la' -o -name 'lib*.a' -print0 | xargs -0 -r chmod 644
+	find "./${LIBDIR}/" -name 'lib*.la' -print0 | xargs -0 -r \
+		sed -i \
+			-e "/^libdir=/s:=.*:='${SYSROOT}/usr/lib':" \
+			-e "/^dependency_libs=/s: /usr/lib/: ${SYSROOT}/usr/lib/:g"
+fi
 
-fix_la_files() {
-	count=0
-	for LA in $(find $CROSS_ROOT/usr/lib/ -iname *.la); do
-		[ -e $LA ] || continue
-		count=$(($count+1))
-		sed  -i -e "s;libdir='/usr/lib';libdir='$CROSS_ROOT/usr/lib';" \
-			-e s@" /usr/lib"@" ${CROSS_ROOT}/usr/lib"@g $LA
-		[[ $? != 0 ]] && printf "FAIL $LA or $CROSS_ROOT FAILED sucka\n"
-	done
-	return $count
-}
+if [ -d "${LIBDIR}/pkgconfig" ] ; then
+	find "./${LIBDIR}/pkgconfig/" -name '*.pc' -print0 | xargs -0 -r \
+		sed -i "/^prefix=/s:=.*:='${SYSROOT}/usr':"
+fi
 
-fix_pc_files() {
-	count=0
-	for PC in $CROSS_ROOT/usr/lib/pkgconfig/*.pc; do
-		[ -e $PC ] || continue
-		sed -i -e "s/^prefix\\=\\/usr$/prefix\=$(re_safe "$CROSS_ROOT")\\/usr/" $PC
-		count=$(($count+1))
-		[[ $? != 0 ]] && printf "Fixing $PC for $CROSS_ROOT FAILED sucka\n"
-	done
-	return $count
-}
+if [ -d usr/bin ] ; then
+	find ./usr/bin/ -name '*-config' -print0 | xargs -0 -r \
+		sed -i "/^prefix=/s:=.*:='${SYSROOT}/usr':"
 
-fix_la_files ${CROSS_ROOT}
-la_count=$?
-fix_pc_files ${CROSS_ROOT}
-pc_count=$?
-:
-( . /sbin/functions.sh ; einfo "Scanned/Fixed $pc_count "'*'".pc and $la_count "'*'".la files" )
+	if [ -n "${CROSS_BINDIR}" ] && [ -d "${CROSS_BINDIR}" ] && [ -n "${CROSS_PREFIX}" ] ; then
+		cd usr/bin || exit 1
+		for config in *-config ; do
+			ln -s "${SYSROOT}/usr/bin/${config}" "${CROSS_BINDIR}/${CROSS_PREFIX}.$$"
+			mv "${CROSS_BINDIR}/${CROSS_PREFIX}.$$" "${CROSS_BINDIR}/${CROSS_PREFIX}"
+		done
+		cd ../..
+	fi
+fi
+
+exit 0
