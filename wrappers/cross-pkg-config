@@ -49,7 +49,7 @@ unset PKG_CONFIG_ALLOW_SYSTEM_LIBS
 #
 # Set the pkg-config search paths to our staging directory.
 #
-export PKG_CONFIG_LIBDIR="${SYSROOT}/usr/lib/pkgconfig"
+export PKG_CONFIG_LIBDIR="${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig"
 if [ -n "${EXTRA_PKG_CONFIG_LIBDIR}" ] ; then
 	EXTRA_CONFIG_LIBDIR="${EXTRA_PKG_CONFIG_LIBDIR}:${PKG_CONFIG_LIBDIR}"
 fi
