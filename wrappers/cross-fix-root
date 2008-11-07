@@ -27,7 +27,7 @@ if [ -n "$1" ] && [ -e "/usr/$1" ] ; then
 	CROSS_PREFIX="$1-"
 fi
 
-cd "${SYSROOT}" || exit 1
+cd "${SYSROOT}" || exit 0
 
 if [ -d "${LIBDIR}" ] ; then
 	find "./${LIBDIR}/" -name 'lib*.so*' -print0 | xargs -0 -r chmod 755
