@@ -352,7 +352,7 @@ SET_X="no"
 
 while [[ $# -gt 0 ]] ; do
 	case $1 in
-	-V|--version)   echo "crossdev-GENTOO_PV"; exit 0;;
+	-V|--version)   echo "crossdev-@CDEVPV@"; exit 0;;
 	-t|--target)    shift; parse_target $1;;
 	--b|--binutils) shift; BVER=$1;;
 	--g|--gcc)      shift; GVER=$1;;

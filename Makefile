@@ -10,9 +10,11 @@ install:
 	$(INSTALL_EXEC) crossdev $(DESTDIR)/$(PREFIX)/bin/
 	$(MAKE) -C wrappers install
 
-P = crossdev-`date +%Y%m%d`
+PV = $(shell date +%Y%m%d)
+P = crossdev-$(PV)
 dist:
-	git archive --prefix=$(P)/ HEAD > $(P).tar
+	git archive --prefix=$(P)/ HEAD | sed 's:@CDEVPV@:$(PV):g' > $(P).tar
 	-lzma -f $(P).tar
+	du -b $(P).tar*
 
 .PHONY: all dist install
