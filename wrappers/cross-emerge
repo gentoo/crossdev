@@ -1,19 +1,26 @@
-#!/bin/bash
+#!/bin/sh
 # Copyright 2008 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-# -solar
-
-[[ $CHOST == "" ]] && { echo "CHOST is not set" ; exit 1 ; }
-
-export CBUILD=$(portageq envvar CBUILD)
-export SYSROOT="/usr/${CHOST}"
-export PORTAGE_CONFIGROOT="/usr/${CHOST}"
-
-FAKEROOT=
-if [[ $(id -u) != 0 ]]; then
-	[[ $(type -p fakeroot) != "" ]] && FAKEROOT=fakeroot
+if [ -z "${CHOST}" ] ; then
+	CHOST=${0##*/}
+	CHOST=${CHOST%-emerge}
 fi
 
-${FAKEROOT} emerge -q "$@"
+: ${SYSROOT=/usr/${CHOST}}
+: ${PORTAGE_CONFIGROOT=${SYSROOT}}
+
+if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
+	echo "cross-emerge: CHOST is not set properly"
+	exit 1
+fi
+
+: ${CBUILD=$(portageq envvar CBUILD)}
+
+FAKEROOT=
+if [ $(id -u) -ne 0 ] ; then
+	type -P fakeroot >/dev/null && FAKEROOT=fakeroot
+fi
+
+exec ${FAKEROOT} emerge -q "$@"
