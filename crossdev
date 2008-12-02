@@ -268,6 +268,7 @@ uninstall() {
 	done
 	rm -f /usr/${CTARGET}/{sys-include,usr}
 	rm -f /usr/bin/${CTARGET}-{gcc,{c,g}++,cpp,gfortran,gcov}
+	rm -f /usr/bin/${CTARGET}-{emerge,fix-root,pkg-config}
 	rmdir /usr/${CTARGET}/{include/asm,include} &> /dev/null
 	for d in /usr/${CTARGET} /usr/lib/gcc{,-lib}/${CTARGET} ; do
 		if [[ ! -d ${d} ]] ; then
@@ -561,6 +562,13 @@ set_portage ${KCAT} ${KPKG} ${KVER}
 set_portage ${LCAT} ${LPKG} ${LVER}
 set_portage sys-devel gdb
 set_portage dev-util insight
+
+#######################################
+### Create links for helper scripts ###
+
+for wrapper in emerge fix-root pkg-config ; do
+	ln -sf cross-${wrapper} /usr/bin/${CTARGET}-${wrapper}
+done
 
 #################
 emerged_with_use() {
