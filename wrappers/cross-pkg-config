@@ -41,7 +41,13 @@ elif [ -n "${STAGEDIR}" ] ; then
 	SYSROOT=${STAGEDIR}
 	EXTRA_PKG_CONFIG_LIBDIR=${UCLINUX_PKG_CONFIG_LIBDIR}
 else
-	error "Need \$ROOT or \$STAGEDIR set first"
+	# /usr/<target>
+	CHOST=${0##*/}
+	CHOST=${CHOST%-pkg-config}
+	SYSROOT="/usr/${CHOST}"
+	if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
+		error "Need \$ROOT or \$STAGEDIR set first"
+	fi
 fi
 # abort infinite loop due to misconfiguration
 [ "${0##*/}" = "pkg-config" ] && error "aborting infinite loop! (make sure to delete uClinux-dist/tools/pkg-config)"
