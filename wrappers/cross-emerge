@@ -23,4 +23,5 @@ if [ $(id -u) -ne 0 ] ; then
 	type -P fakeroot >/dev/null && FAKEROOT=fakeroot
 fi
 
-exec ${FAKEROOT} emerge -q "$@"
+: ${CROSS_CMD:=emerge}
+exec ${FAKEROOT} ${CROSS_CMD} -q "$@"
