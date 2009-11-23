@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2008 Gentoo Foundation
+# Copyright 2008-2009 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -7,9 +7,11 @@ if [ -z "${CHOST}" ] ; then
 	CHOST=${0##*/}
 	CHOST=${CHOST%-emerge}
 fi
+export CHOST
 
 : ${SYSROOT=/usr/${CHOST}}
 : ${PORTAGE_CONFIGROOT=${SYSROOT}}
+export SYSROOT PORTAGE_CONFIGROOT
 
 if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
 	echo "cross-emerge: CHOST is not set properly"
@@ -20,6 +22,7 @@ fi
 : ${BUILD_CFLAGS=$(env -i portageq envvar CFLAGS)}
 : ${BUILD_CXXFLAGS=$(env -i portageq envvar CXXFLAGS)}
 : ${BUILD_CPPFLAGS=$(env -i portageq envvar CPPFLAGS)}
+export CBUILD BUILD_CFLAGS BUILD_CXXFLAGS BUILD_CPPFLAGS
 
 FAKEROOT=
 if [ $(id -u) -ne 0 ] ; then
