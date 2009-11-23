@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2008 Gentoo Foundation
+# Copyright 2008-2009 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -47,7 +47,7 @@ if [ -d "${LIBDIR}" ] ; then
 fi
 
 if [ -d "${LIBDIR}/pkgconfig" ] ; then
-	find "./${LIBDIR}/pkgconfig/" -name '*.pc' -print0 | xargs -0 -r \
+	find "./${LIBDIR}/pkgconfig/" ./usr/share/pkgconfig/ -name '*.pc' -print0 | xargs -0 -r \
 		sed -i "/^prefix=/s:=.*:='${SYSROOT}/usr':"
 fi
 
