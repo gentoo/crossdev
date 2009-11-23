@@ -17,6 +17,9 @@ if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
 fi
 
 : ${CBUILD=$(portageq envvar CBUILD)}
+: ${BUILD_CFLAGS=$(env -i portageq envvar CFLAGS)}
+: ${BUILD_CXXFLAGS=$(env -i portageq envvar CXXFLAGS)}
+: ${BUILD_CPPFLAGS=$(env -i portageq envvar CPPFLAGS)}
 
 FAKEROOT=
 if [ $(id -u) -ne 0 ] ; then
