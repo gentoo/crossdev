@@ -1,5 +1,5 @@
 filter_cross_flags() {
-	[[ ${CFLAGS/-mtunue=/} != ${CFLAGS} ]]
+	[[ ${CFLAGS/-mtune=/} != ${CFLAGS} ]]
 		export CFLAGS="-Os -fomit-frame-pointer -pipe"
 }
 filter_cross_flags
