@@ -6,6 +6,7 @@
 if [ -z "${CHOST}" ] ; then
 	CHOST=${0##*/}
 	CHOST=${CHOST%-emerge}
+	CHOST=${CHOST#emerge-}
 fi
 export CHOST
 
