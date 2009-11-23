@@ -269,7 +269,7 @@ uninstall() {
 	done
 	rm -f /usr/${CTARGET}/{sys-include,usr}
 	rm -f /usr/bin/${CTARGET}-{gcc,{c,g}++,cpp,gfortran,gcov}
-	rm -f /usr/bin/${CTARGET}-{emerge,fix-root,pkg-config}
+	rm -f /usr/bin/${CTARGET}-{emerge,fix-root,pkg-config} /usr/bin/emerge-${CTARGET}
 	rmdir /usr/${CTARGET}/{include/asm,include} &> /dev/null
 	for d in /usr/${CTARGET} /usr/lib/gcc{,-lib}/${CTARGET} ; do
 		if [[ ! -d ${d} ]] ; then
