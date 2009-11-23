@@ -40,6 +40,7 @@ cross_wrap_etc() {
 	[[ ${portdir} != "" ]] && echo PORTDIR=\"${portdir}\" >> ${conf}
 	[[ ${distdir} != "" ]] && echo DISTDIR=\"${distdir}\" >> ${conf}
 	[[ ${overlay} != "" ]] && echo PORTDIR_OVERLAY=\"${overlay}\" >> ${conf}
+	[[ -e /etc/make.conf ]] && grep ^GENTOO_MIRRORS= /etc/make.conf >> ${conf}
 }
 
 cross_init() {
