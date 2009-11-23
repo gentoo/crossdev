@@ -31,6 +31,10 @@ cross_wrap_etc() {
 		E_MACHINE=EM_MIPS
 		ARCH=mips
 	fi
+	if [[ ${chost:0:2} == "sh" ]]; then
+		E_MACHINE=EM_SH
+		ARCH=sh
+	fi
 	[[ ${chost/gnu/} != $chost ]] && sed -i -e s/__LIBC__/glibc/g ${conf}
 	[[ ${chost/uclibc/} != $chost ]] && sed -i -e s/__LIBC__/glibc/g ${conf}
 	[[ $E_MACHINE != "" ]] && sed -i -e s/'#E_MACHINE=__E_MACHINE__'/E_MACHINE=${E_MACHINE}/g ${conf}
