@@ -1,9 +1,13 @@
 [[ $(basename $(readlink -f $PORTAGE_CONFIGROOT/etc/make.profile)) == "embedded" ]] && . ${PORTDIR}/profiles/base/profile.bashrc
-#echo Add a new aggregation group:x=${x##*/}
+
 post_src_install() {
-	[[ -d ${D} ]] || return 0
+	[[ -d ${D} ]] || return 0        
 	[[ ${E_MACHINE} == "" ]] && return 0
-	output="$( cd ${D} && scanelf -RmyBF%a . | grep -v -e ^${E_MACHINE} )"
+	cmdline=""        
+	for EM in $E_MACHINE; do
+		cmdline+=" -e ^${EM}[[:space:]]";        
+	done
+	output="$( cd ${D} && scanelf -RmyBF%a . | grep -v ${cmdline} )"
 	[[ $output != "" ]] && { echo; echo "* Wrong EM_TYPE. Expected ${E_MACHINE}"; echo -e "${output}"; echo; exit 1; }
 }
 
