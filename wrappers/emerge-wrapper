@@ -51,7 +51,7 @@ cross_init() {
 	bn=$(basename $0)
 	[[ $bn != emerge-wrapper ]] && { echo "I wont understand things" ; exit 1; }
 	dn=$(dirname $(readlink -f $0))
-	chosts=$(gcc-config -l | awk '{print $2}'| grep -- -| cut -d '-' -f 1-4| sort -u)
+	chosts=`ls -1 /usr/lib/gcc`
 	cd $dn || { echo "Failed to cd to $dn" ; exit 1; }
 	export overlay=$(portageq envvar PORTDIR_OVERLAY)
 	export portdir=$(portageq envvar PORTDIR)
