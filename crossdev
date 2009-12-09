@@ -484,6 +484,13 @@ emerge -v --info >> ${PORT_LOGDIR}/cross-${CTARGET}-info.log
 ####################################
 ### Fix up portage files / paths ###
 
+check_trailing_newline() { #267132
+	[[ -e $1 ]] || return 0
+	if [[ `tail -c 1 "$1" | wc -l` == *0* ]] ; then
+		ewarn "Autofixing mangled file: $1"
+		echo >> "$1"
+	fi
+}
 set_keywords() {
 	local pkg=$1 ver=$2 output
 	[[ -z ${pkg} ]] && return 0
@@ -493,6 +500,7 @@ set_keywords() {
 	else
 		output="package.keywords/cross-${CTARGET}"
 	fi
+	check_trailing_newline ${output}
 	if [[ ${ver} == "["*"]" ]] || [[ -z ${ver} ]] ; then
 		local keywords=""
 		case ${ver} in
@@ -509,6 +517,7 @@ set_keywords() {
 		else
 			output="package.mask/cross-${CTARGET}"
 		fi
+		check_trailing_newline ${output}
 		echo ">cross-${CTARGET}/${pkg}-${ver}" >> ${output}
 	fi
 }
@@ -523,6 +532,7 @@ set_use() {
 		output="package.use/cross-${CTARGET}"
 	fi
 	[[ -e ${output} ]] && sed -i -e "/cross-${CTARGET}\/${pkg}/d" ${output}
+	check_trailing_newline ${output}
 	echo "cross-${CTARGET}/${pkg} ${use}" >> ${output}
 }
 set_links() {
@@ -551,6 +561,7 @@ set_portage() {
 }
 
 mkdir -p /etc/portage
+check_trailing_newline /etc/portage/categories
 grep -qs "^cross-${CTARGET}$" /etc/portage/categories \
 	|| echo cross-${CTARGET} >> /etc/portage/categories
 mkdir -p "${PORTDIR_OVERLAY}"/cross-${CTARGET}
