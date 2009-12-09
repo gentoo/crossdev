@@ -153,6 +153,11 @@ parse_target() {
 		*-cygwin)
 		      GUSE_DISABLE=${GUSE_DISABLE/nocxx};;
 
+		# these are the mingw64 targets that binutils seems to use
+		x86_64-*-mingw*|*-w64-mingw*)
+		      KPKG="[none]";
+		      LCAT="dev-util"; LPKG="mingw64-runtime";;
+
 		mingw*|*-mingw*)
 		      WITH_DEF_HEADERS="yes";
 		      KCAT="dev-util"; KPKG="w32api";
