@@ -612,8 +612,12 @@ doemerge() {
 	eend 0
 }
 
-# we include the '-u' so that we don't re-emerge packages
-EOPTS_DEF="${UOPTS} --nodeps --oneshot"
+# We include the '-u' so that we don't re-emerge packages.  Avoid
+# using --nodeps as packages have more host depends nowadays (like
+# gcc wanting updated mpfr/gmp).  Don't use --oneshot anymore to
+# follow normal emerge behavior; people can pass the -1 to portage
+# themselves if they want that.
+EOPTS_DEF="${UOPTS}"
 EOPTS_UP="${EOPTS_DEF} -u"
 EOPTS=${EOPTS_UP}
 # keep things like --ask from screwing us up
