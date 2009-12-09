@@ -619,6 +619,9 @@ EOPTS=${EOPTS_UP}
 # keep things like --ask from screwing us up
 export EMERGE_DEFAULT_OPTS=""
 
+# screw random strictness in cross-compilers
+export FEATURES="${FEATURES} -stricter"
+
 # maybe someday this work, but that day != today
 USE="${USE} -selinux"
 
