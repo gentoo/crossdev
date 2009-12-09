@@ -542,16 +542,22 @@ set_use() {
 }
 set_links() {
 	local cat=$1 pkg=$2
-	local s srcdir=${PORTDIR}
-	rm -f "${PORTDIR_OVERLAY}"/cross-${CTARGET}/${pkg}
-	for s in ${PORTDIR_OVERLAYS} ; do
-		if [[ -d ${s}/${cat}/${pkg} ]] ; then
-			einfo "Using ${cat}/${pkg} from ${s} instead of ${PORTDIR}"
-			srcdir=${s}
-			break
-		fi
-	done
-	ln -s "${srcdir}"/${cat}/${pkg} "${PORTDIR_OVERLAY}"/cross-${CTARGET}/${pkg}
+	local s srcdir=${PORTDIR} d
+
+	d="${PORTDIR_OVERLAY}"/cross-${CTARGET}/${pkg}
+	if [[ ! -L ${d} && -d ${d} ]] ; then #211386
+		einfo "Leaving existing dir alone: ${d}"
+	else
+		rm -f "${d}"
+		for s in ${PORTDIR_OVERLAYS} ; do
+			if [[ -d ${s}/${cat}/${pkg} ]] ; then
+				einfo "Using ${cat}/${pkg} from ${s} instead of ${PORTDIR}"
+				srcdir=${s}
+				break
+			fi
+		done
+		ln -s "${srcdir}"/${cat}/${pkg} "${d}"
+	fi
 }
 set_portage() {
 	local cat=$1 pkg=$2 ver=$3
