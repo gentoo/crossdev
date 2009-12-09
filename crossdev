@@ -254,17 +254,21 @@ uninstall() {
 		fi
 	done
 
-	if [[ ! -d /var/db/pkg/cross-${CTARGET} ]] ; then
-		eerror "${CTARGET} is not installed."
-		exit 1
+	rmdir /var/db/pkg/cross-${CTARGET} 2>/dev/null
+	if [[ -d /var/db/pkg/cross-${CTARGET} ]] ; then
+		export CLEAN_DELAY=0
+		cd /var/db/pkg
+		for p in cross-${CTARGET}/* ; do
+			emerge -qC =${p} || exit 1
+		done
+	else
+		ewarn "${CTARGET}: no packages installed"
 	fi
-
-	export CLEAN_DELAY=0
-	cd /var/db/pkg
-	for p in cross-${CTARGET}/* ; do
-		emerge -C =${p} || exit 1
-	done
-	for b in addr2line ar as c++filt ld nm objcopy objdump ranlib readelf size strings strip ; do
+	for b in \
+		addr2line ar as c++filt dlltool dllwrap embedspu \
+		gprof ld nm objcopy objdump ranlib readelf \
+		size strings strip windmc windres
+	do
 		rm -f /usr/bin/${CTARGET}-${b} /usr/${CTARGET}/bin/${b}
 	done
 	rm -f /usr/${CTARGET}/{sys-include,usr}
@@ -280,7 +284,7 @@ uninstall() {
 		fi
 	done
 	rm -f /etc/env.d/{binutils,gcc}/config-${CTARGET}
-	rmdir /var/db/pkg/cross-${CTARGET}
+	[[ -e /var/db/pkg/cross-${CTARGET} ]] && rmdir /var/db/pkg/cross-${CTARGET}
 
 	exit 0
 }
