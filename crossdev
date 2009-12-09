@@ -144,6 +144,9 @@ parse_target() {
 
 	# Now account for all the "special" architectures out there
 	case ${CTARGET} in
+		# this is a linux+ target, not microcontroller (below)
+		avr32*) :;;
+
 		avr*) KPKG="[none]"; STAGE_DEFAULT=${STAGE_LIBC};
 		      LCAT="dev-embedded"; LPKG="avr-libc";
 		      GUSE=${GUSE_DISABLE}
