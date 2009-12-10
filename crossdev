@@ -147,9 +147,9 @@ parse_target() {
 		# this is a linux+ target, not microcontroller (below)
 		avr32*) :;;
 
-		avr*) KPKG="[none]"; STAGE_DEFAULT=${STAGE_LIBC};
+		avr*) KPKG="[none]";
 		      LCAT="dev-embedded"; LPKG="avr-libc";
-		      GUSE=${GUSE_DISABLE}
+		      GUSE="-fortran" # doesn't work
 		      WITH_DEF_HEADERS="no";;
 
 		# due to upstream lameness, build C/C++ at first glance
