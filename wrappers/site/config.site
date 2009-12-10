@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2009 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
 
 TOPDIR=__TOPDIR__
 
@@ -20,17 +22,17 @@ config_site_names() {
 	local sites=""
 	local x
 
-	[[ ${CHOST/-linux-/} != $CHOST ]] && sites="${sites} linux"
-	[[ ${CHOST/darwin/} != $CHOST ]] && sites="${sites} darwin"
+	[[ ${CHOST/-linux-/} != $CHOST ]] && sites+=" linux ${site_arch}-linux"
+	[[ ${CHOST/darwin/} != $CHOST ]] && sites+=" darwin ${site_arch}-linux"
 
-	[[ ${CHOST/-linux-uclibc/} != $CHOST ]] && sites="${sites} ${site_arch}-linux-uclibc linux-uclibc"
-	[[ ${CHOST/-linux-gnu/} != $CHOST ]] && sites="${sites} ${site_arch}-linux-gnu linux-gnu"
+	[[ ${CHOST/-linux-uclibc/} != $CHOST ]] && sites+=" linux-uclibc ${site_arch}-linux-uclibc"
+	[[ ${CHOST/-linux-gnu/} != $CHOST ]] && sites+=" linux-gnu ${site_arch}-linux-gnu"
 
-	[[ ${CHOST/-linux-uclibceabi/} != $CHOST ]] && sites="${sites} ${site_arch}-linux-uclibceabi linux-uclibceabi"
-	[[ ${CHOST/-linux-gnueabi/} != $CHOST ]] && sites="${sites} ${site_arch}-linux-gnueabi linux-gnueabi"
+	[[ ${CHOST/-linux-uclibceabi/} != $CHOST ]] && sites+=" linux-uclibceabi ${site_arch}-linux-uclibceabi"
+	[[ ${CHOST/-linux-gnueabi/} != $CHOST ]] && sites+=" linux-gnueabi ${site_arch}-linux-gnueabi"
 
-	for x in ${CHOST} ${sites} ${site}; do
-		[[ -e ${TOPDIR}/$x ]] && echo ${TOPDIR}/$x
+	for x in ${sites} ${CHOST}; do
+		[[ -e ${TOPDIR}/${x} ]] && echo ${TOPDIR}/${x}
 	done
 }
 
@@ -38,7 +40,7 @@ if [[ ${CHOST} != "" ]]; then
 	sites="$(config_site_names)"
 	if [[ ${sites} != "" ]]; then
 		for site in ${sites}; do
-			echo "$(basename $0): loading site script $site"
+			echo "$(basename $0): loading site script ${site}"
 			. ${site}
 		done
 	fi
