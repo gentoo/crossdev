@@ -11,30 +11,37 @@ cross_wrap_etc() {
 	(cd /usr/$chost/etc ; ln -s /etc/make.globals make.globals )
 	conf=/usr/$chost/etc/make.conf
 
-	if [[ ${chost:0:1} == "i" ]] && [[ ${chost:3:4} == "86" ]]; then
+	case $chost in
+	i?86*)
 		E_MACHINE=EM_X86
 		ARCH=x86
-	fi
-
-	if [[ ${chost:3:4} == "x86_64" ]]; then
+		;;
+	x86_64*)
 		E_MACHINE=EM_X86_64
 		ARCH=amd64
-	fi
-
-	if [[ ${chost:0:3} == "arm" ]]; then
+		;;
+	arm*)
 		E_MACHINE=EM_ARM
 		ARCH=arm
 		echo 'UCLIBC_CPU_DEFAULT="GENERIC_ARM"' >> ${conf}
-	fi
-
-	if [[ ${chost:0:4} == "mips" ]]; then
+		;;
+	mips*)
 		E_MACHINE=EM_MIPS
 		ARCH=mips
-	fi
-	if [[ ${chost:0:2} == "sh" ]]; then
+		;;
+	sh*)
 		E_MACHINE=EM_SH
 		ARCH=sh
-	fi
+		;;
+	*)
+		echo "!!! WARNING - Cannot auto-configure CHOST ${chost}"
+		echo "!!! You should edit ${conf}"
+		echo "!!! by hand to complete your configuration"
+		E_MACHINE="__E_MACHINE__"
+		ARCH="__ARCH__"
+		;;
+	esac
+
 	[[ ${chost/gnu/} != $chost ]] && sed -i -e s/__LIBC__/glibc/g ${conf}
 	[[ ${chost/uclibc/} != $chost ]] && sed -i -e s/__LIBC__/glibc/g ${conf}
 	[[ $E_MACHINE != "" ]] && sed -i -e s/'#E_MACHINE=__E_MACHINE__'/E_MACHINE=${E_MACHINE}/g ${conf}
