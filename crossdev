@@ -256,10 +256,13 @@ uninstall() {
 		f="/etc/portage/${f}"
 		if [[ -d ${f} ]] ; then
 			rm -f "${f}"/cross-${CTARGET}
+			rmdir "${f}" 2>/dev/null
 		elif [[ -f ${f} ]] ; then
 			sed -i -e "/cross-${CTARGET}\//d" "${f}"
 		fi
 	done
+	rm -rf /etc/portage/env/cross-${CTARGET}
+	rmdir /etc/portage/env 2>/dev/null
 
 	rmdir /var/db/pkg/cross-${CTARGET} 2>/dev/null
 	if [[ -d /var/db/pkg/cross-${CTARGET} ]] ; then
@@ -561,6 +564,20 @@ set_links() {
 		ln -s "${srcdir}"/${cat}/${pkg} "${d}"
 	fi
 }
+set_env() {
+	local pkg=$1
+	mkdir -p env/cross-${CTARGET}
+
+	cat <<-EOF > env/cross-${CTARGET}/${pkg}
+	# make sure multilib crap doesn't screw us over
+	ABI=${ABI:-pos}
+	LIBDIR_pos="lib"
+	CFLAGS_pos=
+	CPPFLAGS_pos=
+	CXXFLAGS_pos=
+	LDFLAGS_pos=
+	EOF
+}
 set_portage() {
 	local cat=$1 pkg=$2 ver=$3
 	shift ; shift ; shift
@@ -571,6 +588,7 @@ set_portage() {
 	set_keywords ${pkg} ${ver}
 	set_use ${pkg} ${use}
 	set_links ${cat} ${pkg}
+	set_env ${pkg}
 }
 
 mkdir -p /etc/portage
@@ -652,9 +670,6 @@ export FEATURES="${FEATURES} -stricter"
 
 # maybe someday this work, but that day != today
 USE="${USE} -selinux"
-
-# make sure multilib crap doesn't screw us over
-export ABI=${ABI:-pos} LIBDIR_pos="lib" CFLAGS_pos="" LDFLAGS_pos=""
 
 # only allow UCLIBC_CPU from env, not from make.conf/profile
 export UCLIBC_CPU=${UCLIBC_CPU}
