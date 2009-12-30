@@ -47,7 +47,7 @@ fi
 
 set --
 for d in "./${LIBDIR}/pkgconfig/" ./usr/share/pkgconfig/ ; do
-	[[ -d $d ]] && set -- "$@" "${d}"
+	[ -d "$d" ] && set -- "$@" "${d}"
 done
 if [ $# -gt 0 ] ; then
 	find "$@" -name '*.pc' -print0 | xargs -0 -r \
