@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2008-2009 Gentoo Foundation
+# Copyright 2008-2010 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 #
@@ -23,7 +23,7 @@ error() {
 #
 # Sanity/distro checks
 #
-MIN_VER="0.20"
+MIN_VER="0.23" # needs PKG_CONFIG_SYSROOT_DIR
 if ! pkg-config --atleast-pkgconfig-version ${MIN_VER} ; then
 	error pkg-config is too old ... upgrade to at least v${MIN_VER}
 fi
@@ -79,6 +79,12 @@ export PKG_CONFIG_LIBDIR="${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgc
 if [ -n "${EXTRA_PKG_CONFIG_LIBDIR}" ] ; then
 	PKG_CONFIG_LIBDIR="${EXTRA_PKG_CONFIG_LIBDIR}:${PKG_CONFIG_LIBDIR}"
 fi
+#
+# This guy is horribly broken in pkg-config <=0.23:
+#	https://bugs.freedesktop.org/show_bug.cgi?id=16905
+#
+#export PKG_CONFIG_SYSROOT_DIR="${SYSROOT}"
+unset PKG_CONFIG_SYSROOT_DIR
 
 #
 # Sanity check the output to catch common errors that do not
@@ -86,6 +92,14 @@ fi
 #
 output=$(pkg-config "$@")
 ret=$?
+
+#
+# Inject PKG_CONFIG_SYSROOT_DIR ourselves until pkg-config is fixed.
+# We can't mung the .pc files as some of the vars are used at compile
+# time to encode runtime paths.
+#
+output=$(echo "${output}" | sed -e 's:\(-[IL][[:space:]]*\)\(/usr\):\1'"${SYSROOT}"'\2:g')
+
 case " ${output} " in
 	*" -L/usr/lib "*|*" -L/usr/local/lib "*|\
 	*" -L /usr/lib "*|*" -L /usr/local/lib "*|\

@@ -59,14 +59,7 @@ if [ -d "${LIBDIR}" ] ; then
 			-e "/^dependency_libs=/s: /usr/lib/: ${SYSROOT}/usr/lib/:g"
 fi
 
-set --
-for d in "./${LIBDIR}/pkgconfig/" ./usr/share/pkgconfig/ ; do
-	[ -d "$d" ] && set -- "$@" "${d}"
-done
-if [ $# -gt 0 ] ; then
-	find "$@" -name '*.pc' -print0 | xargs -0 -r \
-		sed -i -r -e "/^(exec_)?prefix=/s:=/usr\$:='${SYSROOT}/usr':"
-fi
+# we don't touch .pc files anymore as we require pkg-config 0.23+ and PKG_CONFIG_SYSROOT_DIR
 
 if [ -d usr/bin ] ; then
 	find ./usr/bin/ -name '*-config' -print0 | xargs -0 -r \
