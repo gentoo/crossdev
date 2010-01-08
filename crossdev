@@ -290,7 +290,10 @@ uninstall() {
 			rm -f "${d}" &> /dev/null
 		else
 			rmdir "${d}" &> /dev/null && continue
-			rm -ri "${d}"
+			printf "${d}: directory still exists; remove recursively? [y/N] "
+			local ans
+			read ans
+			[[ ${ans} == [Yy]* ]] && rm -rf "${d}"
 		fi
 	done
 	rm -f /etc/env.d/{binutils,gcc}/config-${CTARGET}
