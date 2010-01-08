@@ -23,12 +23,9 @@ error() {
 #
 # Sanity/distro checks
 #
-if ver=$(pkg-config --version) ; then
-	if [ ${ver#0.1} != ${ver} ] ; then
-		error pkg-config is too old ... upgrade it
-	fi
-else
-	error unable to find pkg-config in PATH
+MIN_VER="0.20"
+if ! pkg-config --atleast-pkgconfig-version ${MIN_VER} ; then
+	error pkg-config is too old ... upgrade to at least v${MIN_VER}
 fi
 
 if [ "$1" = "--cross-pkg-config-install" ] ; then
