@@ -100,24 +100,22 @@ ret=$?
 #
 output=$(echo "${output}" | sed -e 's:\(-[IL][[:space:]]*\)\(/usr\):\1'"${SYSROOT}"'\2:g')
 
-case " ${output} " in
-	*" -L/usr/lib "*|*" -L/usr/local/lib "*|\
-	*" -L /usr/lib "*|*" -L /usr/local/lib "*|\
-	*" -L/usr/lib64 "*|*" -L/usr/local/lib64 "*|\
-	*" -L /usr/lib64 "*|*" -L /usr/local/lib64 "*)
-		warn "### falling down so here is a dump state ######"
-		export PKG_CONFIG_DEBUG_SPEW="yes"
-		pkg-config --debug "$@" 1>&2
-		warn "### end of dump ###############################"
-		error "host -L paths detected: ${output}"
-		;;
-	*" -I/usr/include"*|*" -I/usr/local/include"*)
-		warn "### falling down so here is a dump state ######"
-		export PKG_CONFIG_DEBUG_SPEW="yes"
-		pkg-config --debug "$@" 1>&2
-		warn "### end of dump ###############################"
-		error "host -I paths detected: ${output}"
-		;;
-esac
+# We turn the output into a newline separate string of options, then use grep
+# to look for bad -Is and -Ls.  Bad -Is and -Ls are ones that point to things
+# outside the ${SYSROOT}.
+bad_lines=$(echo "$output" |         # Get the pkg-config output.
+	tr -s ' ' | tr ' ' '\n' |    # Put each flags on its own line.
+	grep -E '^(-L|-I)' |         # Find all -I and -L lines.
+	grep -v -E "..:?${SYSROOT}"  # Find all things outside the SYSROOT.
+	)
+if [ -n "$bad_lines" ]; then
+	warn "### falling down so here is a dump state ######"
+	pkg-config --debug "$@" 1>&2
+	warn "### end of dump ###############################"
+	warn "### suspicious compile flags dumped here ######"
+	echo "$bad_lines"
+	warn "### end of flag dump ##########################"
+	error "host -I or -L paths detected: ${output}"
+fi
 [ -n "${output}" ] && echo "${output}"
 exit ${ret}
