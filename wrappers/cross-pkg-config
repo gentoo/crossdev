@@ -103,10 +103,10 @@ output=$(echo "${output}" | sed -e 's:\(-[IL][[:space:]]*\)\(/usr\):\1'"${SYSROO
 # We turn the output into a newline separate string of options, then use grep
 # to look for bad -Is and -Ls.  Bad -Is and -Ls are ones that point to things
 # outside the ${SYSROOT}.
-bad_lines=$(echo "$output" |         # Get the pkg-config output.
+bad_lines=$(echo "$output" |     # Get the pkg-config output.
 	tr -s ' ' | tr ' ' '\n' |    # Put each flags on its own line.
 	grep -E '^(-L|-I)' |         # Find all -I and -L lines.
-	grep -v -E "..:?${SYSROOT}"  # Find all things outside the SYSROOT.
+	grep -v -E "..${SYSROOT}"    # Find all things outside the SYSROOT.
 	)
 if [ -n "$bad_lines" ]; then
 	warn "### falling down so here is a dump state ######"
