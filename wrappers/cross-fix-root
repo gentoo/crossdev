@@ -68,6 +68,7 @@ if [ -d usr/bin ] ; then
 	if [ -n "${CROSS_BINDIR}" ] && [ -d "${CROSS_BINDIR}" ] && [ -n "${CROSS_PREFIX}" ] ; then
 		cd usr/bin || exit 1
 		for config in *-config ; do
+			[ -x "${config}" ] || continue # avoid empty globs
 			# work around a possible race condition if multiple make jobs
 			# are generating the same symlink at the same time.  a `mv`
 			# is "atomic" (it uses rename())  while a `ln` is actually
