@@ -23,7 +23,7 @@ error() {
 #
 # Sanity/distro checks
 #
-MIN_VER="0.23" # needs PKG_CONFIG_SYSROOT_DIR
+MIN_VER="0.20" # needs PKG_CONFIG_SYSROOT_DIR
 if ! pkg-config --atleast-pkgconfig-version ${MIN_VER} ; then
 	error pkg-config is too old ... upgrade to at least v${MIN_VER}
 fi
