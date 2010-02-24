@@ -14,8 +14,7 @@ post_src_install() {
 # We don't run this on the assumption that when you're
 # emerging binary packages, it's into a runtime ROOT
 # rather than build development ROOT.  The former doesn't
-# want hacking while the latter does.  We should have a
-# better way of detecting this ... maybe check SYSROOT ?
+# want hacking while the latter does.  
 if [[ $EBUILD_PHASE == "postinst" ]]; then
-	[[ $EMERGE_FROM != binary ]] && cross-fix-root ${CHOST}
+	[[ $SYSROOT == $ROOT ]] && cross-fix-root ${CHOST}
 fi
