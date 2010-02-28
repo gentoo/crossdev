@@ -30,4 +30,4 @@ if [ $(id -u) -ne 0 ] ; then
 fi
 
 : ${CROSS_CMD:=emerge --root-deps=rdeps}
-exec ${FAKEROOT} ${CROSS_CMD} -q "$@"
+exec ${FAKEROOT} ${CROSS_CMD} "$@"
