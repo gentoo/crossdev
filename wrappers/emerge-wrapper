@@ -1,109 +1,161 @@
 #!/bin/bash
-# Copyright 2008-2009 Gentoo Foundation
+# Copyright 2008-2010 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-# - solar
+if [[ $1 == "--help" || $1 == "-h" ]] ; then
+	cat <<-EOF
+	Usage: emerge-wrapper [--target <chost>] <--init|commands for cross-emerge>
 
-cross_wrap_etc() {
-	local chost=$1
-	cp -a __PREFIX__/share/crossdev/etc /usr/$chost/
-	(cd /usr/$chost/etc ; ln -s /etc/make.globals make.globals )
-	conf=/usr/$chost/etc/make.conf
-
-	case $chost in
-	i?86*)
-		E_MACHINE=EM_X86
-		ARCH=x86
-		;;
-	x86_64*)
-		E_MACHINE=EM_X86_64
-		ARCH=amd64
-		;;
-	arm*)
-		E_MACHINE=EM_ARM
-		ARCH=arm
-		echo 'UCLIBC_CPU_DEFAULT="GENERIC_ARM"' >> ${conf}
-		;;
-	mips*)
-		E_MACHINE=EM_MIPS
-		ARCH=mips
-		;;
-	sh*)
-		E_MACHINE=EM_SH
-		ARCH=sh
-		;;
-	*)
-		echo "!!! WARNING - Cannot auto-configure CHOST ${chost}"
-		echo "!!! You should edit ${conf}"
-		echo "!!! by hand to complete your configuration"
-		E_MACHINE="__E_MACHINE__"
-		ARCH="__ARCH__"
-		;;
-	esac
-
-	[[ ${chost/gnu/} != $chost ]] && sed -i -e s/__LIBC__/glibc/g ${conf}
-	[[ ${chost/uclibc/} != $chost ]] && sed -i -e s/__LIBC__/glibc/g ${conf}
-	[[ $E_MACHINE != "" ]] && sed -i -e s/'#E_MACHINE=__E_MACHINE__'/E_MACHINE=${E_MACHINE}/g ${conf}
-	[[ $ARCH != "" ]] && sed -i -e s/__ARCH__/${ARCH}/g ${conf}
-	sed -i -e s/__CHOST__/${chost}/g -e s/__CBUILD__/${CBUILD}/g ${conf}
-	echo MAKEOPTS=-j$(cat /proc/cpuinfo | grep processor| wc -l) >> ${conf}
-	[[ ${portdir} != "" ]] && echo PORTDIR=\"${portdir}\" >> ${conf}
-	[[ ${distdir} != "" ]] && echo DISTDIR=\"${distdir}\" >> ${conf}
-	[[ ${overlay} != "" ]] && echo PORTDIR_OVERLAY=\"${overlay}\" >> ${conf}
-	[[ -e /etc/make.conf ]] && grep ^GENTOO_MIRRORS= /etc/make.conf >> ${conf}
-}
-
-cross_init() {
-	bn=$(basename $0)
-	[[ $bn != emerge-wrapper ]] && { echo "I wont understand things" ; exit 1; }
-	dn=$(dirname $(readlink -f $0))
-	chosts=`ls -1 /usr/lib/gcc`
-	cd $dn || { echo "Failed to cd to $dn" ; exit 1; }
-	export overlay=$(portageq envvar PORTDIR_OVERLAY)
-	export portdir=$(portageq envvar PORTDIR)
-	export distdir=$(portageq envvar DISTDIR)
-
-	for chost in $chosts; do
-		[[ $chost == $CBUILD ]] && continue
-		[[ $(type -p ${chost}-gcc) == "" ]] && continue
-		echo " * Setting up symlinks for $chost"
-		ln -sf emerge-wrapper emerge-${chost}
-		ln -sf emerge-wrapper ${chost}-emerge
-		ln -sf cross-pkg-config ${chost}-pkg-config
-		if [ -d /usr/${chost} ] ; then
-			if [[ ! -d /usr/${chost}/etc/ ]]; then
-				echo " * Setting up cross basics in /usr/${chost}/etc"
-				cross_wrap_etc $chost
-			fi
-		fi
-	done
-}
-
-# CBUILD must be the first thing we export
-export CBUILD=$(portageq envvar CBUILD)
-
-if [[ $1 == "--init" ]]; then
-	cross_init
+	emerge-wrapper is used in one of two ways:
+	  - Use --init to setup cross-toolchain environment(s)
+	  - Pass the command line through to cross-emerge
+	EOF
 	exit 0
 fi
 
-CHOST=$(basename $0)
-CHOST=${CHOST/-emerge}
-CHOST=${CHOST/emerge-}
+PREFIX="__PREFIX__"
+# Enable this script to be manually installed while debugging
+[[ ${PREFIX} == \_\_\P\R\E\F\I\X\_\_ ]] && PREFIX="/usr"
+
+err() { echo "emerge-wrapper: $*" 1>&2; exit 1; }
+
+emit_setup_warning()
+{
+	${setup_warning:-false} && return 0
+	setup_warning=true
+	echo "!!! WARNING - Cannot auto-configure CHOST ${CHOST}"
+	echo "!!! You should edit ${conf}"
+	echo "!!! by hand to complete your configuration"
+}
+
+cross_wrap_etc()
+{
+	[[ $1 == "-q" ]] || echo "${CHOST}: setting up cross basics in ${SYSROOT}/etc"
+
+	setup_warning=false
+
+	cp -a "${PREFIX}"/share/crossdev/etc ${SYSROOT}/     || return 1
+	ln -sf /etc/make.globals ${SYSROOT}/etc/make.globals || return 1
+
+	local conf=${SYSROOT}/etc/make.conf
+
+	# Re-use existing CHOST->portage ARCH mapping code
+	ARCH=$(
+		inherit() { :; }
+		. "${PORTDIR}"/eclass/toolchain-funcs.eclass
+		tc-arch
+	)
+	[[ ${ARCH} == "unknown" ]] && emit_setup_warning
+
+	# Now map out the non-standard EM values
+	case ${ARCH} in
+		amd64) E_MACHINE=X86_64 ;;
+		hppa)  E_MACHINE=PARISC ;;
+		ia64)  E_MACHINE=IA_64  ;;
+		m68k)  E_MACHINE=68K    ;;
+		*)     E_MACHINE=`echo ${ARCH} | tr '[:lower:]' '[:upper:]'` ;;
+	esac
+	E_MACHINE="EM_${E_MACHINE}"
+
+	LIBC="__LIBC__"
+	case ${CHOST} in
+		*gnu*)    LIBC=glibc ;;
+		*uclibc*) LIBC=uclibc ;;
+		*)        emit_setup_warning ;;
+	esac
+
+	sed -i \
+		-e "s:__LIBC__:${LIBC}:g" \
+		-e "s:__E_MACHINE__:${E_MACHINE}:g" \
+		-e "s:__ARCH__:${ARCH}:g" \
+		-e "s:__CBUILD__:${CBUILD}:g" \
+		"${conf}"
+	[[ ${EM_MACHINE} == "EM_UNKNOWN" ]] \
+		&& sed -i '/^E_MACHINE/s:^:#:' "${conf}"
+
+	# Merge UCLIBC_CPU from env only
+	local v
+	for v in ${import_vars} UCLIBC_CPU ; do
+		[[ -n ${!v} ]] && echo "${v}=\"${!v}\""
+	done >> "${conf}"
+
+	return 0
+}
+
+cross_wrap_bin()
+{
+	[[ $1 == "-q" ]] || echo "${CHOST}: Setting up symlinks"
+	local wrapper
+	for wrapper in emerge fix-root pkg-config ; do
+		ln -sf cross-${wrapper} ${CHOST}-${wrapper}
+	done
+	# some people like their tab completion
+	ln -sf cross-emerge emerge-${CHOST}
+}
+
+cross_wrap()
+{
+	SYSROOT=/usr/${CHOST}
+	cross_wrap_bin "$@" || return $?
+	if [[ -d ${SYSROOT} ]] && [[ ! -d ${SYSROOT}/etc ]] ; then
+		cross_wrap_etc "$@"
+	fi
+	return $?
+}
+
+cross_init()
+{
+	cd "${0%/*}" || err "unable to cd to ${0%/*}"
+
+	# Initialize env for just one target.  This is the automated behavior
+	# when crossdev is setting things up for people.
+	if [[ ${CHOST} != "wrapper" ]] ; then
+		cross_wrap -q
+		return $?
+	fi
+
+	# When called generically, blindly set up wrappers for all installed
+	# toolchains.  This is more historical behavior and not really
+	# recommended anymore ...
+	[[ ${0##*/} != emerge-wrapper ]] && err "I wont understand things"
+
+	for CHOST in `find /usr/lib/gcc -maxdepth 1 -mindepth 1 -type d` ; do
+		CHOST=${CHOST##*/}
+		[[ ${CHOST} == ${CBUILD} ]] && continue
+		type -P -- ${CHOST}-gcc >/dev/null || continue
+		cross_wrap
+	done
+}
+
+# CBUILD must be the first thing we export, but might as well avoid
+# running portageq multiple times ...
+import_vars="PORTDIR DISTDIR PORTDIR_OVERLAY MAKEOPTS GENTOO_MIRRORS"
+eval $(portageq envvar -v CBUILD ${import_vars})
+export CBUILD
+
+# Get default CHOST value from program name
+CHOST=${0##*/}
+CHOST=${CHOST%-emerge}
+CHOST=${CHOST#emerge-}
 export CHOST
 
-if [[ $CHOST == wrapper ]]; then
-	if [[ $1 == "--target" ]]; then
-		export CHOST=$2
-		shift 2
-	else
-		echo "After running this program with the --init option as root"
-		echo "you can call it directly like emerge-wrapper --target CHOST <emerge options>"
-		echo "or using the emerge-CHOST wrappers"
-		exit 1
-	fi
+if [[ $1 == "--target" ]] ; then
+	CHOST=$2
+	shift 2
 fi
 
-[[ $(type -p ${CHOST}-gcc) == "" ]] && { echo "You need to 'crossdev $CHOST' first" ; exit 1; }
+if [[ $1 == "--init" ]] ; then
+	cross_init
+	exit $?
+fi
 
-cross-emerge "$@"
+if [[ $CHOST == "wrapper" ]] ; then
+	echo "After running this program with the --init option as root"
+	echo "you can call it directly like emerge-wrapper --target CHOST <emerge options>"
+	echo "or using the emerge-CHOST wrappers"
+	exit 1
+fi
+
+type -P -- ${CHOST}-gcc >/dev/null || err "you need to 'crossdev $CHOST' first"
+
+exec cross-emerge "$@"

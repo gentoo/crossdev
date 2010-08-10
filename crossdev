@@ -622,11 +622,8 @@ set_portage dev-util insight
 #######################################
 ### Create links for helper scripts ###
 
-for wrapper in emerge fix-root pkg-config ; do
-	ln -sf cross-${wrapper} /usr/bin/${CTARGET}-${wrapper}
-done
-# some people like their tab completion
-ln -sf cross-emerge /usr/bin/emerge-${CTARGET}
+mkdir -p /usr/${CTARGET}
+emerge-wrapper --target ${CTARGET} --init || exit 1
 
 #################
 emerged_with_use() {
