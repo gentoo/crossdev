@@ -12,9 +12,10 @@ install:
 
 PV = $(shell date +%Y%m%d)
 P = crossdev-$(PV)
+COMP = xz
 dist:
 	git archive --prefix=$(P)/ HEAD | sed 's:@CDEVPV@:$(PV):g' > $(P).tar
-	-lzma -f $(P).tar
+	-$(COMP) -f $(P).tar
 	du -b $(P).tar*
 
 .PHONY: all dist install
