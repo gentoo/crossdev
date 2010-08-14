@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2008-2009 Gentoo Foundation
+# Copyright 2008-2010 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 if [ -z "${CHOST}" ] ; then
@@ -18,7 +18,9 @@ if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
 	exit 1
 fi
 
-: ${CBUILD=$(portageq envvar CBUILD)}
+# Portage defaults CBUILD to CHOST, so we have to remove CHOST
+# from the env to get a "good" value for CBUILD
+: ${CBUILD=$(env -i portageq envvar CBUILD)}
 : ${BUILD_CFLAGS=$(env -i portageq envvar CFLAGS)}
 : ${BUILD_CXXFLAGS=$(env -i portageq envvar CXXFLAGS)}
 : ${BUILD_CPPFLAGS=$(env -i portageq envvar CPPFLAGS)}
