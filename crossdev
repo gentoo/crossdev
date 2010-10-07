@@ -242,10 +242,7 @@ setup_portage_vars() {
 	PORTDIR=$(portageq envvar PORTDIR)
 	PORT_LOGDIR=$(portageq envvar PORT_LOGDIR)
 	PORT_LOGDIR=${PORT_LOGDIR:-/var/log/portage}
-	export PKGDIR=$(portageq envvar PKGDIR)/cross/${CTARGET}
-	export PORTAGE_TMPDIR=$(portageq envvar PORTAGE_TMPDIR)/cross/${CTARGET}
 	[[ ! -d ${PORT_LOGDIR} ]] && mkdir -p ${PORT_LOGDIR}
-	[[ ! -d ${PORTAGE_TMPDIR} ]] && mkdir -p ${PORTAGE_TMPDIR}
 }
 
 uninstall() {
@@ -495,8 +492,6 @@ einfo "Extra: insight:        DO IT"
 echo
 einfo "PORTDIR_OVERLAY:       ${PORTDIR_OVERLAY}"
 einfo "PORT_LOGDIR:           ${PORT_LOGDIR}"
-einfo "PKGDIR:                ${PKGDIR}"
-einfo "PORTAGE_TMPDIR:        ${PORTAGE_TMPDIR}"
 hr
 ) >& ${PORT_LOGDIR}/cross-${CTARGET}-info.log || exit 1
 cat ${PORT_LOGDIR}/cross-${CTARGET}-info.log
