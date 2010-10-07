@@ -40,10 +40,12 @@ Options:
     ${GOOD}--with[out]-headers${NORMAL}   Build C library headers before C compiler?
 Stage Options:
     ${GOOD}-s0, --stage0${NORMAL}         Build just binutils
-    ${GOOD}-s1, --stage1${NORMAL}         Also build a C compiler (no libc/C++)
+    ${GOOD}-s1, --stage1${NORMAL}         Also build a bare C compiler (no C library/
+                             C++/shared GCC libs/C++ exceptions/etc...)
     ${GOOD}-s2, --stage2${NORMAL}         Also build kernel headers
-    ${GOOD}-s3, --stage3${NORMAL}         Also build the C library (no C++)
-    ${GOOD}-s4, --stage4${NORMAL}         Also build a C++ compiler [default]
+    ${GOOD}-s3, --stage3${NORMAL}         Also build the C library
+    ${GOOD}-s4, --stage4${NORMAL}         Also build a full compiler [default]
+                             (shared libs GCC/various lang frontends/etc...)
 Extra Fun (must be run after above stages):
     ${GOOD}--ex-only${NORMAL}             Skip the stage steps above
     ${GOOD}--ex-gcc${NORMAL}              Build extra gcc targets (gcj/ada/etc...)
