@@ -34,6 +34,7 @@ Options:
     ${GOOD}--g, --gcc${NORMAL} ver        Specify version of gcc to use
     ${GOOD}--k, --kernel${NORMAL} ver     Specify version of kernel headers to use
     ${GOOD}--l, --libc${NORMAL} ver       Specify version of libc to use
+    ${GOOD}--[bgkl]env${NORMAL} env       Specify env settings for binutils/gcc/kernel/libc
     ${GOOD}-S, --stable${NORMAL}          Use latest stable versions as default
     ${GOOD}-C, --clean${NORMAL} target    Uninstall specified target
     ${GOOD}-P, --portage${NORMAL} opts    Options to pass to emerge (see emerge(1))
@@ -368,10 +369,10 @@ TARCH=
 HARCH=
 CTARGET=
 STAGE=""
-BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" ; BUSE=""
-GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" ; GUSE=""
-KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" ; KUSE=""
-LCAT="sys-libs"   ; LPKG=""              ; LVER="" ; LUSE=""
+BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" ; BUSE="" ; BENV=""
+GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" ; GUSE="" ; GENV=""
+KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" ; KUSE="" ; KENV=""
+LCAT="sys-libs"   ; LPKG=""              ; LVER="" ; LUSE="" ; LENV=""
 DEFAULT_VER="[latest]"
 # These flags are always disabled for cross-gcc; either usually/always broken, or
 # not tested, or doesn't make sense, or no one simply cares about them
@@ -390,9 +391,13 @@ while [[ $# -gt 0 ]] ; do
 	-V|--version)   echo "crossdev-${CROSSDEV_VER}"; exit 0;;
 	-t|--target)    shift; parse_target $1;;
 	--b|--binutils) shift; BVER=$1;;
+	--benv)         shift; BENV=$1;;
 	--g|--gcc)      shift; GVER=$1;;
+	--genv)         shift; GENV=$1;;
 	--k|--kernel)   shift; KVER=$1;;
+	--kenv)         shift; KENV=$1;;
 	--l|--libc)     shift; LVER=$1;;
+	--lenv)         shift; LENV=$1;;
 	-S|--stable)    DEFAULT_VER="[stable]";;
 	-C|--clean)     shift; parse_target $1; uninstall;;
 	-s?|--stage?)   STAGE=${1:0-1};;
@@ -583,7 +588,8 @@ set_links() {
 	fi
 }
 set_env() {
-	local pkg=$1
+	local pkg=$1 env=$2
+	shift ; shift
 	mkdir -p env/cross-${CTARGET}
 
 	cat <<-EOF > env/cross-${CTARGET}/${pkg}
@@ -594,10 +600,11 @@ set_env() {
 	CPPFLAGS_pos=
 	CXXFLAGS_pos=
 	LDFLAGS_pos=
+	$(printf '%b' "${env}")
 	EOF
 }
 set_portage() {
-	local cat=$1 pkg=$2 ver=$3
+	local cat=$1 pkg=$2 ver=$3 env=$4
 	shift ; shift ; shift
 	local use=$@
 
@@ -606,7 +613,7 @@ set_portage() {
 	set_keywords ${pkg} ${ver}
 	set_use ${pkg} ${use}
 	set_links ${cat} ${pkg}
-	set_env ${pkg}
+	set_env ${pkg} "${env}"
 }
 
 mkdir -p /etc/portage
@@ -621,10 +628,10 @@ for f in package.{keywords,mask,use} ; do
 	rm -f ${f}/cross-${CTARGET}
 done
 
-set_portage ${BCAT} ${BPKG} ${BVER}
-set_portage ${GCAT} ${GPKG} ${GVER}
-set_portage ${KCAT} ${KPKG} ${KVER}
-set_portage ${LCAT} ${LPKG} ${LVER}
+set_portage ${BCAT} ${BPKG} ${BVER} "${BENV}"
+set_portage ${GCAT} ${GPKG} ${GVER} "${GENV}"
+set_portage ${KCAT} ${KPKG} ${KVER} "${KVER}"
+set_portage ${LCAT} ${LPKG} ${LVER} "${LVER}"
 set_portage sys-devel gdb
 set_portage dev-util insight
 
