@@ -630,8 +630,8 @@ done
 
 set_portage ${BCAT} ${BPKG} ${BVER} "${BENV}"
 set_portage ${GCAT} ${GPKG} ${GVER} "${GENV}"
-set_portage ${KCAT} ${KPKG} ${KVER} "${KVER}"
-set_portage ${LCAT} ${LPKG} ${LVER} "${LVER}"
+set_portage ${KCAT} ${KPKG} ${KVER} "${KENV}"
+set_portage ${LCAT} ${LPKG} ${LVER} "${LENV}"
 set_portage sys-devel gdb
 set_portage dev-util insight
 
