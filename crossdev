@@ -505,9 +505,9 @@ echo
 einfo "PORTDIR_OVERLAY:       ${PORTDIR_OVERLAY}"
 einfo "PORT_LOGDIR:           ${PORT_LOGDIR}"
 hr
-) >& ${PORT_LOGDIR}/cross-${CTARGET}-info.log || exit 1
-cat ${PORT_LOGDIR}/cross-${CTARGET}-info.log
-emerge -v --info >> ${PORT_LOGDIR}/cross-${CTARGET}-info.log
+) >& "${PORT_LOGDIR}"/cross-${CTARGET}-info.log || exit 1
+cat "${PORT_LOGDIR}"/cross-${CTARGET}-info.log
+emerge -v --info >> "${PORT_LOGDIR}"/cross-${CTARGET}-info.log
 
 ####################################
 ### Fix up portage files / paths ###
@@ -659,10 +659,10 @@ doemerge() {
 
 	if [[ ${UOPTS/-v} != ${UOPTS} || ${UOPTS/-p} != ${UOPTS} ]] ; then
 		emerge cross-${CTARGET}/$1 ${EOPTS} \
-			2>&1 | tee ${logfile}
+			2>&1 | tee "${logfile}"
 	else
 		emerge cross-${CTARGET}/$1 ${EOPTS} \
-			>& ${logfile}
+			>& "${logfile}"
 	fi
 	local _pipestatus=${PIPESTATUS[*]}
 	[[ "${_pipestatus// /}" -eq 0 ]] || die "$1 failed :("
