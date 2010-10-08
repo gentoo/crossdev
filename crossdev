@@ -237,12 +237,24 @@ parse_target() {
 }
 
 setup_portage_vars() {
-	PORTDIR_OVERLAYS=$(portageq envvar PORTDIR_OVERLAY)
+	local arch=${ARCH} arch_set=${ARCH+set}
+	local chost=${CHOST} chost_set=${CHOST+set}
+	unset arch chost
+	eval $(portageq envvar -v PORTDIR_OVERLAY PORTDIR PORT_LOGDIR ARCH CHOST)
+
+	# keep the original values, but be aware of the native ones
+	HARCH=${ARCH}
+	[[ ${arch_set} == "set" ]] && ARCH=${arch} || unset ARCH
+	HCHOST=${CHOST}
+	[[ ${chost_set} == "set" ]] && CHOST=${chost} || unset CHOST
+
+	# install our stuff to the last overlay in the list
+	PORTDIR_OVERLAYS=${PORTDIR_OVERLAY}
 	PORTDIR_OVERLAY=${PORTDIR_OVERLAYS%% *}
-	PORTDIR=$(portageq envvar PORTDIR)
-	PORT_LOGDIR=$(portageq envvar PORT_LOGDIR)
-	PORT_LOGDIR=${PORT_LOGDIR:-/var/log/portage}
-	[[ ! -d ${PORT_LOGDIR} ]] && mkdir -p ${PORT_LOGDIR}
+
+	# make sure we have a valid logdir
+	: ${PORT_LOGDIR:=/var/log/portage}
+	mkdir -p "${PORT_LOGDIR}"
 }
 
 uninstall() {
@@ -353,7 +365,7 @@ CROSSDEV=$0
 EOPTS=
 UOPTS=
 TARCH=
-HARCH=$(unset ARCH ; portageq envvar ARCH)
+HARCH=
 CTARGET=
 STAGE=""
 BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" ; BUSE=""
@@ -436,7 +448,7 @@ if [[ -z ${PORTDIR_OVERLAY} ]] ; then
 	exit 1
 fi
 
-if [[ $(unset CHOST ; portageq envvar CHOST) == ${CTARGET} ]] ; then
+if [[ ${HCHOST} == "${CTARGET}" ]] ; then
 	eerror "Refusing to create a cross-compiler using the same"
 	eerror "target name as your host utils."
 	exit 1
