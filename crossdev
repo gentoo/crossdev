@@ -12,6 +12,8 @@ if [[ ${ROOT:-/} != "/" ]] ; then
 	exit 2
 fi
 
+CONFIGROOT="${PORTAGE_CONFIGROOT}/etc/portage"
+
 source /etc/init.d/functions.sh || exit 1
 esyslog() { :; }
 die() {
@@ -265,9 +267,9 @@ uninstall() {
 
 	[[ -d ${PORTDIR_OVERLAY}/cross-${CTARGET} ]] \
 		&& rm -r ${PORTDIR_OVERLAY}/cross-${CTARGET}
-	sed -i -e "/^cross-${CTARGET}$/d" /etc/portage/categories
+	sed -i -e "/^cross-${CTARGET}$/d" "${CONFIGROOT}"/categories
 	for f in package.{mask,keywords,use} ; do
-		f="/etc/portage/${f}"
+		f="${CONFIGROOT}/${f}"
 		if [[ -d ${f} ]] ; then
 			rm -f "${f}"/cross-${CTARGET}
 			rmdir "${f}" 2>/dev/null
@@ -275,8 +277,8 @@ uninstall() {
 			sed -i -e "/cross-${CTARGET}\//d" "${f}"
 		fi
 	done
-	rm -rf /etc/portage/env/cross-${CTARGET}
-	rmdir /etc/portage/env 2>/dev/null
+	rm -rf "${CONFIGROOT}"/env/cross-${CTARGET}
+	rmdir "${CONFIGROOT}"/env 2>/dev/null
 
 	rmdir /var/db/pkg/cross-${CTARGET} 2>/dev/null
 	if [[ -d /var/db/pkg/cross-${CTARGET} ]] ; then
@@ -461,14 +463,15 @@ fi
 
 # grab user settings
 for v in ABI UCLIBC_CPU USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS ASFLAGS ; do
-	if [[ -e /etc/portage/crossdev/${CTARGET}/${v} ]] ; then
+	d="${CONFIGROOT}/crossdev/${CTARGET}"
+	if [[ -e ${d}/${v} ]] ; then
 		# yes, quotes are needed in this instance (export $var="...")
-		export ${v}="$(</etc/portage/crossdev/${CTARGET}/${v})"
+		export ${v}="$(<"${d}"/${v})"
 		einfo "Restoring user setting '${v}' to '${!v}'"
 	fi
-	if [[ -e /etc/portage/crossdev/${CTARGET}/env ]] ; then
+	if [[ -e ${d}/env ]] ; then
 		einfo "Restoring generic user env settings"
-		source /etc/portage/crossdev/${CTARGET}/env
+		source "${d}"/env
 	fi
 done
 
@@ -509,6 +512,7 @@ einfo "Extra: insight:        DO IT"
 echo
 einfo "PORTDIR_OVERLAY:       ${PORTDIR_OVERLAY}"
 einfo "PORT_LOGDIR:           ${PORT_LOGDIR}"
+einfo "PORTAGE_CONFIGROOT:    ${PORTAGE_CONFIGROOT}"
 hr
 ) >& "${PORT_LOGDIR}"/cross-${CTARGET}-info.log || exit 1
 cat "${PORT_LOGDIR}"/cross-${CTARGET}-info.log
@@ -616,15 +620,15 @@ set_portage() {
 	set_env ${pkg} "${env}"
 }
 
-mkdir -p /etc/portage
-check_trailing_newline /etc/portage/categories
-grep -qs "^cross-${CTARGET}$" /etc/portage/categories \
-	|| echo cross-${CTARGET} >> /etc/portage/categories
-mkdir -p "${PORTDIR_OVERLAY}"/cross-${CTARGET}
-cd /etc/portage
+mkdir -p "${CONFIGROOT}"
+check_trailing_newline "${CONFIGROOT}"/categories
+grep -qs "^cross-${CTARGET}$" "${CONFIGROOT}"/categories \
+	|| echo cross-${CTARGET} >> "${CONFIGROOT}"/categories
+mkdir -p "${PORTDIR_OVERLAY}"/cross-${CTARGET} || exit 1
+cd "${CONFIGROOT}"
 for f in package.{keywords,mask,use} ; do
 	[[ -f ${f} ]] && continue
-	mkdir -p ${f}
+	mkdir -p ${f} || exit 1
 	rm -f ${f}/cross-${CTARGET}
 done
 
