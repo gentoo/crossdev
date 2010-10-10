@@ -223,7 +223,7 @@ parse_target() {
 			;;
 
 		# Bare metal targets
-		*-newlib|*-elf)
+		*-newlib|*-elf|*-eabi)
 			LPKG="newlib"
 			KPKG="[none]"
 			STAGE_DEFAULT=${STAGE_LIBC}
