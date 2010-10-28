@@ -68,6 +68,7 @@ cross_wrap_etc()
 		-e "s:__LIBC__:${LIBC}:g" \
 		-e "s:__E_MACHINE__:${E_MACHINE}:g" \
 		-e "s:__ARCH__:${ARCH}:g" \
+		-e "s:__CHOST__:${CHOST}:g" \
 		-e "s:__CBUILD__:${CBUILD}:g" \
 		"${conf}"
 	[[ ${EM_MACHINE} == "EM_UNKNOWN" ]] \
