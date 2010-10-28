@@ -53,6 +53,7 @@ cross_wrap_etc()
 		hppa)  E_MACHINE=PARISC ;;
 		ia64)  E_MACHINE=IA_64  ;;
 		m68k)  E_MACHINE=68K    ;;
+		x86)   E_MACHINE=386    ;;
 		*)     E_MACHINE=`echo ${ARCH} | tr '[:lower:]' '[:upper:]'` ;;
 	esac
 	E_MACHINE="EM_${E_MACHINE}"
