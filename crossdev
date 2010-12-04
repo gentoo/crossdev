@@ -577,8 +577,8 @@ set_links() {
 	local s srcdir=${PORTDIR} d
 
 	d="${PORTDIR_OVERLAY}"/cross-${CTARGET}/${pkg}
-	if [[ ! -L ${d} && -d ${d} ]] ; then #211386
-		einfo "Leaving existing dir alone: ${d}"
+	if [[ -e ${d} ]] ; then #211386 #347389
+		einfo "Leaving existing path alone: ${d}"
 	else
 		rm -f "${d}"
 		for s in ${PORTDIR_OVERLAYS} ; do
