@@ -36,6 +36,7 @@ Options:
     ${GOOD}--g, --gcc${NORMAL} ver        Specify version of gcc to use
     ${GOOD}--k, --kernel${NORMAL} ver     Specify version of kernel headers to use
     ${GOOD}--l, --libc${NORMAL} ver       Specify version of libc to use
+    ${GOOD}-A, --abis${NORMAL} abis       Specify ABIs to build, first one is the default
     ${GOOD}--[bgkl]env${NORMAL} env       Specify env settings for binutils/gcc/kernel/libc
     ${GOOD}-S, --stable${NORMAL}          Use latest stable versions as default
     ${GOOD}-C, --clean${NORMAL} target    Uninstall specified target
@@ -371,6 +372,7 @@ UOPTS=
 TARCH=
 HARCH=
 CTARGET=
+MULTILIB_ABIS="default"
 STAGE=""
 BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" ; BUSE="" ; BENV=""
 GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" ; GUSE="" ; GENV=""
@@ -401,6 +403,7 @@ while [[ $# -gt 0 ]] ; do
 	--kenv)         shift; KENV=$1;;
 	--l|--libc)     shift; LVER=$1;;
 	--lenv)         shift; LENV=$1;;
+	-A|--abis)      shift; MULTILIB_ABIS=$1;;
 	-S|--stable)    DEFAULT_VER="[stable]";;
 	-C|--clean)     shift; parse_target $1; uninstall;;
 	-s?|--stage?)   STAGE=${1:0-1};;
@@ -463,7 +466,7 @@ if [[ ${HCHOST} == "${CTARGET}" ]] ; then
 fi
 
 # grab user settings
-for v in ABI UCLIBC_CPU USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS ASFLAGS ; do
+for v in MULTILIB_ABIS UCLIBC_CPU USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS ASFLAGS ; do
 	d="${CONFIGROOT}/crossdev/${CTARGET}"
 	if [[ -e ${d}/${v} ]] ; then
 		# yes, quotes are needed in this instance (export $var="...")
@@ -475,6 +478,8 @@ for v in ABI UCLIBC_CPU USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS ASFLAGS ; d
 		source "${d}"/env
 	fi
 done
+ABI=$(set -- ${MULTILIB_ABIS:-default}; echo $1)
+DEFAULT_ABI=${ABI}
 
 #####################
 ### do the emerge ###
@@ -485,6 +490,7 @@ einfo "Host Portage ARCH:     ${HARCH}"
 einfo "Target Portage ARCH:   ${TARCH}"
 einfo "Target System:         ${CTARGET}"
 einfo "Stage:                 ${STAGE} (${STAGE_DISP[${STAGE}]})"
+einfo "ABIs:                  ${MULTILIB_ABIS}"
 echo
 ex_fast || {
 is_s0 && {
@@ -598,13 +604,15 @@ set_env() {
 	mkdir -p env/cross-${CTARGET}
 
 	cat <<-EOF > env/cross-${CTARGET}/${pkg}
-	# make sure multilib crap doesn't screw us over
-	ABI=${ABI:-pos}
-	LIBDIR_pos="lib"
-	CFLAGS_pos=
-	CPPFLAGS_pos=
-	CXXFLAGS_pos=
-	LDFLAGS_pos=
+	# handle multilib ourselves
+	ABI=${ABI}
+	MULTILIB_ABIS="${MULTILIB_ABIS}"
+	DEFAULT_ABI=${DEFAULT_ABI}
+	LIBDIR_default="lib"
+	CFLAGS_default=
+	CPPFLAGS_default=
+	CXXFLAGS_default=
+	LDFLAGS_default=
 	$(printf '%b' "${env}")
 	EOF
 }
