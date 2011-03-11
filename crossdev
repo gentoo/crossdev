@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 1999-2010 Gentoo Foundation
+# Copyright 1999-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 CROSSDEV_VER="@CDEVPV@"
@@ -281,6 +281,8 @@ uninstall() {
 	done
 	rm -rf "${CONFIGROOT}"/env/cross-${CTARGET}
 	rmdir "${CONFIGROOT}"/env 2>/dev/null
+	rm -f /etc/revdep-rebuild/05cross-${CTARGET}
+	rmdir /etc/revdep-rebuild 2>/dev/null
 
 	rmdir /var/db/pkg/cross-${CTARGET} 2>/dev/null
 	if [[ -d /var/db/pkg/cross-${CTARGET} ]] ; then
@@ -674,6 +676,10 @@ set_portage ${KCAT} ${KPKG} ${KVER} "${KENV}"
 set_portage ${LCAT} ${LPKG} ${LVER} "${LENV}"
 set_portage sys-devel gdb
 set_portage dev-util insight
+
+# filter out revdep rebuild stuff #182601
+mkdir -p /etc/revdep-rebuild
+echo "SEARCH_DIRS_MASK=/usr/${CTARGET}" > /etc/revdep-rebuild/05cross-${CTARGET}
 
 #######################################
 ### Create links for helper scripts ###
