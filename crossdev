@@ -290,8 +290,11 @@ uninstall() {
 			emerge -qC =${p} || exit 1
 		done
 	else
-		ewarn "${CTARGET}: no packages installed"
+		ewarn "${CTARGET}: no packages installed; will clean out known files"
 	fi
+
+	# clean out known toolchain files (binutils/gcc)
+	local b
 	for b in \
 		addr2line ar as c++filt dlltool dllwrap embedspu \
 		gprof ld nm objcopy objdump ranlib readelf \
@@ -300,22 +303,46 @@ uninstall() {
 		rm -f /usr/bin/${CTARGET}-${b} /usr/${CTARGET}/bin/${b}
 	done
 	rm -f /usr/${CTARGET}/{sys-include,usr}
+	rmdir /usr/${CTARGET}/{include/asm,include} 2>/dev/null
 	rm -f /usr/bin/${CTARGET}-{gcc,{c,g}++,cpp,gfortran,gcov}
+	rm -f /etc/env.d/{binutils,gcc}/config-${CTARGET}
+
+	# clean out files from crossdev itself
+	[[ -e /var/db/pkg/cross-${CTARGET} ]] && rmdir /var/db/pkg/cross-${CTARGET}
 	rm -f /usr/bin/${CTARGET}-{emerge,fix-root,pkg-config} /usr/bin/emerge-${CTARGET}
-	rmdir /usr/${CTARGET}/{include/asm,include} &> /dev/null
-	for d in /usr/${CTARGET} /usr/lib/gcc{,-lib}/${CTARGET} ; do
+
+	local f
+	for f in make.{conf,globals,profile} ; do
+		f="/usr/${CTARGET}/etc/${f}"
+		[[ -L ${f} ]] && rm -f ${f}
+		f="/usr/${CTARGET}/etc/portage/${f##*/}"
+		[[ -L ${f} ]] && rm -f ${f}
+	done
+	find /usr/share/crossdev/etc/ -type f | \
+	while read f ; do
+		f1=${f}
+		[[ ! -e ${f1} ]] && continue
+		m1=$(set -- `md5sum ${f1}`; echo $1)
+		f2=/usr/${CTARGET}${f#/usr/share/crossdev}
+		[[ ! -e ${f2} ]] && continue
+		m2=$(set -- `md5sum ${f2}`; echo $1)
+		if [[ ${m1} == ${m2} ]] ; then
+			rm -f ${f2}
+		fi
+	done
+
+	# clean out the sysroot, prompting the user if need be
+	for d in /usr/lib/gcc{,-lib}/${CTARGET} /usr/${CTARGET} ; do
 		if [[ ! -d ${d} ]] ; then
 			rm -f "${d}" &> /dev/null
 		else
-			rmdir "${d}" &> /dev/null && continue
+			find "${d}" -type d -depth -exec rmdir {} + 2>/dev/null && continue
 			printf "${d}: directory still exists; remove recursively? [y/N] "
 			local ans
 			read ans
 			[[ ${ans} == [Yy]* ]] && rm -rf "${d}"
 		fi
 	done
-	rm -f /etc/env.d/{binutils,gcc}/config-${CTARGET}
-	[[ -e /var/db/pkg/cross-${CTARGET} ]] && rmdir /var/db/pkg/cross-${CTARGET}
 
 	exit 0
 }
