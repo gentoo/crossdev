@@ -270,7 +270,7 @@ uninstall() {
 	[[ -d ${PORTDIR_OVERLAY}/cross-${CTARGET} ]] \
 		&& rm -r ${PORTDIR_OVERLAY}/cross-${CTARGET}
 	sed -i -e "/^cross-${CTARGET}$/d" "${CONFIGROOT}"/categories
-	for f in package.{mask,keywords,use} ; do
+	for f in package.{mask,keywords,use} profile/package.use.force ; do
 		f="${CONFIGROOT}/${f}"
 		if [[ -d ${f} ]] ; then
 			rm -f "${f}"/cross-${CTARGET}
@@ -564,16 +564,18 @@ check_trailing_newline() { #267132
 		echo >> "$1"
 	fi
 }
+_set_portage_file() {
+	local pkg=$1 output=$2
+	[[ ! -f ${output} ]] && output+="/cross-${CTARGET}"
+	[[ -e ${output} ]] && sed -i -e "/^cross-${CTARGET}\/${pkg}/d" ${output}
+	check_trailing_newline ${output}
+	echo ${output}
+}
 set_keywords() {
 	local pkg=$1 ver=$2 output
 	[[ -z ${pkg} ]] && return 0
-	if [[ -f package.keywords ]] ; then
-		output="package.keywords"
-		sed -i -e "/^cross-${CTARGET}\/${pkg} /d" ${output}
-	else
-		output="package.keywords/cross-${CTARGET}"
-	fi
-	check_trailing_newline ${output}
+	output=$(_set_portage_file ${pkg} package.keywords)
+
 	if [[ ${ver} == "["*"]" ]] || [[ -z ${ver} ]] ; then
 		local keywords=""
 		case ${ver} in
@@ -595,17 +597,15 @@ set_keywords() {
 	fi
 }
 set_use() {
-	local pkg=$1 output
-	shift
-	local use=$@
+	local pkg=$1 output use=${@:2}
 	[[ -z ${use} ]] && return 0
-	if [[ -f package.use ]] ; then
-		output="package.use"
-	else
-		output="package.use/cross-${CTARGET}"
-	fi
-	[[ -e ${output} ]] && sed -i -e "/cross-${CTARGET}\/${pkg}/d" ${output}
-	check_trailing_newline ${output}
+	output=$(_set_portage_file ${pkg} package.use)
+	echo "cross-${CTARGET}/${pkg} ${use}" >> ${output}
+}
+set_use_force() {
+	local pkg=$1 output use=${@:2}
+	[[ -z ${use} ]] && return 0
+	output=$(_set_portage_file ${pkg} profile/package.use.force)
 	echo "cross-${CTARGET}/${pkg} ${use}" >> ${output}
 }
 set_links() {
@@ -630,7 +630,6 @@ set_links() {
 set_env() {
 	local pkg=$1 env=$2
 	shift ; shift
-	mkdir -p env/cross-${CTARGET}
 
 	cat <<-EOF > env/cross-${CTARGET}/${pkg}
 	# handle multilib ourselves
@@ -654,6 +653,7 @@ set_portage() {
 
 	set_keywords ${pkg} ${ver}
 	set_use ${pkg} ${use}
+	set_use_force ${pkg} -multilib
 	set_links ${cat} ${pkg}
 	set_env ${pkg} "${env}"
 }
@@ -664,7 +664,7 @@ grep -qs "^cross-${CTARGET}$" "${CONFIGROOT}"/categories \
 	|| echo cross-${CTARGET} >> "${CONFIGROOT}"/categories
 mkdir -p "${PORTDIR_OVERLAY}"/cross-${CTARGET} || exit 1
 cd "${CONFIGROOT}"
-for f in package.{keywords,mask,use} ; do
+for f in package.{keywords,mask,use} env/cross-${CTARGET} profile/package.use.force ; do
 	[[ -f ${f} ]] && continue
 	mkdir -p ${f} || exit 1
 	rm -f ${f}/cross-${CTARGET}
@@ -708,7 +708,7 @@ doemerge() {
 	einfo "Log: ${logfile}"
 	ebegin "Emerging cross-${2:-$1}"
 
-	set_use $1 ${USE}
+	set_use $1 ${USE} $( [[ ${MULTILIB_ABIS} == "default" ]] && echo - )multilib
 
 	if [[ ${UOPTS/-v} != ${UOPTS} || ${UOPTS/-p} != ${UOPTS} ]] ; then
 		emerge cross-${CTARGET}/$1 ${EOPTS} \
