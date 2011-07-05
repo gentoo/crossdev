@@ -10,7 +10,7 @@ install:
 	$(INSTALL_EXEC) crossdev $(DESTDIR)/$(PREFIX)/bin/
 	$(MAKE) -C wrappers install
 
-PV = $(shell date +%Y%m%d)
+PV = $(shell date --date="`git log -1 --format=%ci`" +%Y%m%d)
 P = crossdev-$(PV)
 COMP = xz
 dist:
