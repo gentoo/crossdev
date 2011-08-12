@@ -38,6 +38,7 @@ Options:
     ${GOOD}--l, --libc${NORMAL} ver       Specify version of libc to use
     ${GOOD}-A, --abis${NORMAL} abis       Specify ABIs to build, first one is the default
     ${GOOD}--[bgkl]env${NORMAL} env       Specify env settings for binutils/gcc/kernel/libc
+    ${GOOD}-f, --force${NORMAL}           I don't need a seat belt!
     ${GOOD}-S, --stable${NORMAL}          Use latest stable versions as default
     ${GOOD}-C, --clean${NORMAL} target    Uninstall specified target
     ${GOOD}-P, --portage${NORMAL} opts    Options to pass to emerge (see emerge(1))
@@ -336,13 +337,17 @@ uninstall() {
 	# clean out the sysroot, prompting the user if need be
 	for d in /usr/lib/gcc{,-lib}/${CTARGET} /usr/${CTARGET} ; do
 		if [[ ! -d ${d} ]] ; then
-			rm -f "${d}" &> /dev/null
+			rm -f "${d}"
 		else
-			find "${d}" -type d -depth -exec rmdir {} + 2>/dev/null && continue
-			printf "${d}: directory still exists; remove recursively? [y/N] "
-			local ans
-			read ans
-			[[ ${ans} == [Yy]* ]] && rm -rf "${d}"
+			if [[ ${FORCE} == "no" ]] ; then
+				find "${d}" -type d -depth -exec rmdir {} + 2>/dev/null && continue
+				printf "${d}: directory still exists; remove recursively? [y/N] "
+				local ans
+				read ans
+				[[ ${ans} == [Yy]* ]] && rm -rf "${d}"
+			else
+				rm -rf "${d}"
+			fi
 		fi
 	done
 
@@ -418,6 +423,7 @@ WITH_HEADERS="COW"   WITH_DEF_HEADERS="yes" #227065 gcc-4.3+ is a pita w/out hea
 EX_FAST="no"
 EX_GCC="no"
 EX_GDB="no"
+FORCE="no"
 SET_X="no"
 
 while [[ $# -gt 0 ]] ; do
@@ -442,6 +448,7 @@ while [[ $# -gt 0 ]] ; do
 	--ex-insight)   EX_INSIGHT="yes";;
 	--with-*)       eval $(set_withval $1);;
 	--without-*)    eval $(set_withval $1);;
+	-f|--force)     FORCE="yes";;
 	-x)             SET_X="yes";;
 	-P|--portage)   UOPTS="${UOPTS} $2"; shift;;
 	-b|-d|-p|-v|-q) UOPTS="${UOPTS} $1";;
