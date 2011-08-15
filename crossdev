@@ -751,10 +751,6 @@ export UCLIBC_CPU=${UCLIBC_CPU}
 
 ex_fast || {
 
-ebegin "Forcing the latest versions of {binutils,gcc}-config/gnuconfig"
-emerge {binutils,gcc}-config gnuconfig -qu --ignore-default-opts &> /dev/null
-eend $? || exit 1
-
 doemerge ${BPKG}
 
 is_s1 || exit 0
