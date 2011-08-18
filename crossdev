@@ -43,6 +43,8 @@ Options:
     ${GOOD}-C, --clean${NORMAL} target    Uninstall specified target
     ${GOOD}-P, --portage${NORMAL} opts    Options to pass to emerge (see emerge(1))
     ${GOOD}--with[out]-headers${NORMAL}   Build C library headers before C compiler?
+Note: versions support depend atom syntaxes; e.g. ">=2.20" "~4.6.1" "=2.13.1-r3"
+
 Stage Options:
     ${GOOD}-s0, --stage0${NORMAL}         Build just binutils
     ${GOOD}-s1, --stage1${NORMAL}         Also build a bare C compiler (no C library/
@@ -51,11 +53,13 @@ Stage Options:
     ${GOOD}-s3, --stage3${NORMAL}         Also build the C library
     ${GOOD}-s4, --stage4${NORMAL}         Also build a full compiler [default]
                              (shared libs GCC/various lang frontends/etc...)
+
 Extra Fun (must be run after above stages):
     ${GOOD}--ex-only${NORMAL}             Skip the stage steps above
     ${GOOD}--ex-gcc${NORMAL}              Build extra gcc targets (gcj/ada/etc...)
     ${GOOD}--ex-gdb${NORMAL}              Build a cross gdb
     ${GOOD}--ex-insight${NORMAL}          Build a cross insight
+
 ${BRACKET}Target (-t)${NORMAL} takes a tuple ${BRACKET}ARCH-VENDOR-OS-LIBC${NORMAL}; see 'crossdev -t help'
 EOF
 	[[ -n $* ]] && echo && eerror "Error: $*"
@@ -397,6 +401,21 @@ hr() {
 	local banner=${br//${sext}/${ext}}
 	echo "${banner:0:${c}}"
 }
+ver_get_op() {
+	local op ver=$1
+	[[ ${ver} == "["* ]] && return
+	op=${ver%%[0-9]*}
+	[[ -n ${op} ]] && echo "${op}"
+}
+ver_chop_op() {
+	local op ver=$1
+	op=$(ver_get_op "${ver}")
+	echo "${ver##${op}}"
+}
+pretty_atom() {
+	local mid=$1 ver=$2
+	printf '%s%s%s' "$(ver_get_op "${ver}")" "${mid}" "$(ver_chop_op "${ver}")"
+}
 
 ##################
 ### setup vars ###
@@ -530,17 +549,17 @@ einfo "ABIs:                  ${MULTILIB_ABIS}"
 echo
 ex_fast || {
 is_s0 && {
-einfo "binutils:              ${BPKG}-${BVER}"
+einfo "binutils:              `pretty_atom ${BPKG}- ${BVER}`"
 }
 is_s1 && {
-einfo "gcc:                   ${GPKG}-${GVER}"
+einfo "gcc:                   `pretty_atom ${GPKG}- ${GVER}`"
 }
 is_s2 && {
 [[ ${KPKG} != "[none]" ]] && \
-einfo "headers:               ${KPKG}-${KVER}"
+einfo "headers:               `pretty_atom ${KPKG}- ${KVER}`"
 }
 is_s3 && {
-einfo "libc:                  ${LPKG}-${LVER}"
+einfo "libc:                  `pretty_atom ${LPKG}- ${LVER}`"
 }
 }
 ex_gcc && {
@@ -592,15 +611,23 @@ set_keywords() {
 		[[ "${TARCH}" != "${HARCH}" ]] && keywords="${keywords} -${HARCH} -~${HARCH}"
 		echo "cross-${CTARGET}/${pkg} ${keywords}" >> ${output}
 	else
-		echo "cross-${CTARGET}/${pkg} * ~* **" >> ${output}
-		if [[ -f package.mask ]] ; then
-			output="package.mask"
-			sed -i -e "/cross-${CTARGET}\/${pkg}/d" ${output}
+		local op=$(ver_get_op "${ver}")
+		if [[ -n ${op} ]] ; then
+			# user has been explicit in the version they desire
+			ver=$(ver_chop_op "${ver}")
+			echo "cross-${CTARGET}/${pkg} -*" >> ${output}
+			echo "${op}cross-${CTARGET}/${pkg}-${ver} * ~* **" >> ${output}
 		else
-			output="package.mask/cross-${CTARGET}"
+			echo "cross-${CTARGET}/${pkg} * ~* **" >> ${output}
+			if [[ -f package.mask ]] ; then
+				output="package.mask"
+				sed -i -e "/cross-${CTARGET}\/${pkg}/d" ${output}
+			else
+				output="package.mask/cross-${CTARGET}"
+			fi
+			check_trailing_newline ${output}
+			echo ">cross-${CTARGET}/${pkg}-${ver}" >> ${output}
 		fi
-		check_trailing_newline ${output}
-		echo ">cross-${CTARGET}/${pkg}-${ver}" >> ${output}
 	fi
 }
 set_use() {
