@@ -619,13 +619,7 @@ set_keywords() {
 			echo "${op}cross-${CTARGET}/${pkg}-${ver} * ~* **" >> ${output}
 		else
 			echo "cross-${CTARGET}/${pkg} * ~* **" >> ${output}
-			if [[ -f package.mask ]] ; then
-				output="package.mask"
-				sed -i -e "/cross-${CTARGET}\/${pkg}/d" ${output}
-			else
-				output="package.mask/cross-${CTARGET}"
-			fi
-			check_trailing_newline ${output}
+			output=$(_set_portage_file ${pkg} package.mask)
 			echo ">cross-${CTARGET}/${pkg}-${ver}" >> ${output}
 		fi
 	fi
