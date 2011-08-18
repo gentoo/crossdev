@@ -242,8 +242,6 @@ parse_target() {
 			KPKG="[none]"
 			;;
 	esac
-
-	: ${LPKG=[none]}
 }
 
 setup_portage_vars() {
@@ -430,7 +428,7 @@ STAGE=""
 BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" ; BUSE="" ; BENV=""
 GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" ; GUSE="" ; GENV=""
 KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" ; KUSE="" ; KENV=""
-LCAT="sys-libs"   ; LPKG=""              ; LVER="" ; LUSE="" ; LENV=""
+LCAT="sys-libs"   ; LPKG="[none]"        ; LVER="" ; LUSE="" ; LENV=""
 DEFAULT_VER="[latest]"
 # These flags are always disabled for cross-gcc; either usually/always broken, or
 # not tested, or doesn't make sense, or no one simply cares about them
