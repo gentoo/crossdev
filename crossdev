@@ -32,33 +32,43 @@ cat << EOF
 Usage: ${HILITE}crossdev${NORMAL} ${GOOD}[options]${NORMAL} ${BRACKET}--target TARGET${NORMAL}
 
 Options:
-    ${GOOD}--b, --binutils${NORMAL} ver   Specify version of binutils to use
-    ${GOOD}--g, --gcc${NORMAL} ver        Specify version of gcc to use
-    ${GOOD}--k, --kernel${NORMAL} ver     Specify version of kernel headers to use
-    ${GOOD}--l, --libc${NORMAL} ver       Specify version of libc to use
-    ${GOOD}-A, --abis${NORMAL} abis       Specify ABIs to build, first one is the default
-    ${GOOD}--[bgkl]env${NORMAL} env       Specify env settings for binutils/gcc/kernel/libc
-    ${GOOD}-f, --force${NORMAL}           I don't need a seat belt!
-    ${GOOD}-S, --stable${NORMAL}          Use latest stable versions as default
-    ${GOOD}-C, --clean${NORMAL} target    Uninstall specified target
-    ${GOOD}-P, --portage${NORMAL} opts    Options to pass to emerge (see emerge(1))
-    ${GOOD}--with[out]-headers${NORMAL}   Build C library headers before C compiler?
+    ${GOOD}--b, --binutils${NORMAL} ver      Specify version of binutils to use
+    ${GOOD}--g, --gcc${NORMAL} ver           Specify version of gcc to use
+    ${GOOD}--k, --kernel${NORMAL} ver        Specify version of kernel headers to use
+    ${GOOD}--l, --libc${NORMAL} ver          Specify version of libc to use
+    ${GOOD}-A, --abis${NORMAL} abis          Specify ABIs to build, first one is the default
+    ${GOOD}--[bgkl]env${NORMAL} env          Specify env settings for binutils/gcc/kernel/libc
+    ${GOOD}-f, --force${NORMAL}              I don't need a seat belt!
+    ${GOOD}-S, --stable${NORMAL}             Use latest stable versions as default
+    ${GOOD}-C, --clean${NORMAL} target       Uninstall specified target
+    ${GOOD}-P, --portage${NORMAL} opts       Options to pass to emerge (see emerge(1))
+    ${GOOD}--with[out]-headers${NORMAL}      Build C library headers before C compiler?
 Note: versions support depend atom syntaxes; e.g. ">=2.20" "~4.6.1" "=2.13.1-r3"
 
+Overlay Options:
+    ${GOOD}-oS, --overlays${NORMAL} list     Space delimited list of overlays to search
+                                [default: \${PORTDIR_OVERLAY}]
+    ${GOOD}-oO, --ov-output${NORMAL} path    Overlay to write crossdev package links
+                                [default: last from --overlays list]
+    ${GOOD}-ob, --ov-binutils${NORMAL} path  Overlay for binutils ebuilds [default: search]
+    ${GOOD}-og, --ov-gcc${NORMAL} path       Overlay for gcc ebuilds [default: search]
+    ${GOOD}-ok, --ov-kernel${NORMAL} path    Overlay for kernel ebuilds [default: search]
+    ${GOOD}-ol, --ov-libc${NORMAL} path      Overlay for C library ebuilds [default: search]
+
 Stage Options:
-    ${GOOD}-s0, --stage0${NORMAL}         Build just binutils
-    ${GOOD}-s1, --stage1${NORMAL}         Also build a bare C compiler (no C library/
-                             C++/shared GCC libs/C++ exceptions/etc...)
-    ${GOOD}-s2, --stage2${NORMAL}         Also build kernel headers
-    ${GOOD}-s3, --stage3${NORMAL}         Also build the C library
-    ${GOOD}-s4, --stage4${NORMAL}         Also build a full compiler [default]
-                             (shared libs GCC/various lang frontends/etc...)
+    ${GOOD}-s0, --stage0${NORMAL}            Build just binutils
+    ${GOOD}-s1, --stage1${NORMAL}            Also build a bare C compiler (no C library/
+                                C++/shared GCC libs/C++ exceptions/etc...)
+    ${GOOD}-s2, --stage2${NORMAL}            Also build kernel headers
+    ${GOOD}-s3, --stage3${NORMAL}            Also build the C library
+    ${GOOD}-s4, --stage4${NORMAL}            Also build a full compiler [default]
+                                (shared libs GCC/various lang frontends/etc...)
 
 Extra Fun (must be run after above stages):
-    ${GOOD}--ex-only${NORMAL}             Skip the stage steps above
-    ${GOOD}--ex-gcc${NORMAL}              Build extra gcc targets (gcj/ada/etc...)
-    ${GOOD}--ex-gdb${NORMAL}              Build a cross gdb
-    ${GOOD}--ex-insight${NORMAL}          Build a cross insight
+    ${GOOD}--ex-only${NORMAL}                Skip the stage steps above
+    ${GOOD}--ex-gcc${NORMAL}                 Build extra gcc targets (gcj/ada/etc...)
+    ${GOOD}--ex-gdb${NORMAL}                 Build a cross gdb
+    ${GOOD}--ex-insight${NORMAL}             Build a cross insight
 
 ${BRACKET}Target (-t)${NORMAL} takes a tuple ${BRACKET}ARCH-VENDOR-OS-LIBC${NORMAL}; see 'crossdev -t help'
 EOF
@@ -256,9 +266,14 @@ setup_portage_vars() {
 	HCHOST=${CHOST}
 	[[ ${chost_set} == "set" ]] && CHOST=${chost} || unset CHOST
 
+	# see if user gave us an overlay search list, otherwise
+	# default to whatever is configured in portage
+	: ${SEARCH_OVERLAYS:=${PORTDIR_OVERLAY}}
+
+	# see if user told us where to write things, otherwise
 	# install our stuff to the last overlay in the list
-	PORTDIR_OVERLAYS=${PORTDIR_OVERLAY}
-	PORTDIR_OVERLAY=${PORTDIR_OVERLAYS%% *}
+	: ${CROSSDEV_OVERLAY:=${SEARCH_OVERLAYS}}
+	CROSSDEV_OVERLAY=${CROSSDEV_OVERLAY%% *}
 
 	# make sure we have a valid logdir
 	: ${PORT_LOGDIR:=/var/log/portage}
@@ -270,8 +285,8 @@ uninstall() {
 
 	ewarn "Uninstalling target '${CTARGET}' ..."
 
-	[[ -d ${PORTDIR_OVERLAY}/cross-${CTARGET} ]] \
-		&& rm -r ${PORTDIR_OVERLAY}/cross-${CTARGET}
+	[[ -d ${CROSSDEV_OVERLAY}/cross-${CTARGET} ]] \
+		&& rm -r ${CROSSDEV_OVERLAY}/cross-${CTARGET}
 	sed -i -e "/^cross-${CTARGET}$/d" "${CONFIGROOT}"/categories
 	for f in package.{mask,keywords,use} profile/package.use.force ; do
 		f="${CONFIGROOT}/${f}"
@@ -425,11 +440,13 @@ HARCH=
 CTARGET=
 MULTILIB_ABIS="default"
 STAGE=""
-BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" ; BUSE="" ; BENV=""
-GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" ; GUSE="" ; GENV=""
-KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" ; KUSE="" ; KENV=""
-LCAT="sys-libs"   ; LPKG="[none]"        ; LVER="" ; LUSE="" ; LENV=""
+BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" BUSE="" BENV="" BOVL=""
+GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" GUSE="" GENV="" GOVL=""
+KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" KUSE="" KENV="" KOVL=""
+LCAT="sys-libs"   ; LPKG="[none]"        ; LVER="" LUSE="" LENV="" LOVL=""
 DEFAULT_VER="[latest]"
+SEARCH_OVERLAYS=""
+CROSSDEV_OVERLAY=""
 # These flags are always disabled for cross-gcc; either usually/always broken, or
 # not tested, or doesn't make sense, or no one simply cares about them
 GUSE_DISABLE="-boundschecking -d -gtk -gcj -libffi -mudflap -objc -objc++ -objc-gc"
@@ -445,34 +462,40 @@ SET_X="no"
 
 while [[ $# -gt 0 ]] ; do
 	case $1 in
-	-V|--version)   echo "crossdev-${CROSSDEV_VER}"; exit 0;;
-	-t|--target)    shift; parse_target $1;;
-	--b|--binutils) shift; BVER=$1;;
-	--benv)         shift; BENV=$1;;
-	--g|--gcc)      shift; GVER=$1;;
-	--genv)         shift; GENV=$1;;
-	--k|--kernel)   shift; KVER=$1;;
-	--kenv)         shift; KENV=$1;;
-	--l|--libc)     shift; LVER=$1;;
-	--lenv)         shift; LENV=$1;;
-	-A|--abis)      shift; MULTILIB_ABIS=$1;;
-	-S|--stable)    DEFAULT_VER="[stable]";;
-	-C|--clean)     shift; parse_target $1; uninstall;;
-	-s?|--stage?)   STAGE=${1:0-1};;
-	--ex-only)      EX_FAST="yes";;
-	--ex-gcc)       EX_GCC="yes";;
-	--ex-gdb)       EX_GDB="yes";;
-	--ex-insight)   EX_INSIGHT="yes";;
-	--with-*)       eval $(set_withval $1);;
-	--without-*)    eval $(set_withval $1);;
-	-f|--force)     FORCE="yes";;
-	-x)             SET_X="yes";;
-	-P|--portage)   UOPTS="${UOPTS} $2"; shift;;
-	-b|-d|-p|-v|-q) UOPTS="${UOPTS} $1";;
-	-pv|-vp)        UOPTS="${UOPTS} -p -v";;
-	-h|--help)      usage;;
-	-*)             eerror "UNKNOWN OPTION: '$1'" ; usage 1;;
-	*)              parse_target $1;;
+	-V|--version)      echo "crossdev-${CROSSDEV_VER}"; exit 0;;
+	-t|--target)       shift; parse_target $1;;
+	--b|--binutils)    shift; BVER=$1;;
+	--benv)            shift; BENV=$1;;
+	-ob|--ov-binutils) shift; BOVL=$1;;
+	--g|--gcc)         shift; GVER=$1;;
+	--genv)            shift; GENV=$1;;
+	-og|--ov-gcc)      shift; GOVL=$1;;
+	--k|--kernel)      shift; KVER=$1;;
+	--kenv)            shift; KENV=$1;;
+	-ok|--ov-kernel)   shift; KOVL=$1;;
+	--l|--libc)        shift; LVER=$1;;
+	--lenv)            shift; LENV=$1;;
+	-ol|--ov-libc)     shift; LOVL=$1;;
+	-A|--abis)         shift; MULTILIB_ABIS=$1;;
+	-S|--stable)       DEFAULT_VER="[stable]";;
+	-C|--clean)        shift; parse_target $1; uninstall;;
+	-s?|--stage?)      STAGE=${1:0-1};;
+	-oS|--overlays)    shift; SEARCH_OVERLAYS=$1;;
+	-oO|--ov-output)   shift; CROSSDEV_OVERLAY=$1;;
+	--ex-only)         EX_FAST="yes";;
+	--ex-gcc)          EX_GCC="yes";;
+	--ex-gdb)          EX_GDB="yes";;
+	--ex-insight)      EX_INSIGHT="yes";;
+	--with-*)          eval $(set_withval $1);;
+	--without-*)       eval $(set_withval $1);;
+	-f|--force)        FORCE="yes";;
+	-x)                SET_X="yes";;
+	-P|--portage)      UOPTS="${UOPTS} $2"; shift;;
+	-b|-d|-p|-v|-q)    UOPTS="${UOPTS} $1";;
+	-pv|-vp)           UOPTS="${UOPTS} -p -v";;
+	-h|--help)         usage;;
+	-*)                eerror "UNKNOWN OPTION: '$1'" ; usage 1;;
+	*)                 parse_target $1;;
 	esac
 	shift
 done
@@ -506,9 +529,9 @@ if ! egrep -qs 'inherit.*toolchain( |$)' /var/db/pkg/sys-devel/gcc-*/*.ebuild ; 
 fi
 
 setup_portage_vars
-if [[ -z ${PORTDIR_OVERLAY} ]] ; then
-	eerror "You need to set PORTDIR_OVERLAY in your make.conf."
-	eerror "A standard setting is /usr/local/portage"
+if [[ -z ${CROSSDEV_OVERLAY} ]] ; then
+	eerror "You need to specify an output overlay.  Please use --ov-output or set"
+	eerror "PORTDIR_OVERLAY in your make.conf.  A standard setting is: /usr/local/portage"
 	exit 1
 fi
 
@@ -570,7 +593,7 @@ ex_insight && {
 einfo "Extra: insight:        DO IT"
 }
 echo
-einfo "PORTDIR_OVERLAY:       ${PORTDIR_OVERLAY}"
+einfo "CROSSDEV_OVERLAY:      ${CROSSDEV_OVERLAY}"
 einfo "PORT_LOGDIR:           ${PORT_LOGDIR}"
 einfo "PORTAGE_CONFIGROOT:    ${PORTAGE_CONFIGROOT}"
 hr
@@ -639,23 +662,29 @@ set_use_force() {
 	echo "cross-${CTARGET}/${pkg} ${use}" >> ${output}
 }
 set_links() {
-	local cat=$1 pkg=$2
+	local cat=$1 pkg=$2 ovl=$3
 	local s srcdir=${PORTDIR} d
 
-	d="${PORTDIR_OVERLAY}"/cross-${CTARGET}/${pkg}
-	if [[ -e ${d} ]] ; then #211386 #347389
-		einfo "Leaving existing path alone: ${d}"
-	else
-		rm -f "${d}"
-		for s in ${PORTDIR_OVERLAYS} ; do
-			if [[ -d ${s}/${cat}/${pkg} ]] ; then
-				einfo "Using ${cat}/${pkg} from ${s} instead of ${PORTDIR}"
-				srcdir=${s}
-				break
-			fi
-		done
-		ln -s "${srcdir}"/${cat}/${pkg} "${d}"
+	d="${CROSSDEV_OVERLAY}"/cross-${CTARGET}/${pkg}
+	# if auto searching and something is already set, leave it be
+	if [[ -z ${ovl} ]] && [[ -e ${d} ]] ; then #211386 #347389
+		einfo "leaving ${cat}/${pkg} in ${CROSSDEV_OVERLAY}"
+		return
 	fi
+
+	rm -f "${d}"
+	if [[ -e ${d} ]] ; then
+		eerror "${d} still exists and isn't a symlink !?"
+		exit 1
+	fi
+	for s in ${ovl} ${SEARCH_OVERLAYS} ; do
+		if [[ -d ${s}/${cat}/${pkg} ]] ; then
+			srcdir=${s}
+			einfo "getting ${cat}/${pkg} from ${srcdir}"
+			break
+		fi
+	done
+	ln -s "${srcdir}"/${cat}/${pkg} "${d}"
 }
 set_env() {
 	local pkg=$1 env=$2
@@ -675,8 +704,8 @@ set_env() {
 	EOF
 }
 set_portage() {
-	local cat=$1 pkg=$2 ver=$3 env=$4
-	shift ; shift ; shift
+	local cat=$1 pkg=$2 ver=$3 env=$4 ovl=$5
+	shift 5
 	local use=$@
 
 	[[ ${pkg} == "[none]" ]] && return 0
@@ -684,7 +713,7 @@ set_portage() {
 	set_keywords ${pkg} ${ver}
 	set_use ${pkg} ${use}
 	set_use_force ${pkg} -multilib
-	set_links ${cat} ${pkg}
+	set_links ${cat} ${pkg} "${ovl}"
 	set_env ${pkg} "${env}"
 }
 
@@ -692,7 +721,7 @@ mkdir -p "${CONFIGROOT}"
 check_trailing_newline "${CONFIGROOT}"/categories
 grep -qs "^cross-${CTARGET}$" "${CONFIGROOT}"/categories \
 	|| echo cross-${CTARGET} >> "${CONFIGROOT}"/categories
-mkdir -p "${PORTDIR_OVERLAY}"/cross-${CTARGET} || exit 1
+mkdir -p "${CROSSDEV_OVERLAY}"/cross-${CTARGET} || exit 1
 cd "${CONFIGROOT}"
 for f in package.{keywords,mask,use} env/cross-${CTARGET} profile/package.use.force ; do
 	[[ -f ${f} ]] && continue
@@ -700,16 +729,18 @@ for f in package.{keywords,mask,use} env/cross-${CTARGET} profile/package.use.fo
 	rm -f ${f}/cross-${CTARGET}
 done
 
-set_portage ${BCAT} ${BPKG} ${BVER} "${BENV}"
-set_portage ${GCAT} ${GPKG} ${GVER} "${GENV}"
-set_portage ${KCAT} ${KPKG} ${KVER} "${KENV}"
-set_portage ${LCAT} ${LPKG} ${LVER} "${LENV}"
+set_portage ${BCAT} ${BPKG} ${BVER} "${BENV}" "${BOVL}"
+set_portage ${GCAT} ${GPKG} ${GVER} "${GENV}" "${GOVL}"
+set_portage ${KCAT} ${KPKG} ${KVER} "${KENV}" "${KOVL}"
+set_portage ${LCAT} ${LPKG} ${LVER} "${LENV}" "${LOVL}"
 set_portage sys-devel gdb
 set_portage dev-util insight
 
 # filter out revdep rebuild stuff #182601
 mkdir -p /etc/revdep-rebuild
 echo "SEARCH_DIRS_MASK=/usr/${CTARGET}" > /etc/revdep-rebuild/05cross-${CTARGET}
+
+hr
 
 #######################################
 ### Create links for helper scripts ###
@@ -751,6 +782,12 @@ doemerge() {
 	[[ "${_pipestatus// /}" -eq 0 ]] || die "$1 failed :("
 	eend 0
 }
+
+# Make this "just work" rather than worrying about user not putting
+# this overlay path into their system settings already.
+if [[ -n ${CROSSDEV_OVERLAY} ]] ; then
+	export PORTDIR_OVERLAY="${CROSSDEV_OVERLAY} ${PORTDIR_OVERLAY}"
+fi
 
 # We include the '-u' so that we don't re-emerge packages.  Avoid
 # using --nodeps as packages have more host depends nowadays (like
