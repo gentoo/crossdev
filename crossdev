@@ -536,7 +536,7 @@ DEFAULT_ABI=${ABI}
 
 #####################
 ### do the emerge ###
-(
+info() {
 hr -
 einfo "crossdev version:      ${CROSSDEV_VER}"
 einfo "Host Portage ARCH:     ${HARCH}"
@@ -574,9 +574,13 @@ einfo "PORTDIR_OVERLAY:       ${PORTDIR_OVERLAY}"
 einfo "PORT_LOGDIR:           ${PORT_LOGDIR}"
 einfo "PORTAGE_CONFIGROOT:    ${PORTAGE_CONFIGROOT}"
 hr
+}
+# avoid pipe since `einfo` will not use color :(
+info
+(
+info
+emerge -v --info
 ) >& "${PORT_LOGDIR}"/cross-${CTARGET}-info.log || exit 1
-cat "${PORT_LOGDIR}"/cross-${CTARGET}-info.log
-emerge -v --info >> "${PORT_LOGDIR}"/cross-${CTARGET}-info.log
 
 ####################################
 ### Fix up portage files / paths ###
