@@ -439,7 +439,7 @@ UOPTS=
 TARCH=
 HARCH=
 CTARGET=
-MULTILIB_ABIS="default"
+MULTILIB_ABIS=""
 STAGE=""
 BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" BUSE="" BENV="" BOVL=""
 GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" GUSE="" GENV="" GOVL=""
@@ -555,8 +555,6 @@ for v in MULTILIB_ABIS UCLIBC_CPU USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS A
 		source "${d}"/env
 	fi
 done
-ABI=$(set -- ${MULTILIB_ABIS:-default}; echo $1)
-DEFAULT_ABI=${ABI}
 
 #####################
 ### do the emerge ###
@@ -567,7 +565,7 @@ einfo "Host Portage ARCH:     ${HARCH}"
 einfo "Target Portage ARCH:   ${TARCH}"
 einfo "Target System:         ${CTARGET}"
 einfo "Stage:                 ${STAGE} (${STAGE_DISP[${STAGE}]})"
-einfo "ABIs:                  ${MULTILIB_ABIS}"
+einfo "ABIs:                  ${MULTILIB_ABIS:-<just one: the default>}"
 echo
 ex_fast || {
 is_s0 && {
@@ -688,21 +686,26 @@ set_links() {
 	ln -s "${srcdir}"/${cat}/${pkg} "${d}"
 }
 set_env() {
-	local pkg=$1 env=$2
+	local pkg=$1 env=$2 output
 	shift ; shift
 
-	cat <<-EOF > env/cross-${CTARGET}/${pkg}
-	# handle multilib ourselves
-	ABI=${ABI}
-	MULTILIB_ABIS="${MULTILIB_ABIS}"
-	DEFAULT_ABI=${DEFAULT_ABI}
-	LIBDIR_default="lib"
-	CFLAGS_default=
-	CPPFLAGS_default=
-	CXXFLAGS_default=
-	LDFLAGS_default=
+	output="env/cross-${CTARGET}/${pkg}"
+	cat <<-EOF > "${output}"
+	SYMLINK_LIB=no
 	$(printf '%b' "${env}")
 	EOF
+
+	# allow USE=-multilib to work its magic via multilib.eclass
+	# by not setting random values when we simply want one abi
+	if [[ -n ${MULTILIB_ABIS} ]] ; then
+		ABI=$(set -- ${MULTILIB_ABIS}; echo $1)
+		cat <<-EOF >> "${output}"
+		# handle multilib ourselves
+		ABI=${ABI}
+		MULTILIB_ABIS="${MULTILIB_ABIS}"
+		DEFAULT_ABI=${ABI}
+		EOF
+	fi
 }
 set_portage() {
 	local cat=$1 pkg=$2 ver=$3 env=$4 ovl=$5
@@ -814,7 +817,7 @@ doemerge() {
 	einfo "Log: ${logfile}"
 	ebegin "Emerging cross-${2:-$1}"
 
-	set_use $1 ${USE} $( [[ ${MULTILIB_ABIS} == "default" ]] && echo - )multilib
+	set_use $1 ${USE} $( [[ -z ${MULTILIB_ABIS} ]] && echo - )multilib
 
 	if [[ ${UOPTS/-v} != ${UOPTS} || ${UOPTS/-p} != ${UOPTS} ]] ; then
 		emerge cross-${CTARGET}/$1 ${EOPTS} \
