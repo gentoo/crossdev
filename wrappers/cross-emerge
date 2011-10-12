@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2008-2010 Gentoo Foundation
+# Copyright 2008-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 if [ -z "${CHOST}" ] ; then
@@ -20,10 +20,14 @@ fi
 
 # Portage defaults CBUILD to CHOST, so we have to remove CHOST
 # from the env to get a "good" value for CBUILD
-: ${CBUILD=$(env -i portageq envvar CBUILD)}
-: ${BUILD_CFLAGS=$(env -i portageq envvar CFLAGS)}
-: ${BUILD_CXXFLAGS=$(env -i portageq envvar CXXFLAGS)}
-: ${BUILD_CPPFLAGS=$(env -i portageq envvar CPPFLAGS)}
+query_vars="CBUILD CFLAGS CXXFLAGS CPPFLAGS"
+clean_vars="${query_vars} CHOST SYSROOT PORTAGE_CONFIGROOT"
+eval $(env $(printf -- '-u %s ' ${clean_vars}) \
+	portageq envvar -v ${query_vars} | sed s:^:_E_:)
+: ${CBUILD=${_E_CBUILD}}
+: ${BUILD_CFLAGS=${_E_CFLAGS}}
+: ${BUILD_CXXFLAGS=${_E_CXXFLAGS}}
+: ${BUILD_CPPFLAGS=${_E_CPPFLAGS}}
 export CBUILD BUILD_CFLAGS BUILD_CXXFLAGS BUILD_CPPFLAGS
 
 FAKEROOT=
