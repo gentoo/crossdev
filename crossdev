@@ -439,7 +439,8 @@ UOPTS=
 TARCH=
 HARCH=
 CTARGET=
-MULTILIB_ABIS=""
+MULTILIB_ABIS="default"
+MULTILIB_USE=""
 STAGE=""
 BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" BUSE="" BENV="" BOVL=""
 GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" GUSE="" GENV="" GOVL=""
@@ -556,6 +557,57 @@ for v in MULTILIB_ABIS UCLIBC_CPU USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS A
 	fi
 done
 
+# parse multilib settings until profiles are sane
+DEFAULT_ABI=${MULTILIB_ABIS%% *}
+eval $(
+	# clean the env
+	unset ${!CFLAGS_*} ${!CHOST_*} ${!CTARGET_*} ${!LDFLAGS_*} ${!LIBDIR_*}
+
+	# ask multilib.eclass to tell us how things work
+	inherit() { :; }
+	for p in ${SEARCH_OVERLAYS} ${PORTDIR} ; do
+		p+="/eclass/multilib.eclass"
+		if [[ -e ${p} ]] ; then
+			. "${p}"
+			break
+		fi
+	done
+	unset DEFAULT_ABI
+	if [[ ${MULTILIB_ABIS} == "default" ]] ; then
+		unset MULTILIB_ABIS
+		single_abi=true
+	else
+		single_abi=false
+	fi
+	multilib_env
+	${single_abi} && MULTILIB_ABIS=${DEFAULT_ABI}
+
+	# output the desired env
+	for v in ${!CFLAGS_*} ${!CHOST_*} ${!CTARGET_*} ${!LDFLAGS_*} ${!LIBDIR_*} MULTILIB_ABIS DEFAULT_ABI ; do
+		echo ${v}=\'${!v}\'
+	done
+
+	# make sure all ABIs have valid vars
+	def_CFLAGS=
+	def_LIBDIR="lib"
+	def_LDFLAGS=
+	for v in CFLAGS LIBDIR LDFLAGS ; do
+		d="def_${v}"
+		for a in ${MULTILIB_ABIS} ; do
+			_v="${v}_${a}"
+			[[ ${!_v+set} == "set" ]] && continue
+			echo ${_v}=\'${!d}\'
+		done
+	done
+)
+if [[ -z ${MULTILIB_USE} ]] ; then
+	if [[ $(set -- ${MULTILIB_ABIS}; echo $#) -eq 1 ]] ; then
+		MULTILIB_USE="no"
+	else
+		MULTILIB_USE="yes"
+	fi
+fi
+
 #####################
 ### do the emerge ###
 info() {
@@ -565,7 +617,8 @@ einfo "Host Portage ARCH:     ${HARCH}"
 einfo "Target Portage ARCH:   ${TARCH}"
 einfo "Target System:         ${CTARGET}"
 einfo "Stage:                 ${STAGE} (${STAGE_DISP[${STAGE}]})"
-einfo "ABIs:                  ${MULTILIB_ABIS:-<just one: the default>}"
+[[ ${DEFAULT_ABI} != "${MULTILIB_ABIS}" ]] && def_out=" (default: ${DEFAULT_ABI})" || def_out=
+einfo "ABIs:                  ${MULTILIB_ABIS}${def_out}"
 echo
 ex_fast || {
 is_s0 && {
@@ -695,17 +748,11 @@ set_env() {
 	$(printf '%b' "${env}")
 	EOF
 
-	# allow USE=-multilib to work its magic via multilib.eclass
-	# by not setting random values when we simply want one abi
-	if [[ -n ${MULTILIB_ABIS} ]] ; then
-		ABI=$(set -- ${MULTILIB_ABIS}; echo $1)
-		cat <<-EOF >> "${output}"
-		# handle multilib ourselves
-		ABI=${ABI}
-		MULTILIB_ABIS="${MULTILIB_ABIS}"
-		DEFAULT_ABI=${ABI}
-		EOF
-	fi
+	local v
+	local ABI=$(set -- ${MULTILIB_ABIS}; echo $1)
+	for v in ${!CFLAGS_*} ${!CHOST_*} ${!CTARGET_*} ${!LDFLAGS_*} ${!LIBDIR_*} ABI MULTILIB_ABIS DEFAULT_ABI ; do
+		echo "${v}='${!v}'" >> "${output}"
+	done
 }
 set_portage() {
 	local cat=$1 pkg=$2 ver=$3 env=$4 ovl=$5
@@ -817,7 +864,7 @@ doemerge() {
 	einfo "Log: ${logfile}"
 	ebegin "Emerging cross-${2:-$1}"
 
-	set_use $1 ${USE} $( [[ -z ${MULTILIB_ABIS} ]] && echo - )multilib
+	set_use $1 ${USE} $( [[ ${MULTILIB_USE} == "no" ]] && echo - )multilib
 
 	if [[ ${UOPTS/-v} != ${UOPTS} || ${UOPTS/-p} != ${UOPTS} ]] ; then
 		emerge cross-${CTARGET}/$1 ${EOPTS} \
