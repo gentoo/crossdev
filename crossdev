@@ -514,22 +514,6 @@ for with in HEADERS ; do
 	[[ ${!var} == "COW" ]] && eval ${var}=${!defvar}
 done
 
-#####################
-### sanity checks ###
-if ! binutils-config --version &> /dev/null ; then
-	eerror "Sorry, but your host system needs to have binutils-config"
-	eerror "in order to keep from screwing things up."
-	eerror "That means you must be running unstable versions of"
-	eerror "both binutils and binutils-config."
-	exit 1
-fi
-if ! egrep -qs 'inherit.*toolchain( |$)' /var/db/pkg/sys-devel/gcc-*/*.ebuild ; then
-	eerror "Sorry, but your host system needs to have"
-	eerror "an unstable version of gcc in order to"
-	eerror "keep from screwing things up."
-	exit 1
-fi
-
 setup_portage_vars
 if [[ -z ${CROSSDEV_OVERLAY} ]] ; then
 	eerror "You need to specify an output overlay.  Please use --ov-output or set"
