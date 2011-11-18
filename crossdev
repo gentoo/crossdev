@@ -177,7 +177,7 @@ parse_target() {
 
 		# due to upstream lameness, build C/C++ at first glance
 		*-cygwin)
-		      GUSE_DISABLE_STAGE_1=${GUSE_DISABLE_STAGE_1/nocxx};;
+		      GUSE_DISABLE_STAGE_1+=" -nocxx cxx";;
 
 		# these are the mingw64 targets that binutils seems to use
 		x86_64-*-mingw*|*-w64-mingw*)
@@ -453,7 +453,7 @@ CROSSDEV_OVERLAY=""
 # not tested, or doesn't make sense, or no one simply cares about them
 GUSE_DISABLE="-boundschecking -d -gtk -gcj -libffi -mudflap -objc -objc++ -objc-gc"
 # These are disabled only for stage1 gcc
-GUSE_DISABLE_STAGE_1="${GUSE_DISABLE} -fortran nocxx -openmp"
+GUSE_DISABLE_STAGE_1="${GUSE_DISABLE} -fortran nocxx -cxx -openmp"
 GUSE_DISABLE_STAGE_2="${GUSE_DISABLE}"
 WITH_HEADERS="COW"   WITH_DEF_HEADERS="yes" #227065 gcc-4.3+ is a pita w/out headers
 EX_FAST="no"
