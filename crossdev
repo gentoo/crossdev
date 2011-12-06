@@ -877,7 +877,7 @@ EOPTS_DEF="${UOPTS}"
 EOPTS_UP="${EOPTS_DEF} -u"
 EOPTS=${EOPTS_UP}
 # keep things like --ask from screwing us up
-export EMERGE_DEFAULT_OPTS=""
+export EMERGE_DEFAULT_OPTS="--quiet-build=n"
 
 # screw random strictness in cross-compilers
 export FEATURES="${FEATURES} -stricter"
