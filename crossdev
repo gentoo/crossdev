@@ -542,7 +542,6 @@ for v in MULTILIB_ABIS UCLIBC_CPU USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS A
 done
 
 # parse multilib settings until profiles are sane
-DEFAULT_ABI=${MULTILIB_ABIS%% *}
 eval $(
 	# clean the env
 	unset ${!CFLAGS_*} ${!CHOST_*} ${!CTARGET_*} ${!LDFLAGS_*} ${!LIBDIR_*}
@@ -584,6 +583,7 @@ eval $(
 		done
 	done
 )
+DEFAULT_ABI=${MULTILIB_ABIS%% *}
 if [[ -z ${MULTILIB_USE} ]] ; then
 	if [[ $(set -- ${MULTILIB_ABIS}; echo $#) -eq 1 ]] ; then
 		MULTILIB_USE="no"
