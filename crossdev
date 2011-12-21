@@ -191,7 +191,13 @@ parse_target() {
 		      LCAT="dev-util"; LPKG="mingw-runtime";;
 
 		msp430)
-		      STAGE_DEFAULT=${STAGE_BINUTILS};;
+		      KCAT="dev-embedded"; KPKG="msp430mcu";
+		      BCAT="dev-embedded"; BPKG="msp430-binutils";
+		      GCAT="dev-embedded"; GPKG="msp430-gcc";
+		      LCAT="dev-embedded"; LPKG="msp430-libc";
+		      DCAT="dev-embedded"; DPKG="msp430-gdb";
+		      GUSE="-fortran -openmp";
+		      WITH_DEF_HEADERS="no";;
 
 		nios2*)
 		      BPKG="binutils-nios2";
