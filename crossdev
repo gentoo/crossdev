@@ -38,7 +38,7 @@ Options:
     ${GOOD}--k, --kernel${NORMAL} ver        Specify version of kernel headers to use
     ${GOOD}--l, --libc${NORMAL} ver          Specify version of libc to use
     ${GOOD}-A, --abis${NORMAL} abis          Specify ABIs to build, first one is the default
-    ${GOOD}--[bgkl]env${NORMAL} env          Specify env settings for binutils/gcc/kernel/libc
+    ${GOOD}--[bdgkl]env${NORMAL} env         Specify env settings for binutils/gcc/gdb/kernel/libc
     ${GOOD}-f, --force${NORMAL}              I don't need a seat belt!
     ${GOOD}-S, --stable${NORMAL}             Use latest stable versions as default
     ${GOOD}-C, --clean${NORMAL} target       Uninstall specified target
@@ -52,6 +52,7 @@ Overlay Options:
     ${GOOD}-oO, --ov-output${NORMAL} path    Overlay to write crossdev package links
                                 [default: last from --overlays list]
     ${GOOD}-ob, --ov-binutils${NORMAL} path  Overlay for binutils ebuilds [default: search]
+    ${GOOD}-od, --ov-gdb${NORMAL} path       Overlay for gdb ebuilds [default: search]
     ${GOOD}-og, --ov-gcc${NORMAL} path       Overlay for gcc ebuilds [default: search]
     ${GOOD}-ok, --ov-kernel${NORMAL} path    Overlay for kernel ebuilds [default: search]
     ${GOOD}-ol, --ov-libc${NORMAL} path      Overlay for C library ebuilds [default: search]
@@ -446,6 +447,7 @@ BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" BUSE="" BENV="" BOVL=""
 GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" GUSE="" GENV="" GOVL=""
 KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" KUSE="" KENV="" KOVL=""
 LCAT="sys-libs"   ; LPKG="[none]"        ; LVER="" LUSE="" LENV="" LOVL=""
+DCAT="sys-devel"  ; DPKG="gdb"           ; DVER="" DUSE="" DENV="" DOVL=""
 DEFAULT_VER="[latest]"
 SEARCH_OVERLAYS=""
 CROSSDEV_OVERLAY=""
@@ -469,6 +471,9 @@ while [[ $# -gt 0 ]] ; do
 	--b|--binutils)    shift; BVER=$1;;
 	--benv)            shift; BENV=$1;;
 	-ob|--ov-binutils) shift; BOVL=$1;;
+	--d|--gdb)         shift; DVER=$1;;
+	--denv)            shift; DENV=$1;;
+	-od|--ov-gdb)      shift; DOVL=$1;;
 	--g|--gcc)         shift; GVER=$1;;
 	--genv)            shift; GENV=$1;;
 	-og|--ov-gcc)      shift; GOVL=$1;;
@@ -811,7 +816,7 @@ set_portage ${BCAT} ${BPKG} ${BVER} "${BENV}" "${BOVL}"
 set_portage ${GCAT} ${GPKG} ${GVER} "${GENV}" "${GOVL}"
 set_portage ${KCAT} ${KPKG} ${KVER} "${KENV}" "${KOVL}"
 set_portage ${LCAT} ${LPKG} ${LVER} "${LENV}" "${LOVL}"
-set_portage sys-devel gdb
+set_portage ${DCAT} ${DPKG} ${DVER} "${DENV}" "${DOVL}"
 set_portage dev-util insight
 set_metadata
 
@@ -924,7 +929,7 @@ USE="${GUSE} ${USE} ${GUSE_DISABLE_STAGE_2}" \
 
 EOPTS="${EOPTS_UP} --newuse"
 ex_gcc && USE="${GUSE} ${USE}" doemerge ${GPKG} ${GPKG}-extra
-ex_gdb && doemerge gdb
+ex_gdb && USE="${DUSE} ${USE}" doemerge ${DPKG}
 ex_insight && doemerge insight
 
 exit 0
