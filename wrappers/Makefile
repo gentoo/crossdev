@@ -9,6 +9,9 @@ SITE = $(PREFIX)/share/crossdev/include/site
 TOPDIR =
 
 all:
+	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" cross-emerge
+	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" emerge-wrapper
+	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" etc/portage/make.conf
 
 install:
 	$(INSTALL_DIR) $(DESTDIR)/$(PREFIX)/bin/ $(DESTDIR)/$(SITE)

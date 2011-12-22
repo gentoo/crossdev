@@ -13,9 +13,15 @@ if [[ ${ROOT} != "/" ]] ; then
 	exit 2
 fi
 
+EPREFIX="@GENTOO_PORTAGE_EPREFIX@"
+if [[ ${EPREFIX} == "@"GENTOO_PORTAGE_EPREFIX"@" ]] ; then
+	EPREFIX=""
+fi
+EROOT=${ROOT%/}"${EPREFIX}"/
+: ${PORTAGE_CONFIGROOT:=${EROOT}}
 CONFIGROOT="${PORTAGE_CONFIGROOT}/etc/portage"
 
-source /etc/init.d/functions.sh || exit 1
+source "${EPREFIX}"/etc/init.d/functions.sh || exit 1
 esyslog() { :; }
 die_logs() {
 	echo
@@ -318,7 +324,7 @@ parse_repo_config() {
 	# location = /usr/local/portage
 	# masters = gentoo
 	# priority = 0
-	local repo_config=$(portageq repositories_configuration "${ROOT}")
+	local repo_config=$(portageq repositories_configuration "${EROOT}")
 	local flat_config=$(echo "${repo_config}" | gawk '
 		function push(arr, idx, ele) {
 			if (idx in arr)
@@ -400,7 +406,7 @@ setup_portage_vars() {
 	fi
 
 	# make sure we have a valid logdir
-	: ${PORT_LOGDIR:=/var/log/portage}
+	: ${PORT_LOGDIR:=${EPREFIX}/var/log/portage}
 	xmkdir -p "${PORT_LOGDIR}"
 }
 
@@ -421,8 +427,8 @@ uninstall() {
 	done
 	rm -rf "${CONFIGROOT}"/env/cross-${CTARGET}
 	rmdir "${CONFIGROOT}"/env 2>/dev/null
-	rm -f /etc/revdep-rebuild/05cross-${CTARGET}
-	rmdir /etc/revdep-rebuild 2>/dev/null
+	rm -f "${EPREFIX}"/etc/revdep-rebuild/05cross-${CTARGET}
+	rmdir "${EPREFIX}"/etc/revdep-rebuild 2>/dev/null
 
 	# Unmerge all toolchain packages for this target.
 	qmerge -Uqy $(qlist -IC "cross-${CTARGET}/")
@@ -433,29 +439,29 @@ uninstall() {
 		gcc-{ar,nm,ranlib} gccbug gprof ld nm objcopy objdump \
 		ranlib readelf size strings strip windmc windres
 	do
-		rm -f /usr/bin/${CTARGET}-${f} /usr/${CTARGET}/bin/${f}
+		rm -f "${EPREFIX}"/usr/bin/${CTARGET}-${f} "${EPREFIX}"/usr/${CTARGET}/bin/${f}
 	done
-	rm -f /usr/${CTARGET}/{sys-include,usr}
-	rmdir /usr/${CTARGET}/{include/asm,include} 2>/dev/null
-	rm -f /usr/bin/${CTARGET}-{gcc,{c,g}++,cpp,gfortran,gcov}
-	rm -f /etc/env.d/{binutils,gcc}/config-${CTARGET}
+	rm -f "${EPREFIX}"/usr/${CTARGET}/{sys-include,usr}
+	rmdir "${EPREFIX}"/usr/${CTARGET}/{include/asm,include} 2>/dev/null
+	rm -f "${EPREFIX}"/usr/bin/${CTARGET}-{gcc,{c,g}++,cpp,gfortran,gcov}
+	rm -f "${EPREFIX}"/etc/env.d/{binutils,gcc}/config-${CTARGET}
 
 	# clean out files from crossdev itself
-	[[ -e /var/db/pkg/cross-${CTARGET} ]] && rmdir /var/db/pkg/cross-${CTARGET}
-	rm -f /usr/bin/${CTARGET}-{emerge,fix-root,pkg-config} /usr/bin/emerge-${CTARGET}
+	[[ -e ${EPREFIX}/var/db/pkg/cross-${CTARGET} ]] && rmdir "${EPREFIX}"/var/db/pkg/cross-${CTARGET}
+	rm -f "${EPREFIX}"/usr/bin/${CTARGET}-{emerge,fix-root,pkg-config} "${EPREFIX}"/usr/bin/emerge-${CTARGET}
 
 	for f in make.{conf,globals,profile} ; do
-		f="/usr/${CTARGET}/etc/${f}"
+		f="${EPREFIX}/usr/${CTARGET}/etc/${f}"
 		[[ -L ${f} ]] && rm -f ${f}
-		f="/usr/${CTARGET}/etc/portage/${f##*/}"
+		f="${EPREFIX}/usr/${CTARGET}/etc/portage/${f##*/}"
 		[[ -L ${f} ]] && rm -f ${f}
 	done
-	find /usr/share/crossdev/etc/ -type f | \
+	find "${EPREFIX}"/usr/share/crossdev/etc/ -type f | \
 	while read f ; do
 		f1=${f}
 		[[ ! -e ${f1} ]] && continue
 		m1=$(set -- `md5sum ${f1}`; echo $1)
-		f2=/usr/${CTARGET}${f#/usr/share/crossdev}
+		f2=${EPREFIX}/usr/${CTARGET}${f#/usr/share/crossdev}
 		[[ ! -e ${f2} ]] && continue
 		m2=$(set -- `md5sum ${f2}`; echo $1)
 		if [[ ${m1} == ${m2} ]] ; then
@@ -464,7 +470,7 @@ uninstall() {
 	done
 
 	# clean out the sysroot, prompting the user if need be
-	for d in /usr/lib/gcc{,-lib}/${CTARGET} /usr/${CTARGET} ; do
+	for d in "${EPREFIX}"/usr/lib/gcc{,-lib}/${CTARGET} "${EPREFIX}"/usr/${CTARGET} ; do
 		if [[ ! -d ${d} ]] ; then
 			rm -f "${d}"
 		else
@@ -540,9 +546,9 @@ hr() {
 			|| c=${c##* }
 	fi
 	local ext=${1:-  _  -  ~  -}
-	local sext=${ext//?/ }
+	local sext=${ext/?/ }
 	local br=$(printf "%$((c + ${#ext}))s")
-	local banner=${br//${sext}/${ext}}
+	local banner=${br/${sext}/${ext}}
 	echo "${banner:0:${c}}"
 }
 ver_get_op() {
@@ -1124,21 +1130,21 @@ for_each_extra_pkg set_portage X
 set_metadata
 
 # filter out revdep rebuild stuff #182601
-xmkdir -p /etc/revdep-rebuild
-echo "SEARCH_DIRS_MASK=/usr/${CTARGET}" > /etc/revdep-rebuild/05cross-${CTARGET}
+xmkdir -p "${EPREFIX}"/etc/revdep-rebuild
+echo "SEARCH_DIRS_MASK=${EPREFIX}/usr/${CTARGET}" > "${EPREFIX}"/etc/revdep-rebuild/05cross-${CTARGET}
 
 hr
 
 #######################################
 ### Create links for helper scripts ###
 
-xmkdir -p /usr/${CTARGET}
+xmkdir -p "${EPREFIX}"/usr/${CTARGET}
 emerge-wrapper --target ${CTARGET} --init || exit 1
 
 #################
 emerged_with_use() {
 	local pkg=$1 use=$2
-	grep -qs ${use} /var/db/pkg/cross-${CTARGET}/${pkg}-*/USE
+	grep -qs ${use} "${EPREFIX}"/var/db/pkg/cross-${CTARGET}/${pkg}-*/USE
 }
 set_eopts_on_pkg_status() {
 	emerged_with_use "$@" \

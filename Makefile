@@ -4,6 +4,8 @@
 include settings.mk
 
 all:
+	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" crossdev
+	$(MAKE) -C wrappers
 
 install:
 	$(INSTALL_DIR) $(DESTDIR)/$(PREFIX)/bin/

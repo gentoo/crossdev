@@ -9,7 +9,12 @@ if [ -z "${CHOST}" ] ; then
 fi
 export CHOST
 
-: ${SYSROOT=/usr/${CHOST}}
+EPREFIX="@GENTOO_PORTAGE_EPREFIX@"
+if [[ ${EPREFIX} == "@"GENTOO_PORTAGE_EPREFIX"@" ]] ; then
+	EPREFIX=""
+fi
+
+: ${SYSROOT=${EPREFIX}/usr/${CHOST}}
 : ${PORTAGE_CONFIGROOT=${SYSROOT}}
 export SYSROOT PORTAGE_CONFIGROOT
 

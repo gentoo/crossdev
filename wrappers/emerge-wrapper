@@ -91,7 +91,7 @@ cross_wrap_bin()
 
 cross_wrap()
 {
-	SYSROOT=/usr/${CHOST}
+	SYSROOT=@GENTOO_PORTAGE_EPREFIX@/usr/${CHOST}
 	cross_wrap_bin "$@" || return $?
 	if [[ -d ${SYSROOT} ]] && [[ ! -d ${SYSROOT}/etc ]] ; then
 		cross_wrap_etc "$@"
