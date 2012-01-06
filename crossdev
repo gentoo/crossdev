@@ -295,14 +295,13 @@ uninstall() {
 
 	[[ -d ${CROSSDEV_OVERLAY}/cross-${CTARGET} ]] \
 		&& rm -r ${CROSSDEV_OVERLAY}/cross-${CTARGET}
-	sed -i -e "/^cross-${CTARGET}$/d" "${CONFIGROOT}"/categories
-	for f in package.{mask,keywords,use} profile/package.use.force ; do
+	for f in categories package.{mask,keywords,use} profile/package.use.force ; do
 		f="${CONFIGROOT}/${f}"
 		if [[ -d ${f} ]] ; then
 			rm -f "${f}"/cross-${CTARGET}
 			rmdir "${f}" 2>/dev/null
 		elif [[ -f ${f} ]] ; then
-			sed -i -e "/cross-${CTARGET}\//d" "${f}"
+			sed -i -r -e "/^cross-${CTARGET}(\/|$)/d" "${f}"
 		fi
 	done
 	rm -rf "${CONFIGROOT}"/env/cross-${CTARGET}
