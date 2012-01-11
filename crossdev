@@ -295,7 +295,7 @@ uninstall() {
 
 	[[ -d ${CROSSDEV_OVERLAY}/cross-${CTARGET} ]] \
 		&& rm -r ${CROSSDEV_OVERLAY}/cross-${CTARGET}
-	for f in categories package.{mask,keywords,use} profile/package.use.force ; do
+	for f in categories package.{mask,keywords,use} profile/package.use.{force,mask} ; do
 		f="${CONFIGROOT}/${f}"
 		if [[ -d ${f} ]] ; then
 			rm -f "${f}"/cross-${CTARGET}
@@ -707,6 +707,12 @@ set_use_force() {
 	output=$(_set_portage_file ${pkg} profile/package.use.force)
 	echo "cross-${CTARGET}/${pkg} ${use}" >> ${output}
 }
+set_use_mask() {
+	local pkg=$1 output use=${@:2}
+	[[ -z ${use} ]] && return 0
+	output=$(_set_portage_file ${pkg} profile/package.use.mask)
+	echo "cross-${CTARGET}/${pkg} ${use}" >> ${output}
+}
 set_links() {
 	local cat=$1 pkg=$2 ovl=$3
 	local s srcdir=${PORTDIR} d
@@ -758,6 +764,7 @@ set_portage() {
 	set_keywords ${pkg} ${ver}
 	set_use ${pkg} ${use}
 	set_use_force ${pkg} -multilib
+	set_use_mask ${pkg} -multilib
 	set_links ${cat} ${pkg} "${ovl}"
 	set_env ${pkg} "${env}"
 }
@@ -811,7 +818,7 @@ grep -qs "^cross-${CTARGET}$" "${CONFIGROOT}"/categories \
 	|| echo cross-${CTARGET} >> "${CONFIGROOT}"/categories
 mkdir -p "${CROSSDEV_OVERLAY}"/cross-${CTARGET} || exit 1
 cd "${CONFIGROOT}"
-for f in package.{keywords,mask,use} env/cross-${CTARGET} profile/package.use.force ; do
+for f in package.{keywords,mask,use} env/cross-${CTARGET} profile/package.use.{force,mask} ; do
 	[[ -f ${f} ]] && continue
 	mkdir -p ${f} || exit 1
 	rm -f ${f}/cross-${CTARGET}
