@@ -41,6 +41,7 @@ Options:
                                  e.g. ">=2.20" "~4.6.1" "=2.13.1-r3"
     ${GOOD}-A, --abis${NORMAL} abis          Specify ABIs to build, first one is the default
     ${GOOD}--[bdgkl]env${NORMAL} env         Specify env settings for binutils/gcc/gdb/kernel/libc
+                                Note: make sure to quote: 'VAR="some value"'
     ${GOOD}-f, --force${NORMAL}              I don't need a seat belt!
     ${GOOD}-S, --stable${NORMAL}             Use latest stable versions as default
     ${GOOD}-C, --clean${NORMAL} target       Uninstall specified target
