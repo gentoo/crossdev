@@ -37,6 +37,8 @@ Options:
     ${GOOD}--g, --gcc${NORMAL} ver           Specify version of gcc to use
     ${GOOD}--k, --kernel${NORMAL} ver        Specify version of kernel headers to use
     ${GOOD}--l, --libc${NORMAL} ver          Specify version of libc to use
+                                Note: versions support depend atom syntaxes:
+                                 e.g. ">=2.20" "~4.6.1" "=2.13.1-r3"
     ${GOOD}-A, --abis${NORMAL} abis          Specify ABIs to build, first one is the default
     ${GOOD}--[bdgkl]env${NORMAL} env         Specify env settings for binutils/gcc/gdb/kernel/libc
     ${GOOD}-f, --force${NORMAL}              I don't need a seat belt!
@@ -44,7 +46,7 @@ Options:
     ${GOOD}-C, --clean${NORMAL} target       Uninstall specified target
     ${GOOD}-P, --portage${NORMAL} opts       Options to pass to emerge (see emerge(1))
     ${GOOD}--with[out]-headers${NORMAL}      Build C library headers before C compiler?
-Note: versions support depend atom syntaxes; e.g. ">=2.20" "~4.6.1" "=2.13.1-r3"
+    ${GOOD}--show-fail-log${NORMAL}          If the build fails, dump the failing log
 
 Overlay Options:
     ${GOOD}-oS, --overlays${NORMAL} list     Space delimited list of overlays to search
@@ -468,6 +470,7 @@ EX_GCC="no"
 EX_GDB="no"
 FORCE="no"
 SET_X="no"
+SHOW_FAIL_LOG="no"
 
 while [[ $# -gt 0 ]] ; do
 	case $1 in
@@ -502,6 +505,7 @@ while [[ $# -gt 0 ]] ; do
 	--without-*)       eval $(set_withval $1);;
 	-f|--force)        FORCE="yes";;
 	-x)                SET_X="yes";;
+	--show-fail-log)   SHOW_FAIL_LOG="yes";;
 	-P|--portage)      UOPTS="${UOPTS} $2"; shift;;
 	-b|-d|-p|-v|-q)    UOPTS="${UOPTS} $1";;
 	-pv|-vp)           UOPTS="${UOPTS} -p -v";;
@@ -868,6 +872,7 @@ doemerge() {
 	set_use $1 ${USE} $( [[ ${MULTILIB_USE} == "no" ]] && echo - )multilib
 
 	if has -v ${UOPTS} || has -p ${UOPTS} || has -vp ${UOPTS} || has -pv ${UOPTS} ; then
+		SHOW_FAIL_LOG="no"
 		emerge cross-${CTARGET}/$1 ${EOPTS} \
 			2>&1 | tee "${logfile}"
 	else
@@ -875,7 +880,10 @@ doemerge() {
 			>& "${logfile}"
 	fi
 	local _pipestatus=${PIPESTATUS[*]}
-	[[ "${_pipestatus// /}" -eq 0 ]] || die "$1 failed :("
+	if [[ "${_pipestatus// /}" -ne 0 ]] ; then
+		[[ ${SHOW_FAIL_LOG} == "yes" ]] && cat "${logfile}"
+		die "$1 failed :("
+	fi
 	eend 0
 }
 
