@@ -42,23 +42,25 @@ if [ "$1" = "--cross-pkg-config-install" ] ; then
 fi
 
 unset EXTRA_PKG_CONFIG_LIBDIR
-if [ "@CROSS_PKG_CONFIG_INSTALLED@" = "installed" ] ; then
-	# Manual install
-	SYSROOT="@CROSS_PKG_CONFIG_PATH@"
-elif [ -n "${ROOT}" ] ; then
-	# Gentoo
-	SYSROOT=${ROOT}
-elif [ -n "${STAGEDIR}" ] ; then
-	# uClinux-dist
-	SYSROOT=${STAGEDIR}
-	EXTRA_PKG_CONFIG_LIBDIR=${UCLINUX_PKG_CONFIG_LIBDIR}
-else
-	# /usr/<target>
-	CHOST=${0##*/}
-	CHOST=${CHOST%-pkg-config}
-	SYSROOT="/usr/${CHOST}"
-	if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
-		error "Need \$ROOT or \$STAGEDIR set first"
+if [ -z "${SYSROOT}" ] ; then
+	if [ "@CROSS_PKG_CONFIG_INSTALLED@" = "installed" ] ; then
+		# Manual install
+		SYSROOT="@CROSS_PKG_CONFIG_PATH@"
+	elif [ -n "${ROOT}" ] ; then
+		# Gentoo
+		SYSROOT=${ROOT}
+	elif [ -n "${STAGEDIR}" ] ; then
+		# uClinux-dist
+		SYSROOT=${STAGEDIR}
+		EXTRA_PKG_CONFIG_LIBDIR=${UCLINUX_PKG_CONFIG_LIBDIR}
+	else
+		# /usr/<target>
+		CHOST=${0##*/}
+		CHOST=${CHOST%-pkg-config}
+		SYSROOT="/usr/${CHOST}"
+		if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
+			error "Need \$ROOT or \$STAGEDIR set first"
+		fi
 	fi
 fi
 # abort infinite loop due to misconfiguration
