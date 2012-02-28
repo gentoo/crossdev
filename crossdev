@@ -537,7 +537,7 @@ for with in HEADERS ; do
 done
 
 show_target_cfg() {
-	local pkgs
+	local pkgs crosspkgs=()
 
 	pkgs=(
 		binutils B
@@ -547,18 +547,27 @@ show_target_cfg() {
 	)
 	ex_gdb && pkgs+=( gdb D )
 
-	echo "arch ${TARCH}"
-	echo "target ${CTARGET}"
-	echo "category cross-${CTARGET}"
+	echo "arch=${TARCH}"
+	echo "target=${CTARGET}"
+	echo "category=cross-${CTARGET}"
 	while [[ ${#pkgs[@]} -gt 0 ]] ; do
-		local vcat="${pkgs[1]}CAT"
-		local vpkg="${pkgs[1]}PKG"
+		local pkg=${pkgs[0]}
+		local v=${pkgs[1]}
+		local vcat="${v}CAT"
+		local vpkg="${v}PKG"
+		local ocat="${pkg}_category"
+		local opkg="${pkg}_pn"
 
 		if [[ ${!vpkg} != "[none]" ]] ; then
-			echo "${pkgs[0]} ${!vcat} ${!vpkg}"
+			echo "${ocat}=${!vcat}"
+			echo "${opkg}=${!vpkg}"
+		else
+			printf '%s=\n' "${ocat}" "${opkg}"
 		fi
+		crosspkgs+=( ${pkg} )
 		pkgs=( ${pkgs[@]:2} )
 	done
+	echo "crosspkgs='${crosspkgs[*]}'"
 
 	exit 0
 }
