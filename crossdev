@@ -542,7 +542,7 @@ show_target_cfg() {
 	pkgs=(
 		binutils B
 		gcc G
-		headers K
+		kernel K
 		libc L
 	)
 	ex_gdb && pkgs+=( gdb D )
