@@ -848,9 +848,11 @@ set_metadata() {
 		fi
 		[[ -z ${name} ]] && continue
 
-		# If this repo has an eclass dir, mark it as a master
+		# If this repo has an eclass dir, mark it as a master.
+		# Note: portage reads the masters list in reverse order,
+		#       so we have to prepare it the same way.
 		if [[ -d ${d}/eclass ]] ; then
-			has ${name} ${masters} || masters+=" ${name}"
+			has ${name} ${masters} || masters="${name} ${masters}"
 		fi
 
 		# If one of the overlays uses thin manifests, then turn it on
@@ -878,7 +880,7 @@ set_metadata() {
 	cat <<-EOF > "${layout}"
 	${autogen_tag}
 	# Delete the above line if you want to manage this file yourself
-	masters =${masters}
+	masters = ${masters% }
 	$(printf '%b' "${this_manifests}")
 	EOF
 }
