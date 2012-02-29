@@ -16,14 +16,21 @@ CONFIGROOT="${PORTAGE_CONFIGROOT}/etc/portage"
 
 source /etc/init.d/functions.sh || exit 1
 esyslog() { :; }
-die() {
+die_logs() {
 	echo
-	eerror $*
-	eerror If you file a bug, please attach the following logfiles:
-	eerror ${PORT_LOGDIR}/cross-${CTARGET}-info.log
-	eerror ${logfile}
+	eerror "$1"
+
+	shift
+	local log
+	eerror
+	eerror "If you file a bug, please attach the following logfiles:"
+	eerror "${PORT_LOGDIR}/cross-${CTARGET}-info.log"
+	for log in "$@" ; do
+		eerror "${log}"
+	done
 	exit 1
 }
+die() { die_logs "$*"; }
 has() { [[ " ${@:2} " == *" $1 "* ]]; }
 
 usage() {
@@ -274,7 +281,7 @@ setup_portage_vars() {
 	local arch=${ARCH} arch_set=${ARCH+set}
 	local chost=${CHOST} chost_set=${CHOST+set}
 	unset arch chost
-	eval $(portageq envvar -v PORTDIR_OVERLAY PORTDIR PORT_LOGDIR ARCH CHOST)
+	eval $(portageq envvar -v PORTDIR_OVERLAY PORTDIR PORT_LOGDIR PORTAGE_TMPDIR ARCH CHOST)
 
 	# keep the original values, but be aware of the native ones
 	HARCH=${ARCH}
@@ -928,30 +935,46 @@ set_eopts_on_pkg_status() {
 		|| EOPTS=${EOPTS_UP}
 }
 doemerge() {
-	[[ $1 == "[none]" ]] && return 0
+	local category="cross-${CTARGET}"
+	local pn=$1
+	local atom="${category}/${pn}"
 
-	local logfile=${PORT_LOGDIR}/cross-${CTARGET}
+	[[ ${pn} == "[none]" ]] && return 0
+
+	local logfile=${PORT_LOGDIR}/${category}
 	[[ -z $2 ]] \
-		&& logfile=${logfile}-$1.log \
+		&& logfile=${logfile}-${pn}.log \
 		|| logfile=${logfile}-$2.log
 
 	einfo "Log: ${logfile}"
-	ebegin "Emerging cross-${2:-$1}"
+	ebegin "Emerging cross-${2:-${pn}}"
 
-	set_use $1 ${USE} $( [[ ${MULTILIB_USE} == "no" ]] && echo - )multilib
+	set_use ${pn} ${USE} $( [[ ${MULTILIB_USE} == "no" ]] && echo - )multilib
 
 	if has -v ${UOPTS} || has -p ${UOPTS} || has -vp ${UOPTS} || has -pv ${UOPTS} ; then
 		SHOW_FAIL_LOG="no"
-		emerge cross-${CTARGET}/$1 ${EOPTS} \
-			2>&1 | tee "${logfile}"
+		emerge ${atom} ${EOPTS} 2>&1 | tee "${logfile}"
 	else
-		emerge cross-${CTARGET}/$1 ${EOPTS} \
-			>& "${logfile}"
+		emerge ${atom} ${EOPTS} >& "${logfile}"
 	fi
 	local _pipestatus=${PIPESTATUS[*]}
 	if [[ "${_pipestatus// /}" -ne 0 ]] ; then
 		[[ ${SHOW_FAIL_LOG} == "yes" ]] && cat "${logfile}"
-		die "$1 failed :("
+
+		local d
+		for d in "${PORTAGE_TMPDIR}"/portage/${atom}*/work/ ; do
+			pushd "${d}" >/dev/null
+			mkdir -p ../temp # sanity!
+			find -name config.log | \
+				tar cf - --files-from=- | \
+				xz > ../temp/${pn}-config.logs.tar.xz
+			popd "${d}" >/dev/null
+		done
+		xz -zk "${logfile}"
+
+		die_logs "${pn} failed :(" \
+			"${logfile}.xz" \
+			"${PORTAGE_TMPDIR}/portage/${atom}*/temp/${pn}-config.logs.tar.xz"
 	fi
 	eend 0
 }
