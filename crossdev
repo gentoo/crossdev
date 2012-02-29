@@ -794,9 +794,19 @@ set_env() {
 	local pkg=$1 env=$2 output
 	shift ; shift
 
+	# We have to ignore collisions in the build-id tree because it's
+	# easy to create a cross-program that is the same.  For example,
+	# if we try to build gdb for both arm-eabi and cross-arm-linux-gnueabi,
+	# then these gdb's might have the same build-id and try to install
+	# into the same paths.  Ignoring the collisions isn't great since
+	# updating one can drop the symlink for another, but for now, it's
+	# the best we've got without implementing reference counting on
+	# installed paths in the PM.
+
 	output="env/cross-${CTARGET}/${pkg}.conf"
 	cat <<-EOF > "${output}"
 	SYMLINK_LIB=no
+	COLLISION_IGNORE="\${COLLISION_IGNORE} /usr/lib/debug/.build-id"
 	$(printf '%b' "${env}")
 	EOF
 
