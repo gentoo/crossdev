@@ -959,6 +959,7 @@ doemerge() {
 
 		local d
 		for d in "${PORTAGE_TMPDIR}"/portage/${atom}*/work/ ; do
+			[[ -d ${d} ]] || continue
 			pushd "${d}" >/dev/null
 			mkdir -p ../temp # sanity!
 			find -name config.log | \
@@ -966,7 +967,7 @@ doemerge() {
 				xz > ../temp/${pn}-config.logs.tar.xz
 			popd "${d}" >/dev/null
 		done
-		xz -zk "${logfile}"
+		xz -zkf "${logfile}"
 
 		die_logs "${pn} failed :(" \
 			"${logfile}.xz" \
