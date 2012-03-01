@@ -311,7 +311,7 @@ uninstall() {
 	[[ -d ${CROSSDEV_OVERLAY}/cross-${CTARGET} ]] \
 		&& rm -r ${CROSSDEV_OVERLAY}/cross-${CTARGET}
 	local f
-	for f in categories package.{mask,keywords,use} profile/package.use.{force,mask} ; do
+	for f in categories package.{env,mask,keywords,use} profile/package.use.{force,mask} ; do
 		rm -f "${f}"/cross-${CTARGET}
 		rmdir "${f}" 2>/dev/null
 	done
@@ -794,7 +794,7 @@ set_env() {
 	local pkg=$1 env=$2 output
 	shift ; shift
 
-	output="env/cross-${CTARGET}/${pkg}"
+	output="env/cross-${CTARGET}/${pkg}.conf"
 	cat <<-EOF > "${output}"
 	SYMLINK_LIB=no
 	$(printf '%b' "${env}")
@@ -805,6 +805,9 @@ set_env() {
 	for v in ${!CFLAGS_*} ${!CHOST_*} ${!CTARGET_*} ${!LDFLAGS_*} ${!LIBDIR_*} ABI MULTILIB_ABIS DEFAULT_ABI ; do
 		echo "${v}='${!v}'" >> "${output}"
 	done
+
+	output=$(_set_portage_file ${pkg} package.env)
+	echo "cross-${CTARGET}/${pkg} cross-${CTARGET}/${pkg}.conf" >> ${output}
 }
 set_portage() {
 	local cat=$1 pkg=$2 ver=$3 env=$4 ovl=$5
@@ -894,7 +897,7 @@ grep -qs "^cross-${CTARGET}$" "${CONFIGROOT}"/categories \
 	|| echo cross-${CTARGET} >> "${CONFIGROOT}"/categories
 mkdir -p "${CROSSDEV_OVERLAY}"/cross-${CTARGET} || exit 1
 cd "${CONFIGROOT}"
-for f in package.{keywords,mask,use} env/cross-${CTARGET} profile/package.use.{force,mask} ; do
+for f in package.{env,keywords,mask,use} env/cross-${CTARGET} profile/package.use.{force,mask} ; do
 	[[ -f ${f} ]] && die "please convert ${CONFIGROOT}/${f} to a directory"
 	mkdir -p ${f} || die "wtf!?"
 	rm -f ${f}/cross-${CTARGET}
