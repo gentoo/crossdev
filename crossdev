@@ -312,6 +312,7 @@ uninstall() {
 		&& rm -r ${CROSSDEV_OVERLAY}/cross-${CTARGET}
 	local f
 	for f in categories package.{env,mask,keywords,use} profile/package.use.{force,mask} ; do
+		f="${CONFIGROOT}/${f}"
 		rm -f "${f}"/cross-${CTARGET}
 		rmdir "${f}" 2>/dev/null
 	done
