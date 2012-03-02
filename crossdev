@@ -304,13 +304,15 @@ setup_portage_vars() {
 }
 
 uninstall() {
+	local d f
+
 	setup_portage_vars
 
 	ewarn "Uninstalling target '${CTARGET}' ..."
 
+	# clean out portage config files
 	[[ -d ${CROSSDEV_OVERLAY}/cross-${CTARGET} ]] \
 		&& rm -r ${CROSSDEV_OVERLAY}/cross-${CTARGET}
-	local f
 	for f in categories package.{env,mask,keywords,use} profile/package.use.{force,mask} ; do
 		f="${CONFIGROOT}/${f}"
 		rm -f "${f}"/cross-${CTARGET}
@@ -325,21 +327,19 @@ uninstall() {
 	if [[ -d /var/db/pkg/cross-${CTARGET} ]] ; then
 		export CLEAN_DELAY=0
 		cd /var/db/pkg
-		for p in cross-${CTARGET}/* ; do
-			emerge -qC =${p} || exit 1
-		done
+		local pkgs=( cross-${CTARGET}/* )
+		emerge -qC ${pkgs[@]/#/=} || exit 1
 	else
 		ewarn "${CTARGET}: no packages installed; will clean out known files"
 	fi
 
 	# clean out known toolchain files (binutils/gcc)
-	local b
-	for b in \
+	for f in \
 		addr2line ar as c++filt dlltool dllwrap embedspu \
 		gprof ld nm objcopy objdump ranlib readelf \
 		size strings strip windmc windres
 	do
-		rm -f /usr/bin/${CTARGET}-${b} /usr/${CTARGET}/bin/${b}
+		rm -f /usr/bin/${CTARGET}-${f} /usr/${CTARGET}/bin/${f}
 	done
 	rm -f /usr/${CTARGET}/{sys-include,usr}
 	rmdir /usr/${CTARGET}/{include/asm,include} 2>/dev/null
@@ -350,7 +350,6 @@ uninstall() {
 	[[ -e /var/db/pkg/cross-${CTARGET} ]] && rmdir /var/db/pkg/cross-${CTARGET}
 	rm -f /usr/bin/${CTARGET}-{emerge,fix-root,pkg-config} /usr/bin/emerge-${CTARGET}
 
-	local f
 	for f in make.{conf,globals,profile} ; do
 		f="/usr/${CTARGET}/etc/${f}"
 		[[ -L ${f} ]] && rm -f ${f}
