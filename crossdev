@@ -694,6 +694,7 @@ echo
 einfo "CROSSDEV_OVERLAY:      ${CROSSDEV_OVERLAY}"
 einfo "PORT_LOGDIR:           ${PORT_LOGDIR}"
 einfo "PORTAGE_CONFIGROOT:    ${PORTAGE_CONFIGROOT}"
+einfo "Portage flags:         ${UOPTS}"
 hr
 }
 # avoid pipe since `einfo` will not use color :(
