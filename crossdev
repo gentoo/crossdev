@@ -165,7 +165,7 @@ parse_target() {
 		alpha*)     TARCH=alpha;;
 		arm*)       TARCH=arm;;
 		hppa*)      TARCH=hppa;;
-		ia64*)      TARCH=ia64    WITH_DEF_HEADERS="yes";;
+		ia64*)      TARCH=ia64;;
 		i?86*)      TARCH=x86;;
 		m68*)       TARCH=m68k;;
 		mips*)      TARCH=mips;;
@@ -201,7 +201,6 @@ parse_target() {
 		      LCAT="dev-util"; LPKG="mingw64-runtime";;
 
 		mingw*|*-mingw*)
-		      WITH_DEF_HEADERS="yes";
 		      KCAT="dev-util"; KPKG="w32api";
 		      LCAT="dev-util"; LPKG="mingw-runtime";;
 
