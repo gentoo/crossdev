@@ -83,7 +83,6 @@ Extra Fun (must be run after above stages):
     ${GOOD}--ex-only${NORMAL}                Skip the stage steps above
     ${GOOD}--ex-gcc${NORMAL}                 Build extra gcc targets (gcj/ada/etc...)
     ${GOOD}--ex-gdb${NORMAL}                 Build a cross gdb
-    ${GOOD}--ex-insight${NORMAL}             Build a cross insight
 
 ${BRACKET}Target (-t)${NORMAL} takes a tuple ${BRACKET}ARCH-VENDOR-OS-LIBC${NORMAL}; see 'crossdev -t help'
 EOF
@@ -415,7 +414,6 @@ with_headers()   { [[ ${WITH_HEADERS}   == "yes" ]] ; }
 ex_fast()    { [[ ${EX_FAST}    == "yes" ]] ; }
 ex_gcc()     { [[ ${EX_GCC}     == "yes" ]] ; }
 ex_gdb()     { [[ ${EX_GDB}     == "yes" ]] ; }
-ex_insight() { [[ ${EX_INSIGHT} == "yes" ]] ; }
 
 hr() {
 	local c=${COLUMNS:-0}
@@ -509,7 +507,6 @@ while [[ $# -gt 0 ]] ; do
 	--ex-only)         EX_FAST="yes";;
 	--ex-gcc)          EX_GCC="yes";;
 	--ex-gdb)          EX_GDB="yes";;
-	--ex-insight)      EX_INSIGHT="yes";;
 	--with-*)          eval $(set_withval $1);;
 	--without-*)       eval $(set_withval $1);;
 	-f|--force)        FORCE="yes";;
@@ -685,9 +682,6 @@ einfo "Extra: gcc pass:       DO IT"
 }
 ex_gdb && {
 einfo "Extra: gdb:            DO IT"
-}
-ex_insight && {
-einfo "Extra: insight:        DO IT"
 }
 echo
 einfo "CROSSDEV_OVERLAY:      ${CROSSDEV_OVERLAY}"
@@ -918,7 +912,6 @@ set_portage ${GCAT} ${GPKG} ${GVER} "${GENV}" "${GOVL}"
 set_portage ${KCAT} ${KPKG} ${KVER} "${KENV}" "${KOVL}"
 set_portage ${LCAT} ${LPKG} ${LVER} "${LENV}" "${LOVL}"
 set_portage ${DCAT} ${DPKG} ${DVER} "${DENV}" "${DOVL}"
-set_portage dev-util insight
 set_metadata
 
 # filter out revdep rebuild stuff #182601
@@ -1079,6 +1072,5 @@ fi
 EOPTS="${EOPTS_UP} --newuse"
 ex_gcc && USE="${GUSE} ${USE}" doemerge ${GPKG} ${GPKG}-extra
 ex_gdb && USE="${DUSE} ${USE}" doemerge ${DPKG}
-ex_insight && doemerge insight
 
 exit 0
