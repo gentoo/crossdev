@@ -47,6 +47,7 @@ Options:
                                 Note: versions support depend atom syntaxes:
                                  e.g. ">=2.20" "~4.6.1" "=2.13.1-r3"
     ${GOOD}-A, --abis${NORMAL} abis          Specify ABIs to build, first one is the default
+    ${GOOD}--host-abi abi                    Specify the ABI of the compiler itself
     ${GOOD}--env${NORMAL} env                Specify env settings for all packages (see below)
     ${GOOD}--[bdgkl]env${NORMAL} env         Specify env settings for binutils/gdb/gcc/kernel/libc
                                 Note: make sure to quote: 'VAR="some value"\nFOO="cow"'
@@ -457,6 +458,7 @@ HARCH=
 CTARGET=
 MULTILIB_ABIS="default"
 MULTILIB_USE=""
+HOST_ABI="default"
 STAGE=""
 AENV=""
 BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" BUSE="" BENV="" BOVL=""
@@ -504,6 +506,7 @@ while [[ $# -gt 0 ]] ; do
 	-ol|--ov-libc)     shift; LOVL=$1;;
 	--env)             shift; AENV=$1;;
 	-A|--abis)         shift; MULTILIB_ABIS=$1;;
+	--host-abi)        shift; HOST_ABI=$1;;
 	-S|--stable)       DEFAULT_VER="[stable]";;
 	-C|--clean)        shift; parse_target $1; uninstall;;
 	-s?|--stage?)      STAGE=${1:0-1};;
@@ -606,8 +609,13 @@ for v in MULTILIB_ABIS UCLIBC_CPU USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS A
 done
 
 # parse multilib settings until profiles are sane
-eval $(
-	# clean the env
+multilib_env() {
+	local var=$1
+	eval $(
+	# see what target to parse
+	CTARGET=${!var}
+
+	# clean the env in our subshell
 	unset ${!CFLAGS_*} ${!CHOST_*} ${!CTARGET_*} ${!LDFLAGS_*} ${!LIBDIR_*}
 
 	# ask multilib.eclass to tell us how things work
@@ -630,8 +638,13 @@ eval $(
 	${single_abi} && MULTILIB_ABIS=${DEFAULT_ABI}
 
 	# output the desired env
-	for v in ${!CFLAGS_*} ${!CHOST_*} ${!CTARGET_*} ${!LDFLAGS_*} ${!LIBDIR_*} MULTILIB_ABIS DEFAULT_ABI ; do
+	for v in ${!CFLAGS_*} ${!CHOST_*} ${!CTARGET_*} ${!LDFLAGS_*} ${!LIBDIR_*} ; do
 		echo ${v}=\'${!v}\'
+	done
+	# output the variables that are not uniquely named
+	[[ ${var} == "CTARGET" ]] && d='' || d='_'
+	for v in MULTILIB_ABIS DEFAULT_ABI ; do
+		echo ${d}${v}=\'${!v}\'
 	done
 
 	# make sure all ABIs have valid vars
@@ -646,7 +659,14 @@ eval $(
 			echo ${_v}=\'${!d}\'
 		done
 	done
-)
+	)
+}
+# Load settings for the host.
+MULTILIB_ABIS=${HOST_ABI} multilib_env HCHOST
+HOST_ABI=${_MULTILIB_ABIS}
+# Load settings for the target.
+multilib_env CTARGET
+
 DEFAULT_ABI=${MULTILIB_ABIS%% *}
 if [[ -z ${MULTILIB_USE} ]] ; then
 	if [[ $(set -- ${MULTILIB_ABIS}; echo $#) -eq 1 ]] ; then
@@ -791,7 +811,7 @@ set_links() {
 	ln -s "${srcdir}"/${cat}/${pkg} "${d}"
 }
 set_env() {
-	local pkg=$1 env=$2 output
+	local l=$1 pkg=$2 env=$3 output
 	shift ; shift
 
 	# We have to ignore collisions in the build-id tree because it's
@@ -811,16 +831,41 @@ set_env() {
 	$(printf '%b' "${AENV}")
 	EOF
 
+	# We need to differentiate between the host and target ABI just like
+	# we have to handle the difference between CHOST and CTARGET.  For
+	# the headers and library packages, we want the ABI to be the target.
+	# For the compiler tools (as/ld/cc/gdb/etc...), we want the ABI to be
+	# the host.
+	local TARGET_ABI=$(set -- ${MULTILIB_ABIS}; echo $1)
+	case ${l} in
+	K|L)
+		# Target packages.
+		local ABI=${TARGET_ABI}
+		# Use MULTILIB_ABIS & DEFAULT_ABI from env.
+		;;
+	*)
+		# Host packages.
+		cat <<-EOF >> "${output}"
+		TARGET_ABI='${TARGET_ABI}'
+		TARGET_MULTILIB_ABIS='${MULTILIB_ABIS}'
+		TARGET_DEFAULT_ABI='${DEFAULT_ABI}'
+		EOF
+		local ABI=${HOST_ABI}
+		local MULTILIB_ABIS=${ABI}
+		local DEFAULT_ABI=${ABI}
+		;;
+	esac
 	local v
-	local ABI=$(set -- ${MULTILIB_ABIS}; echo $1)
 	for v in ${!CFLAGS_*} ${!CHOST_*} ${!CTARGET_*} ${!LDFLAGS_*} ${!LIBDIR_*} ABI MULTILIB_ABIS DEFAULT_ABI ; do
-		echo "${v}='${!v}'" >> "${output}"
-	done
+		echo "${v}='${!v}'"
+	done >> "${output}"
 
 	output=$(_set_portage_file ${pkg} package.env)
 	echo "cross-${CTARGET}/${pkg} cross-${CTARGET}/${pkg}.conf" >> ${output}
 }
 set_portage() {
+	local l=$1
+	eval set -- \${${l}CAT} \${${l}PKG} \${${l}VER} \"\${${l}ENV}\" \"\${${l}OVL}\"
 	local cat=$1 pkg=$2 ver=$3 env=$4 ovl=$5
 	shift 5
 	local use=$@
@@ -832,7 +877,7 @@ set_portage() {
 	set_use_force ${pkg} -multilib
 	set_use_mask ${pkg} -multilib
 	set_links ${cat} ${pkg} "${ovl}"
-	set_env ${pkg} "${env}"
+	set_env ${l} ${pkg} "${env}"
 }
 set_metadata() {
 	# for people who have eclasses spread over their overlays, generate
@@ -914,11 +959,9 @@ for f in package.{env,keywords,mask,use} env/cross-${CTARGET} profile/package.us
 	rm -f ${f}/cross-${CTARGET}
 done
 
-set_portage ${BCAT} ${BPKG} ${BVER} "${BENV}" "${BOVL}"
-set_portage ${GCAT} ${GPKG} ${GVER} "${GENV}" "${GOVL}"
-set_portage ${KCAT} ${KPKG} ${KVER} "${KENV}" "${KOVL}"
-set_portage ${LCAT} ${LPKG} ${LVER} "${LENV}" "${LOVL}"
-set_portage ${DCAT} ${DPKG} ${DVER} "${DENV}" "${DOVL}"
+for v in B G K L D ; do
+	set_portage ${v}
+done
 set_metadata
 
 # filter out revdep rebuild stuff #182601

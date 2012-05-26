@@ -1,11 +1,6 @@
 - strip package.use.force (i.e. building x86_64 on x86_64 gets forced multilib)
 - filter /usr/CTARGET/ from revdep-rebuild #182601
 
-- HOST_ABI and TARGET_ABI selection; consider:
-	- build a 64bit (amd64) cross-compiler which targets 32bit (x86)
-	- build a 64bit (amd64) cross-compiler which targets x32
-	- ABI variables atm do not differentiate between host
-
 - package.use not getting setup correctly:
 # cat /etc/portage/package.use/cross-x86_64-cros-linux-gnu
 cross-x86_64-cros-linux-gnu/gdb sys-devel gdb
