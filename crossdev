@@ -78,6 +78,7 @@ Stage Options:
 
 External Tooling Options:
     ${GOOD}--show-target-cfg${NORMAL}        Display target settings that crossdev will use
+    ${GOOD}--init-target${NORMAL}            Setup config/overlay/etc... files only
 
 Extra Fun (must be run after above stages):
     ${GOOD}--ex-only${NORMAL}                Skip the stage steps above
@@ -478,6 +479,7 @@ FORCE="no"
 SET_X="no"
 SHOW_FAIL_LOG="no"
 SHOW_TARGET_CFG="no"
+INIT_TARGET_ONLY="false"
 
 while [[ $# -gt 0 ]] ; do
 	case $1 in
@@ -512,6 +514,7 @@ while [[ $# -gt 0 ]] ; do
 	-f|--force)        FORCE="yes";;
 	-x)                SET_X="yes";;
 	--show-target-cfg) SHOW_TARGET_CFG="yes";;
+	--init-target)     INIT_TARGET_ONLY="yes";;
 	--show-fail-log)   SHOW_FAIL_LOG="yes";;
 	-P|--portage)      UOPTS="${UOPTS} $2"; shift;;
 	-b|-d|-p|-v|-q)    UOPTS="${UOPTS} $1";;
@@ -943,6 +946,10 @@ doemerge() {
 
 	[[ ${pn} == "[none]" ]] && return 0
 
+	set_use ${pn} ${USE} $( [[ ${MULTILIB_USE} == "no" ]] && echo - )multilib
+
+	[[ ${INIT_TARGET_ONLY} == "yes" ]] && return 0
+
 	local logfile=${PORT_LOGDIR}/${category}
 	[[ -z $2 ]] \
 		&& logfile=${logfile}-${pn}.log \
@@ -950,8 +957,6 @@ doemerge() {
 
 	einfo "Log: ${logfile}"
 	ebegin "Emerging cross-${2:-${pn}}"
-
-	set_use ${pn} ${USE} $( [[ ${MULTILIB_USE} == "no" ]] && echo - )multilib
 
 	if has -v ${UOPTS} || has -p ${UOPTS} || has -vp ${UOPTS} || has -pv ${UOPTS} ; then
 		SHOW_FAIL_LOG="no"
