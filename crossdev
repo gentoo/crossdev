@@ -47,6 +47,7 @@ Options:
                                 Note: versions support depend atom syntaxes:
                                  e.g. ">=2.20" "~4.6.1" "=2.13.1-r3"
     ${GOOD}-A, --abis${NORMAL} abis          Specify ABIs to build, first one is the default
+    ${GOOD}--env${NORMAL} env                Specify env settings for all packages (see below)
     ${GOOD}--[bdgkl]env${NORMAL} env         Specify env settings for binutils/gdb/gcc/kernel/libc
                                 Note: make sure to quote: 'VAR="some value"\nFOO="cow"'
     ${GOOD}-f, --force${NORMAL}              I don't need a seat belt!
@@ -457,6 +458,7 @@ CTARGET=
 MULTILIB_ABIS="default"
 MULTILIB_USE=""
 STAGE=""
+AENV=""
 BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" BUSE="" BENV="" BOVL=""
 GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" GUSE="" GENV="" GOVL=""
 KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" KUSE="" KENV="" KOVL=""
@@ -500,6 +502,7 @@ while [[ $# -gt 0 ]] ; do
 	--l|--libc)        shift; LVER=$1;;
 	--lenv)            shift; LENV=$1;;
 	-ol|--ov-libc)     shift; LOVL=$1;;
+	--env)             shift; AENV=$1;;
 	-A|--abis)         shift; MULTILIB_ABIS=$1;;
 	-S|--stable)       DEFAULT_VER="[stable]";;
 	-C|--clean)        shift; parse_target $1; uninstall;;
@@ -805,6 +808,7 @@ set_env() {
 	SYMLINK_LIB=no
 	COLLISION_IGNORE="\${COLLISION_IGNORE} /usr/lib/debug/.build-id"
 	$(printf '%b' "${env}")
+	$(printf '%b' "${AENV}")
 	EOF
 
 	local v
