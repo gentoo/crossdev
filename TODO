@@ -1,8 +1,2 @@
 - strip package.use.force (i.e. building x86_64 on x86_64 gets forced multilib)
 - filter /usr/CTARGET/ from revdep-rebuild #182601
-
-- package.use not getting setup correctly:
-# cat /etc/portage/package.use/cross-x86_64-cros-linux-gnu
-cross-x86_64-cros-linux-gnu/gdb sys-devel gdb
-cross-x86_64-cros-linux-gnu/insight dev-util insight
-cross-x86_64-cros-linux-gnu/binutils -selinux multilib

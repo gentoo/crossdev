@@ -865,10 +865,10 @@ set_env() {
 }
 set_portage() {
 	local l=$1
-	eval set -- \${${l}CAT} \${${l}PKG} \${${l}VER} \"\${${l}ENV}\" \"\${${l}OVL}\"
+	eval set -- \${${l}CAT} \${${l}PKG} \"\${${l}VER}\" \"\${${l}ENV}\" \"\${${l}OVL}\"
 	local cat=$1 pkg=$2 ver=$3 env=$4 ovl=$5
 	shift 5
-	local use=$@
+	local use=$*
 
 	[[ ${pkg} == "[none]" ]] && return 0
 
