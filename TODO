@@ -1,2 +1,0 @@
-- strip package.use.force (i.e. building x86_64 on x86_64 gets forced multilib)
-- filter /usr/CTARGET/ from revdep-rebuild #182601
