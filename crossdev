@@ -483,7 +483,7 @@ FORCE="no"
 SET_X="no"
 SHOW_FAIL_LOG="no"
 SHOW_TARGET_CFG="no"
-INIT_TARGET_ONLY="false"
+INIT_TARGET_ONLY="no"
 
 while [[ $# -gt 0 ]] ; do
 	case $1 in
@@ -718,10 +718,12 @@ hr
 }
 # avoid pipe since `einfo` will not use color :(
 info
-(
-info
-emerge -v --info
-) >& "${PORT_LOGDIR}"/cross-${CTARGET}-info.log || exit 1
+if [[ ${INIT_TARGET_ONLY} != "yes" ]] ; then
+	(
+	info
+	emerge -v --info
+	) >& "${PORT_LOGDIR}"/cross-${CTARGET}-info.log || exit 1
+fi
 
 ####################################
 ### Fix up portage files / paths ###
