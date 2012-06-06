@@ -386,8 +386,6 @@ uninstall() {
 			fi
 		fi
 	done
-
-	exit 0
 }
 
 set_withval() {
@@ -481,6 +479,7 @@ EX_GCC="no"
 EX_GDB="no"
 FORCE="no"
 SET_X="no"
+ACTION="install"
 SHOW_FAIL_LOG="no"
 SHOW_TARGET_CFG="no"
 INIT_TARGET_ONLY="no"
@@ -508,7 +507,7 @@ while [[ $# -gt 0 ]] ; do
 	-A|--abis)         shift; MULTILIB_ABIS=$1;;
 	--host-abi)        shift; HOST_ABI=$1;;
 	-S|--stable)       DEFAULT_VER="[stable]";;
-	-C|--clean)        shift; parse_target $1; uninstall;;
+	-C|--clean)        shift; parse_target $1; ACTION="uninstall";;
 	-s?|--stage?)      STAGE=${1:0-1};;
 	-oS|--overlays)    shift; SEARCH_OVERLAYS=$1;;
 	-oO|--ov-output)   shift; CROSSDEV_OVERLAY=$1;;
@@ -532,6 +531,9 @@ while [[ $# -gt 0 ]] ; do
 	shift
 done
 [[ ${SET_X} == "yes" ]] && set -x
+case ${ACTION} in
+uninstall) uninstall; exit 0;;
+esac
 
 BVER=${BVER:-${DEFAULT_VER}}
 GVER=${GVER:-${DEFAULT_VER}}
