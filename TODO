@@ -1,0 +1,4 @@
+- add a --target-flags option #420089 so people can set the default flags
+  that they want to build the cross-compiler with.  this requires fixing
+  gcc/binutils and how we only have a single CFLAGS value that is passed
+  both for the host (e.g. `gcc`) and for the target (e.g. libgcc.so).
