@@ -36,7 +36,8 @@ config_site_names() {
 	done
 }
 
-if [[ ${CHOST} != "" ]]; then
+# Only kick in for cross-compiles so we don't break native builds #427184
+if [[ ${CBUILD:-${CHOST}} != ${CHOST} ]]; then
 	sites="$(config_site_names)"
 	if [[ ${sites} != "" ]]; then
 		for site in ${sites}; do
