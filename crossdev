@@ -62,7 +62,7 @@ Overlay Options:
     ${GOOD}-oS, --overlays${NORMAL} list     Space delimited list of overlays to search
                                 [default: \${PORTDIR_OVERLAY}]
     ${GOOD}-oO, --ov-output${NORMAL} path    Overlay to write crossdev package links
-                                [default: last from --overlays list]
+                                [default: first from --overlays list]
     ${GOOD}-ob, --ov-binutils${NORMAL} path  Overlay for binutils ebuilds [default: search]
     ${GOOD}-od, --ov-gdb${NORMAL} path       Overlay for gdb ebuilds [default: search]
     ${GOOD}-og, --ov-gcc${NORMAL} path       Overlay for gcc ebuilds [default: search]
@@ -295,7 +295,7 @@ setup_portage_vars() {
 	: ${SEARCH_OVERLAYS:=${PORTDIR_OVERLAY}}
 
 	# see if user told us where to write things, otherwise
-	# install our stuff to the last overlay in the list
+	# install our stuff to the first overlay in the list
 	: ${CROSSDEV_OVERLAY:=${SEARCH_OVERLAYS}}
 	CROSSDEV_OVERLAY=${CROSSDEV_OVERLAY%% *}
 
