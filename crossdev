@@ -1081,8 +1081,12 @@ if ! ex_fast ; then
 
 			if [[ -n ${LPKG} ]] ; then
 				# install C library headers
+				# we have to use --nodeps as glibc itself might have
+				# a dependency on newer gcc versions that we don't
+				# care about at this point -- we aren't compiling yet
 				USE="${LUSE} ${USE}" \
 				CROSSCOMPILE_OPTS="headers-only" \
+				EOPTS="${EOPTS} --nodeps" \
 					doemerge ${LPKG} ${LPKG}-headers
 			fi
 		fi
