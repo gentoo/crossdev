@@ -191,6 +191,7 @@ parse_target() {
 		avr*) KPKG="[none]";
 		      LCAT="dev-embedded"; LPKG="avr-libc";
 		      GUSE="-fortran" # doesn't work
+		      MULTILIB_USE="yes" #377039
 		      WITH_DEF_HEADERS="no";;
 
 		# due to upstream lameness, build C/C++ at first glance
@@ -213,6 +214,7 @@ parse_target() {
 		      LCAT="dev-embedded"; LPKG="msp430-libc";
 		      DCAT="dev-embedded"; DPKG="msp430-gdb";
 		      GUSE="-fortran -openmp";
+		      MULTILIB_USE="yes"
 		      WITH_DEF_HEADERS="no";;
 
 		nios2*)
@@ -267,6 +269,7 @@ parse_target() {
 			LPKG="newlib"
 			KPKG="[none]"
 			STAGE_DEFAULT=${STAGE_LIBC}
+			MULTILIB_USE="yes" #407275
 			WITH_DEF_HEADERS="no"
 			;;
 
