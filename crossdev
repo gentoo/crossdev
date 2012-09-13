@@ -108,7 +108,7 @@ parse_target() {
 	if [[ ${CTARGET} == "help" ]] ; then
 		cat <<-EOF
 		Supported Architectures:
-		   - alpha                                     - arm / armeb
+		   - alpha                                     - arm / armeb / aarch64
 		   - hppa (parisc)                             - ia64
 		   - i386 / i486 / i586 / i686 (x86)           - m68k
 		   - mips / mipsel / mips64 / mips64el
@@ -164,6 +164,7 @@ parse_target() {
 
 	# Figure out an acceptable portage ARCH for this target
 	case ${CTARGET} in
+		aarch64*)   TARCH=arm;;
 		alpha*)     TARCH=alpha;;
 		arm*)       TARCH=arm;;
 		hppa*)      TARCH=hppa;;
