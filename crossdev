@@ -285,7 +285,7 @@ parse_target() {
 setup_portage_vars() {
 	local arch=${ARCH} arch_set=${ARCH+set}
 	local chost=${CHOST} chost_set=${CHOST+set}
-	unset arch chost
+	unset ARCH CHOST
 	eval $(portageq envvar -v PORTDIR_OVERLAY PORTDIR PORT_LOGDIR PORTAGE_TMPDIR ARCH CHOST)
 
 	# keep the original values, but be aware of the native ones
