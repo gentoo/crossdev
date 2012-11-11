@@ -47,7 +47,7 @@ Options:
                                 Note: versions support depend atom syntaxes:
                                  e.g. ">=2.20" "~4.6.1" "=2.13.1-r3"
     ${GOOD}-A, --abis${NORMAL} abis          Specify ABIs to build, first one is the default
-    ${GOOD}--host-abi abi                    Specify the ABI of the compiler itself
+    ${GOOD}--host-abi abi${NORMAL}           Specify the ABI of the compiler itself
     ${GOOD}--env${NORMAL} env                Specify env settings for all packages (see below)
     ${GOOD}--[bdgkl]env${NORMAL} env         Specify env settings for binutils/gdb/gcc/kernel/libc
                                 Note: make sure to quote: 'VAR="some value"\nFOO="cow"'
