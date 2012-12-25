@@ -118,6 +118,7 @@ parse_target() {
 		Supported C Libraries:
 		   - glibc (gnu)
 		   - klibc       [prob wont work]
+		   - musl
 		   - newlib      [bare metal/no operating system]
 		   - uclibc      [not all arches are ported]
 		Special Targets:
@@ -258,6 +259,7 @@ parse_target() {
 		*-klibc)    LPKG="klibc";;
 		*-uclibc*)  LPKG="uclibc";;
 		*-uclinux)  LPKG="uclibc";;
+		*-musl*)    LPKG="musl";;
 
 		# Windows targets
 		*-cygwin)
