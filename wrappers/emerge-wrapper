@@ -35,13 +35,6 @@ cross_wrap_etc()
 	setup_warning=false
 
 	cp -a "${PREFIX}"/share/crossdev/etc ${SYSROOT}/     || return 1
-	local f
-	for f in /usr/share/portage/config/make.globals /etc/{portage/,}make.globals ; do
-		if [[ -e ${f} ]] ; then
-			ln -sf ${f} "${SYSROOT}"/etc/portage/make.globals || return 1
-			break
-		fi
-	done
 
 	local conf=${SYSROOT}/etc/portage/make.conf
 
