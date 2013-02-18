@@ -126,6 +126,7 @@ parse_target() {
 		   - bfin     http://blackfin.uclinux.org/
 		   - h8300    http://h8300-hms.sourceforge.net/
 		   - mingw32  http://www.mingw.org/
+		   - mingw64  http://mingw-w64.sourceforge.net/
 		   - msp430   http://mspgcc.sourceforge.net/
 		   - nios2    http://www.altera.com/products/ip/processors/nios2/ni2-index.html
 		   - xc16x    http://www.infineon.com/
@@ -140,6 +141,24 @@ parse_target() {
 
 	# Allow for laziness
 	if [[ ${CTARGET} != *-* ]] ; then
+		# Handle aliases
+		local aliases=()
+		case ${CTARGET} in
+			cell)    aliases=( ppu spu-elf );;
+			mingw64) aliases=( x86_64-w64-mingw32 );;
+			ps2)     aliases=( ee iop dvp );;
+		esac
+		if [[ ${#aliases[@]} -eq 1 ]] ; then
+			CTARGET=${aliases[0]}
+		else
+			einfo "The '${CTARGET}' target is really an alias for the '${aliases}' target(s)"
+			local alias
+			for alias in ${aliases} ; do
+				${CROSSDEV} -t ${alias} || exit 1
+			done
+			exit 0
+		fi
+
 		# First translate portage ARCH to actual tuple
 		case ${CTARGET} in
 			amd64)      CTARGET="x86_64";;
@@ -223,20 +242,11 @@ parse_target() {
 		      BPKG="binutils-nios2";
 		      GPKG="gcc-nios2";;
 
-		cell) einfo "The cell target is really an alias for the spu/ppu targets"
-		      ${CROSSDEV} -t ppu || exit 1
-		      ${CROSSDEV} -t spu-elf || exit 1
-		      exit 0;;
 		spu*) TARCH=ppc64;
 		      KPKG="[none]";
 		      LPKG="newlib";;
 		ppu*) TARCH=ppc64;;
 
-		ps2)  einfo "The ps2 target is really an alias for the ee/iop/dvp targets"
-		      ${CROSSDEV} -t ee  || exit 1
-		      ${CROSSDEV} -t iop || exit 1
-		      ${CROSSDEV} -t dvp || exit 1
-		      exit 0;;
 		ee*)  TARCH=mips;
 		      KPKG="[none]"
 		      GVER="3.2.2"; BVER="2.14";
