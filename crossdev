@@ -150,7 +150,7 @@ parse_target() {
 		esac
 		if [[ ${#aliases[@]} -eq 1 ]] ; then
 			CTARGET=${aliases[0]}
-		else
+		elif [[ ${#aliases[@]} -gt 1 ]] ; then
 			einfo "The '${CTARGET}' target is really an alias for the '${aliases}' target(s)"
 			local alias
 			for alias in ${aliases} ; do
