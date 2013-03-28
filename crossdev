@@ -967,16 +967,18 @@ set_metadata() {
 	EOF
 }
 
-mkdir -p "${CONFIGROOT}"
-check_trailing_newline "${CONFIGROOT}"/categories
-grep -qs "^cross-${CTARGET}$" "${CONFIGROOT}"/categories \
-	|| echo cross-${CTARGET} >> "${CONFIGROOT}"/categories
-mkdir -p "${CROSSDEV_OVERLAY}"/cross-${CTARGET} || exit 1
-cd "${CONFIGROOT}"
+mkdir -p "${CONFIGROOT}" "${CROSSDEV_OVERLAY}"/{cross-${CTARGET},profiles} || die "wtf!?"
+for f in "${CONFIGROOT}" "${CROSSDEV_OVERLAY}"/profiles ; do
+	f+="/categories"
+	check_trailing_newline "${f}"
+	grep -qs "^cross-${CTARGET}$" "${f}" \
+		|| echo cross-${CTARGET} >> "${f}"
+done
+cd "${CONFIGROOT}" || die "wtf!?"
 for f in package.{env,keywords,mask,use} env/cross-${CTARGET} profile/package.use.{force,mask} ; do
 	[[ -f ${f} ]] && die "please convert ${CONFIGROOT}/${f} to a directory"
-	mkdir -p ${f} || die "wtf!?"
-	rm -f ${f}/cross-${CTARGET}
+	mkdir -p "${f}" || die "wtf!?"
+	rm -f "${f}/cross-${CTARGET}"
 done
 
 for v in B G K L D ; do
