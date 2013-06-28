@@ -211,7 +211,7 @@ parse_target() {
 
 		avr*) KPKG="[none]";
 		      LCAT="dev-embedded"; LPKG="avr-libc";
-		      GUSE="-fortran" # doesn't work
+		      GUSE="-fortran -go" # doesn't work
 		      MULTILIB_USE="yes" #377039
 		      WITH_DEF_HEADERS="no";;
 
