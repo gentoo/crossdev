@@ -311,9 +311,20 @@ setup_portage_vars() {
 	: ${SEARCH_OVERLAYS:=${PORTDIR_OVERLAY}}
 
 	# see if user told us where to write things, otherwise
-	# install our stuff to the first overlay in the list
-	: ${CROSSDEV_OVERLAY:=${SEARCH_OVERLAYS}}
-	CROSSDEV_OVERLAY=${CROSSDEV_OVERLAY%% *}
+	# set up some repos.conf magic if possible.  if not,
+	# install our stuff to the first overlay in the list.
+	if [[ -z ${CROSSDEV_OVERLAY} ]] ; then
+		CROSSDEV_OVERLAY=${SEARCH_OVERLAYS%% *}
+
+		local repo
+		for repo in "cross-${CTARGET}" crossdev ; do
+			repo=$(portageq get_repo_path / "${repo}")
+			if [[ -n ${repo} ]] ; then
+				CROSSDEV_OVERLAY=${repo}
+				break
+			fi
+		done
+	fi
 
 	# make sure we have a valid logdir
 	: ${PORT_LOGDIR:=/var/log/portage}
