@@ -1056,7 +1056,7 @@ doemerge() {
 			find -name config.log | \
 				tar cf - --files-from=- | \
 				xz > ../temp/${pn}-config.logs.tar.xz
-			popd "${d}" >/dev/null
+			popd >/dev/null
 		done
 		xz -zkf "${logfile}"
 
