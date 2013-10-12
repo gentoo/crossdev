@@ -62,7 +62,9 @@ Overlay Options:
     ${GOOD}-oS, --overlays${NORMAL} list     Space delimited list of overlays to search
                                 [default: \${PORTDIR_OVERLAY}]
     ${GOOD}-oO, --ov-output${NORMAL} path    Overlay to write crossdev package links
-                                [default: first from --overlays list]
+                                [default: uses repo with name 'crossdev', or
+                                 'cross-\${CTARGET}', or falls back to first
+                                 from --overlays list]
     ${GOOD}-ob, --ov-binutils${NORMAL} path  Overlay for binutils ebuilds [default: search]
     ${GOOD}-od, --ov-gdb${NORMAL} path       Overlay for gdb ebuilds [default: search]
     ${GOOD}-og, --ov-gcc${NORMAL} path       Overlay for gcc ebuilds [default: search]
