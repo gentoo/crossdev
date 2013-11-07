@@ -130,6 +130,7 @@ parse_target() {
 		   - mingw32  http://www.mingw.org/
 		   - mingw64  http://mingw-w64.sourceforge.net/
 		   - msp430   http://mspgcc.sourceforge.net/
+		   - nds32    http://github.com/nds32
 		   - nios2    http://www.altera.com/products/ip/processors/nios2/ni2-index.html
 		   - xc16x    http://www.infineon.com/
 		   - ee / iop / dvp (ps2) [Playstation 2 targets]
@@ -179,7 +180,7 @@ parse_target() {
 				CTARGET="${CTARGET}-unknown-linux-gnueabi";;
 			aarch64*|alpha*|cris*|hppa*|ia64*|m68*|mips*|powerpc*|sparc*|sh*|tile*)
 				CTARGET="${CTARGET}-unknown-linux-gnu";;
-			bfin*|h8300*|nios2*|spu*|xc16x*)
+			bfin*|h8300*|nds32*|nios2*|spu*|xc16x*)
 				CTARGET="${CTARGET}-elf";;
 		esac
 	fi
