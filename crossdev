@@ -293,6 +293,7 @@ parse_target() {
 			LPKG="newlib"
 			KPKG="[none]"
 			STAGE_DEFAULT=${STAGE_LIBC}
+			GUSE+=" -openmp" #489798
 			MULTILIB_USE="yes" #407275
 			WITH_DEF_HEADERS="no"
 			;;
