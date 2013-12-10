@@ -1,4 +1,4 @@
-[[ $(basename $(readlink -f $PORTAGE_CONFIGROOT/etc/make.profile)) == "embedded" ]] && . ${PORTDIR}/profiles/base/profile.bashrc
+[[ $(basename $(readlink -f $PORTAGE_CONFIGROOT/etc/portage/make.profile)) == "embedded" ]] && . ${PORTDIR}/profiles/base/profile.bashrc
 
 post_src_install() {
 	[[ -d ${D} ]] || return 0        

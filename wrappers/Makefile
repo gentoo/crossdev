@@ -18,6 +18,6 @@ install:
 	sed -i -e s@__PREFIX__@$(PREFIX)@g $(DESTDIR)/$(PREFIX)/bin/emerge-wrapper
 	sed -i -e s@__TOPDIR__@$(SITE)@g $(DESTDIR)/$(SITE)/config.site
 	mv $(DESTDIR)/$(SITE)/config.site $(DESTDIR)/$(PREFIX)/share/
-	ln -sf $(PORTDIR)/profiles/embedded $(DESTDIR)/$(PREFIX)/share/crossdev/etc/make.profile
+	ln -sf $(PORTDIR)/profiles/embedded $(DESTDIR)/$(PREFIX)/share/crossdev/etc/portage/make.profile
 
 .PHONY: all install
