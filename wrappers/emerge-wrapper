@@ -46,17 +46,6 @@ cross_wrap_etc()
 	)
 	[[ ${ARCH} == "unknown" ]] && emit_setup_warning
 
-	# Now map out the non-standard EM values
-	case ${ARCH} in
-		amd64) E_MACHINE=X86_64 ;;
-		hppa)  E_MACHINE=PARISC ;;
-		ia64)  E_MACHINE=IA_64  ;;
-		m68k)  E_MACHINE=68K    ;;
-		x86)   E_MACHINE=386    ;;
-		*)     E_MACHINE=`echo ${ARCH} | tr '[:lower:]' '[:upper:]'` ;;
-	esac
-	E_MACHINE="EM_${E_MACHINE}"
-
 	LIBC="__LIBC__"
 	case ${CHOST} in
 		*gnu*)    LIBC=glibc ;;
@@ -66,13 +55,10 @@ cross_wrap_etc()
 
 	sed -i \
 		-e "s:__LIBC__:${LIBC}:g" \
-		-e "s:__E_MACHINE__:${E_MACHINE}:g" \
 		-e "s:__ARCH__:${ARCH}:g" \
 		-e "s:__CHOST__:${CHOST}:g" \
 		-e "s:__CBUILD__:${CBUILD}:g" \
 		"${conf}"
-	[[ ${EM_MACHINE} == "EM_UNKNOWN" ]] \
-		&& sed -i '/^E_MACHINE/s:^:#:' "${conf}"
 
 	# Merge UCLIBC_CPU from env only
 	local v
