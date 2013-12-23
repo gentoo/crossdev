@@ -86,12 +86,15 @@ cross_wrap_etc()
 cross_wrap_bin()
 {
 	[[ $1 == "-q" ]] || echo "${CHOST}: Setting up symlinks"
+
+	pushd "${0%/*}" >/dev/null
 	local wrapper
 	for wrapper in emerge fix-root pkg-config ; do
 		ln -sf cross-${wrapper} ${CHOST}-${wrapper}
 	done
 	# some people like their tab completion
 	ln -sf cross-emerge emerge-${CHOST}
+	popd >/dev/null
 }
 
 cross_wrap()
@@ -106,26 +109,13 @@ cross_wrap()
 
 cross_init()
 {
-	cd "${0%/*}" || err "unable to cd to ${0%/*}"
+	if [[ ${CHOST} == "wrapper" ]] ; then
+		err "missing --target <CHOST> option"
+	fi
 
 	# Initialize env for just one target.  This is the automated behavior
 	# when crossdev is setting things up for people.
-	if [[ ${CHOST} != "wrapper" ]] ; then
-		cross_wrap -q
-		return $?
-	fi
-
-	# When called generically, blindly set up wrappers for all installed
-	# toolchains.  This is more historical behavior and not really
-	# recommended anymore ...
-	[[ ${0##*/} != emerge-wrapper ]] && err "I wont understand things"
-
-	for CHOST in `find /usr/lib/gcc -maxdepth 1 -mindepth 1 -type d` ; do
-		CHOST=${CHOST##*/}
-		[[ ${CHOST} == ${CBUILD} ]] && continue
-		type -P -- ${CHOST}-gcc >/dev/null || continue
-		cross_wrap
-	done
+	cross_wrap -q
 }
 
 # CBUILD must be the first thing we export, but might as well avoid
