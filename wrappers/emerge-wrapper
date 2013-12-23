@@ -60,12 +60,6 @@ cross_wrap_etc()
 		-e "s:__CBUILD__:${CBUILD}:g" \
 		"${conf}"
 
-	# Merge UCLIBC_CPU from env only
-	local v
-	for v in ${import_vars} UCLIBC_CPU ; do
-		[[ -n ${!v} ]] && echo "${v}=\"${!v}\""
-	done >> "${conf}"
-
 	return 0
 }
 

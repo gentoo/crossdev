@@ -636,7 +636,7 @@ if [[ ${HCHOST} == "${CTARGET}" ]] ; then
 fi
 
 # grab user settings
-for v in MULTILIB_ABIS UCLIBC_CPU USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS ASFLAGS ; do
+for v in MULTILIB_ABIS USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS ASFLAGS ; do
 	d="${CONFIGROOT}/crossdev/${CTARGET}"
 	if [[ -e ${d}/${v} ]] ; then
 		# yes, quotes are needed in this instance (export $var="...")
@@ -1101,9 +1101,6 @@ export FEATURES="${FEATURES} -stricter"
 
 # maybe someday this work, but that day != today
 USE="${USE} -selinux"
-
-# only allow UCLIBC_CPU from env, not from make.conf/profile
-export UCLIBC_CPU=${UCLIBC_CPU}
 
 if ! ex_fast ; then
 
