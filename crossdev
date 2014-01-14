@@ -176,6 +176,8 @@ parse_target() {
 				CTARGET="${CTARGET}-pc-linux-gnu";;
 			s390*)
 				CTARGET="${CTARGET}-ibm-linux-gnu";;
+			arm64*)
+				CTARGET="aarch${CTARGET#arm}-unknown-linux-gnu";;
 			arm*)
 				CTARGET="${CTARGET}-unknown-linux-gnueabi";;
 			aarch64*|alpha*|cris*|hppa*|ia64*|m68*|mips*|powerpc*|sparc*|sh*|tile*)
@@ -187,7 +189,7 @@ parse_target() {
 
 	# Figure out an acceptable portage ARCH for this target
 	case ${CTARGET} in
-		aarch64*)   TARCH=arm;;
+		aarch64*)   TARCH=arm64;;
 		alpha*)     TARCH=alpha;;
 		arm*)       TARCH=arm;;
 		hppa*)      TARCH=hppa;;
