@@ -60,6 +60,15 @@ cross_wrap_etc()
 		-e "s:__CBUILD__:${CBUILD}:g" \
 		"${conf}"
 
+	# Try to figure out the libc version & os headers to avoid installing over top of it.
+	# XXX: Would be nice to use virtual/libc and virtual/os-headers here ...
+	cd "${SYSROOT}/etc/portage"
+	mkdir -p profile
+	qlist -ICv "cross-${CHOST}/" | \
+		egrep '/(linux-headers|glibc|musl|newlib|uclibc)-' | \
+		sed "s:^[^/]*:sys-libs:" \
+		> profile/package.provided
+
 	return 0
 }
 
