@@ -30,10 +30,5 @@ eval $(env $(printf -- '-u %s ' ${clean_vars}) \
 : ${BUILD_CPPFLAGS=${_E_CPPFLAGS}}
 export CBUILD BUILD_CFLAGS BUILD_CXXFLAGS BUILD_CPPFLAGS
 
-FAKEROOT=
-if [ $(id -u) -ne 0 ] ; then
-	type -P fakeroot >/dev/null && FAKEROOT=fakeroot
-fi
-
 : ${CROSS_CMD:=emerge --root-deps=rdeps}
-exec ${FAKEROOT} ${CROSS_CMD} "$@"
+exec ${CROSS_CMD} "$@"
