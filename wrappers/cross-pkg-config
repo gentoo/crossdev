@@ -34,10 +34,10 @@ if [ "$1" = "--cross-pkg-config-install" ] ; then
 	pkg_config="${3:-$0}"
 	sed -i.tmp \
 		-e "s:@CROSS_PKG_CONFIG_INSTALLED@:installed:" \
-		-e "s:@CROSS_PKG_CONFIG_PATH@:$pkg_path:" \
-		"$pkg_config"
-	rm -f "$pkg_config".tmp
-	chmod a+rx "$pkg_config"
+		-e "s:@CROSS_PKG_CONFIG_PATH@:${pkg_path}:" \
+		"${pkg_config}"
+	rm -f "${pkg_config}".tmp
+	chmod a+rx "{$pkg_config}"
 	exit 0
 fi
 
@@ -115,7 +115,7 @@ if [ -n "${bad_lines}" ] ; then
 	pkg-config --debug "$@" 1>&2
 	warn "### end of dump ###############################"
 	warn "### suspicious compile flags dumped here ######"
-	echo "$bad_lines"
+	echo "${bad_lines}"
 	warn "### end of flag dump ##########################"
 	error "host -I or -L paths detected: ${output}"
 fi
