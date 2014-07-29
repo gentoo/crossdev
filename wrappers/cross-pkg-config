@@ -42,6 +42,10 @@ if [ "$1" = "--cross-pkg-config-install" ] ; then
 fi
 
 unset EXTRA_PKG_CONFIG_LIBDIR
+if [ -z "${CHOST}" ] ; then
+	CHOST=${0##*/}
+	CHOST=${CHOST%-pkg-config}
+fi
 if [ -z "${SYSROOT}" ] ; then
 	if [ "@CROSS_PKG_CONFIG_INSTALLED@" = "installed" ] ; then
 		# Manual install
@@ -55,8 +59,6 @@ if [ -z "${SYSROOT}" ] ; then
 		EXTRA_PKG_CONFIG_LIBDIR=${UCLINUX_PKG_CONFIG_LIBDIR}
 	else
 		# /usr/<target>
-		CHOST=${0##*/}
-		CHOST=${CHOST%-pkg-config}
 		SYSROOT="/usr/${CHOST}"
 		if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
 			error "Need \$ROOT or \$STAGEDIR set first"
@@ -75,9 +77,25 @@ unset PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 unset PKG_CONFIG_ALLOW_SYSTEM_LIBS
 
 #
+# Try and figure out the appropriate libdir for this target.
+# This logic matches Gentoo's get_libdir which uses $ABI.
+#
+: ${ABI:=${DEFAULT_ABI:-default}}
+var="LIBDIR_${ABI}"
+libdir=${!var}
+if [ -z "${libdir}" ] ; then
+	# Fall back to probing the compiler.
+	libc=$(realpath $(${CC:-${CHOST}-gcc} ${CFLAGS} ${LDFLAGS} -print-file-name=libc.so))
+	# Chopping the basename isn't exactly correct, but it's good enough for now.
+	libdir=$(basename "${libc%/*}")
+fi
+: ${libdir:=lib}
+export PKG_CONFIG_SYSTEM_LIBRARY_PATH="/usr/${libdir}:/${libdir}"
+
+#
 # Set the pkg-config search paths to our staging directory.
 #
-export PKG_CONFIG_LIBDIR="${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig"
+export PKG_CONFIG_LIBDIR="${SYSROOT}/usr/${libdir}/pkgconfig:${SYSROOT}/usr/share/pkgconfig"
 if [ -n "${EXTRA_PKG_CONFIG_LIBDIR}" ] ; then
 	PKG_CONFIG_LIBDIR="${EXTRA_PKG_CONFIG_LIBDIR}:${PKG_CONFIG_LIBDIR}"
 fi
