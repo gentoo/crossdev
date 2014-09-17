@@ -7,7 +7,8 @@ CROSSDEV_VER="@CDEVPV@"
 cd /
 umask 0022 #159111
 
-if [[ ${ROOT:-/} != "/" ]] ; then
+: ${ROOT:=/}
+if [[ ${ROOT} != "/" ]] ; then
 	echo "Sorry, but crossdev does not support ROOT." 1>&2
 	exit 2
 fi
@@ -60,7 +61,7 @@ Options:
 
 Overlay Options:
     ${GOOD}-oS, --overlays${NORMAL} list     Space delimited list of overlays to search
-                                [default: \${PORTDIR_OVERLAY}]
+                                [default: \`portageq repositories_configuration\`]
     ${GOOD}-oO, --ov-output${NORMAL} path    Overlay to write crossdev package links
                                 [default: uses repo with name 'crossdev', or
                                  'cross-\${CTARGET}', or falls back to first
@@ -308,11 +309,56 @@ parse_target() {
 	esac
 }
 
+parse_repo_config() {
+	# Ugh, ini parser here we come.
+	# [DEFAULT]
+	# main-repo = gentoo
+	# [crossdev]
+	# location = /usr/local/portage
+	# masters = gentoo
+	# priority = 0
+	local repo_config=$(portageq repositories_configuration "${ROOT}")
+	local flat_config=$(echo "${repo_config}" | gawk '
+		{
+			if ($1 == "main-repo") {
+				main_repo = $NF
+			} else if ($1 ~ /^\[/) {
+				if (repo_name && loc)
+					repos[prio] = repo_name ":" loc
+				repo_name = gensub(/\[([^\]]*)\]/, "\\1", "", $1)
+				loc = prio = ""
+			} else if ($1 == "priority") {
+				prio = $3
+			} else if ($1 == "location") {
+				loc = $3
+			}
+		}
+		END {
+			repos[prio] = repo_name ":" loc
+
+			print(main_repo)
+			asorti(repos, prios)
+			for (prio in prios)
+				print(repos[prios[prio]])
+		}
+	')
+
+	MAIN_REPO_NAME=$(echo "${flat_config}" | head -1)
+	REPO_CONFIG=$(echo "${flat_config}" | sed 1d)
+	MAIN_REPO_PATH=$(echo "${REPO_CONFIG}" | sed -n "/^${MAIN_REPO_NAME}:/s,^[^:]*:,,p")
+	if [[ -z ${SEARCH_OVERLAYS} ]] ; then
+		# see if user gave us an overlay search list, otherwise
+		# default to whatever is configured in portage
+		SEARCH_OVERLAYS=$(echo "${REPO_CONFIG}" | sed -e "/^${MAIN_REPO_NAME}:/d" -e 's,^[^:]*:,,')
+	fi
+}
+
 setup_portage_vars() {
 	local arch=${ARCH} arch_set=${ARCH+set}
 	local chost=${CHOST} chost_set=${CHOST+set}
 	unset ARCH CHOST
-	eval $(portageq envvar -v PORTDIR_OVERLAY PORTDIR PORT_LOGDIR PORTAGE_TMPDIR ARCH CHOST)
+	eval $(portageq envvar -v PORT_LOGDIR PORTAGE_TMPDIR ARCH CHOST)
+	parse_repo_config
 
 	# keep the original values, but be aware of the native ones
 	HARCH=${ARCH}
@@ -320,24 +366,20 @@ setup_portage_vars() {
 	HCHOST=${CHOST}
 	[[ ${chost_set} == "set" ]] && CHOST=${chost} || unset CHOST
 
-	# see if user gave us an overlay search list, otherwise
-	# default to whatever is configured in portage
-	: ${SEARCH_OVERLAYS:=${PORTDIR_OVERLAY}}
-
 	# see if user told us where to write things, otherwise
 	# set up some repos.conf magic if possible.  if not,
 	# install our stuff to the first overlay in the list.
 	if [[ -z ${CROSSDEV_OVERLAY} ]] ; then
-		CROSSDEV_OVERLAY=${SEARCH_OVERLAYS%% *}
-
 		local repo
 		for repo in "cross-${CTARGET}" crossdev ; do
-			repo=$(portageq get_repo_path / "${repo}")
+			repo=$(echo "${REPO_CONFIG}" | sed -n "/^${repo}:/s,^[^:]*:,,p")
 			if [[ -n ${repo} ]] ; then
 				CROSSDEV_OVERLAY=${repo}
 				break
 			fi
 		done
+
+		: ${CROSSDEV_OVERLAY:=$(echo "${SEARCH_OVERLAYS}" | head -1)}
 	fi
 
 	# make sure we have a valid logdir
@@ -626,8 +668,8 @@ show_target_cfg() {
 
 setup_portage_vars
 if [[ -z ${CROSSDEV_OVERLAY} ]] ; then
-	eerror "You need to specify an output overlay.  Please use --ov-output or set"
-	eerror "PORTDIR_OVERLAY in your make.conf.  A standard setting is: /usr/local/portage"
+	eerror "You need to specify an output overlay.  Please use --ov-output, or consult"
+	eerror "https://wiki.gentoo.org/wiki/Overlay/Local_overlay for more details."
 	exit 1
 fi
 
@@ -663,7 +705,7 @@ multilib_env() {
 
 	# ask multilib.eclass to tell us how things work
 	inherit() { :; }
-	for p in ${SEARCH_OVERLAYS} ${PORTDIR} ; do
+	for p in ${SEARCH_OVERLAYS} ${MAIN_REPO_PATH} ; do
 		p+="/eclass/multilib.eclass"
 		if [[ -e ${p} ]] ; then
 			. "${p}"
@@ -832,7 +874,7 @@ set_use_mask() {
 }
 set_links() {
 	local cat=$1 pkg=$2 ovl=$3
-	local s srcdir=${PORTDIR} d
+	local s srcdir=${MAIN_REPO_PATH} d
 
 	d="${CROSSDEV_OVERLAY}"/cross-${CTARGET}/${pkg}
 	# if auto searching and something is already set, leave it be
@@ -952,7 +994,7 @@ set_metadata() {
 	fi
 
 	# build up a list of possible repos where we can pull from
-	for d in "${BOVL}" "${GOVL}" "${KOVL}" "${LOVL}" ${SEARCH_OVERLAYS} "${PORTDIR}" ; do
+	for d in "${BOVL}" "${GOVL}" "${KOVL}" "${LOVL}" ${SEARCH_OVERLAYS} "${MAIN_REPO_PATH}" ; do
 		[[ -z ${d} ]] && continue
 
 		name=
@@ -1089,12 +1131,6 @@ doemerge() {
 	fi
 	eend 0
 }
-
-# Make this "just work" rather than worrying about user not putting
-# this overlay path into their system settings already.
-if [[ -n ${CROSSDEV_OVERLAY} ]] ; then
-	export PORTDIR_OVERLAY="${CROSSDEV_OVERLAY} ${PORTDIR_OVERLAY}"
-fi
 
 # We include the '-u' so that we don't re-emerge packages.  Avoid
 # using --nodeps as packages have more host depends nowadays (like
