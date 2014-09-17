@@ -85,9 +85,9 @@ var="LIBDIR_${ABI}"
 libdir=${!var}
 if [ -z "${libdir}" ] ; then
 	# Fall back to probing the compiler.
-	libc=$(realpath $(${CC:-${CHOST}-gcc} ${CFLAGS} ${LDFLAGS} -print-file-name=libc.so))
+	libdir=$(realpath "$(${CC:-${CHOST}-gcc} ${CFLAGS} ${LDFLAGS} -print-file-name=pkgconfig)/..")
 	# Chopping the basename isn't exactly correct, but it's good enough for now.
-	libdir=$(basename "${libc%/*}")
+	libdir=$(basename "${libdir}")
 fi
 : ${libdir:=lib}
 export PKG_CONFIG_SYSTEM_LIBRARY_PATH="/usr/${libdir}:/${libdir}"
