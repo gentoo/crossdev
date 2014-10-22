@@ -130,7 +130,7 @@ parse_target() {
 		   - h8300    http://h8300-hms.sourceforge.net/
 		   - mingw32  http://www.mingw.org/
 		   - mingw64  http://mingw-w64.sourceforge.net/
-		   - msp430   http://mspgcc.sourceforge.net/
+		   - msp430   http://www.ti.com/msp430
 		   - nds32    http://github.com/nds32
 		   - nios2    http://www.altera.com/products/ip/processors/nios2/ni2-index.html
 		   - xc16x    http://www.infineon.com/
@@ -183,7 +183,7 @@ parse_target() {
 				CTARGET="${CTARGET}-unknown-linux-gnueabi";;
 			aarch64*|alpha*|cris*|hppa*|ia64*|m68*|mips*|powerpc*|sparc*|sh*|tile*)
 				CTARGET="${CTARGET}-unknown-linux-gnu";;
-			bfin*|h8300*|nds32*|nios2*|spu*|xc16x*)
+			bfin*|h8300*|msp430*|nds32*|nios2*|spu*|xc16x*)
 				CTARGET="${CTARGET}-elf";;
 		esac
 	fi
@@ -234,15 +234,11 @@ parse_target() {
 		      KCAT="dev-util"; KPKG="w32api";
 		      LCAT="dev-util"; LPKG="mingw-runtime";;
 
-		msp430)
-		      KCAT="dev-embedded"; KPKG="msp430mcu";
-		      BCAT="dev-embedded"; BPKG="msp430-binutils";
-		      GCAT="dev-embedded"; GPKG="msp430-gcc";
-		      LCAT="dev-embedded"; LPKG="msp430-libc";
-		      DCAT="dev-embedded"; DPKG="msp430-gdb";
-		      GUSE="-fortran -openmp";
-		      MULTILIB_USE="yes"
-		      WITH_DEF_HEADERS="no";;
+		msp430*)
+		      BVER=">=2.24.90";
+		      GVER=">=4.9.1";
+		      LVER=">=2.1.0";
+		      DVER=">=7.7";;
 
 		nios2*)
 		      BPKG="binutils-nios2";
