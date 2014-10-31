@@ -1,50 +1,52 @@
-#!/bin/bash
-# Copyright 2009 Gentoo Foundation
+#!/bin/sh
+# Copyright 2009-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 TOPDIR=__TOPDIR__
 
 config_site_arch() {
-	local host=$(echo ${CHOST/-/ } | awk '{print $1}')
+	local host="${CHOST%%-*}"
 
-	[[ ${host/arm.*eb/} != ${host} ]] && host=armeb
-	[[ ${host/arm/} != ${host} ]] && [[ ${host} != armeb ]] && host=arm
+	case ${host} in
+	arm*b*)  host=armeb ;;
+	arm*)    host=arm ;;
+	mips*l*) host=mipsel ;;
+	mips*)   host=mips ;;
+	esac
 
-	[[ ${host/mips.*el/} != ${host} ]] && host=mipsel
-
-	#[[ ${host/i[4-5]/6} != ${host} ]] && host=i686
-
-	echo ${host}
+	echo "${host}"
 }
 
 config_site_names() {
-	local site_arch=$(config_site_arch)
+	local site_arch="$(config_site_arch)"
 	local sites=""
 	local x
 
-	[[ ${CHOST/-linux-/} != $CHOST ]] && sites+=" linux ${site_arch}-linux"
-	[[ ${CHOST/darwin/} != $CHOST ]] && sites+=" darwin ${site_arch}-linux"
+	case ${CHOST} in
+	*-linux-*)          sites="linux ${site_arch}-linux" ;;
+	*-darwin*)          sites="darwin ${site_arch}-darwin" ;;
+	esac
 
-	[[ ${CHOST/-linux-uclibc/} != $CHOST ]] && sites+=" linux-uclibc ${site_arch}-linux-uclibc"
-	[[ ${CHOST/-linux-gnu/} != $CHOST ]] && sites+=" linux-gnu ${site_arch}-linux-gnu"
-
-	[[ ${CHOST/-linux-uclibceabi/} != $CHOST ]] && sites+=" linux-uclibceabi ${site_arch}-linux-uclibceabi"
-	[[ ${CHOST/-linux-gnueabi/} != $CHOST ]] && sites+=" linux-gnueabi ${site_arch}-linux-gnueabi"
+	case ${CHOST} in
+	*-linux-uclibc)     sites="linux-uclibc ${site_arch}-linux-uclibc" ;;
+	*-linux-gnu)        sites="linux-gnu ${site_arch}-linux-gnu" ;;
+	*-linux-uclibceabi) sites="linux-uclibceabi ${site_arch}-linux-uclibceabi" ;;
+	*-linux-gnueabi)    sites="linux-gnueabi ${site_arch}-linux-gnueabi" ;;
+	esac
 
 	for x in ${sites} ${CHOST}; do
-		[[ -e ${TOPDIR}/${x} ]] && echo ${TOPDIR}/${x}
+		[ -e "${TOPDIR}/${x}" ] && echo "${TOPDIR}/${x}"
 	done
 }
 
 # Only kick in for cross-compiles so we don't break native builds #427184
-if [[ ${CBUILD:-${CHOST}} != ${CHOST} ]]; then
+if [ "${CBUILD:-${CHOST}}" != "${CHOST}" ] ; then
 	sites="$(config_site_names)"
-	if [[ ${sites} != "" ]]; then
+	if [ -n "${sites}" ] ; then
 		for site in ${sites}; do
-			echo "$(basename $0): loading site script ${site}"
-			. ${site}
+			echo "${0##*/}: loading site script ${site}"
+			. "${site}"
 		done
 	fi
-	unset site
-	unset sites
+	unset site sites
 fi
