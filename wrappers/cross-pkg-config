@@ -82,7 +82,7 @@ unset PKG_CONFIG_ALLOW_SYSTEM_LIBS
 #
 : ${ABI:=${DEFAULT_ABI:-default}}
 var="LIBDIR_${ABI}"
-libdir=${!var}
+eval libdir=\${${var}}
 if [ -z "${libdir}" ] ; then
 	# Fall back to probing the compiler.
 	libdir=$(realpath "$(${CC:-${CHOST}-gcc} ${CFLAGS} ${LDFLAGS} -print-file-name=pkgconfig)/..")
