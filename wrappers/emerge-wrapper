@@ -21,11 +21,13 @@ err() { echo "emerge-wrapper: $*" 1>&2; exit 1; }
 
 emit_setup_warning()
 {
-	${setup_warning:-false} && return 0
-	setup_warning=true
-	echo "!!! WARNING - Cannot auto-configure CHOST ${CHOST}"
-	echo "!!! You should edit ${conf}"
-	echo "!!! by hand to complete your configuration"
+	if ! ${setup_warning} ; then
+		setup_warning=true
+		echo "!!! WARNING - Cannot auto-configure CHOST ${CHOST};"
+		echo "!!! You should edit ${conf}"
+		echo "!!! by hand to complete your configuration."
+	fi
+	echo "!!!  $*"
 }
 
 cross_wrap_etc()
@@ -44,13 +46,13 @@ cross_wrap_etc()
 		. "${MAIN_REPO_PATH}"/eclass/toolchain-funcs.eclass
 		tc-arch
 	)
-	[[ ${ARCH} == "unknown" ]] && emit_setup_warning
+	[[ ${ARCH} == "unknown" ]] && emit_setup_warning "No ARCH is known for this target."
 
 	LIBC="__LIBC__"
 	case ${CHOST} in
 		*gnu*)    LIBC=glibc ;;
 		*uclibc*) LIBC=uclibc ;;
-		*)        emit_setup_warning ;;
+		*)        emit_setup_warning "No LIBC is known for this target." ;;
 	esac
 
 	sed -i \
