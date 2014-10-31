@@ -50,9 +50,10 @@ cross_wrap_etc()
 
 	LIBC="__LIBC__"
 	case ${CHOST} in
-		*gnu*)    LIBC=glibc ;;
-		*uclibc*) LIBC=uclibc ;;
-		*)        emit_setup_warning "No LIBC is known for this target." ;;
+	*gnu*)    LIBC=glibc ;;
+	*uclibc*) LIBC=uclibc ;;
+	*mingw*)  LIBC=mingw ;;
+	*)        emit_setup_warning "No LIBC is known for this target." ;;
 	esac
 
 	sed -i \
