@@ -847,6 +847,11 @@ set_keywords() {
 			ver=$(ver_chop_op "${ver}")
 			echo "cross-${CTARGET}/${pkg} -*" >> ${output}
 			echo "${op}cross-${CTARGET}/${pkg}-${ver} * ~* **" >> ${output}
+			if [[ ${ver} != "9999" ]] ; then
+				# Disable live versions unless exactly requested.
+				output=$(_set_portage_file ${pkg} package.mask)
+				echo ">=cross-${CTARGET}/${pkg}-9999" >> ${output}
+			fi
 		else
 			echo "cross-${CTARGET}/${pkg} * ~* **" >> ${output}
 			output=$(_set_portage_file ${pkg} package.mask)
