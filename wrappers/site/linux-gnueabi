@@ -294,8 +294,4 @@ ac_cv_libiconv_utf8=${ac_cv_libiconv_utf8=yes}
 
 
 # enca
-ac_cv_file__dev_srandom=yes
-ac_cv_file__dev_urandom=yes
-ac_cv_file__dev_random=yes
-ac_cv_file__dev_arandom=no
 yeti_cv_func_scanf_modif_size_t=z
