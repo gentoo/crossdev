@@ -241,8 +241,10 @@ parse_target() {
 		      DVER=">=7.7";;
 
 		nios2*)
-		      BPKG="binutils-nios2";
-		      GPKG="gcc-nios2";;
+		      BVER=">=2.24";
+		      GVER=">=4.9.1";
+		      LVER=">=2.21";
+		      KVER=">=4.0";;
 
 		spu*) TARCH=ppc64;
 		      KPKG="[none]";
