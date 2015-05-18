@@ -351,6 +351,15 @@ parse_repo_config() {
 	fi
 }
 
+# Used by --show-repo-cfg to share the parser logic with other tools.
+show_repo_cfg() {
+	local var=$1
+	unset SEARCH_OVERLAYS
+	parse_repo_config
+	echo "${!var}"
+	exit 0
+}
+
 setup_portage_vars() {
 	local arch=${ARCH} arch_set=${ARCH+set}
 	local chost=${CHOST} chost_set=${CHOST+set}
@@ -602,6 +611,7 @@ while [[ $# -gt 0 ]] ; do
 	--show-target-cfg) SHOW_TARGET_CFG="yes";;
 	--init-target)     INIT_TARGET_ONLY="yes";;
 	--show-fail-log)   SHOW_FAIL_LOG="yes";;
+	--show-repo-cfg)   show_repo_cfg "$2";;
 	-P|--portage)      UOPTS="${UOPTS} $2"; shift;;
 	-b|-d|-p|-v|-q)    UOPTS="${UOPTS} $1";;
 	-pv|-vp)           UOPTS="${UOPTS} -p -v";;
