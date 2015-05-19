@@ -71,6 +71,7 @@ Overlay Options:
     ${GOOD}-og, --ov-gcc${NORMAL} path       Overlay for gcc ebuilds [default: search]
     ${GOOD}-ok, --ov-kernel${NORMAL} path    Overlay for kernel ebuilds [default: search]
     ${GOOD}-ol, --ov-libc${NORMAL} path      Overlay for C library ebuilds [default: search]
+    ${GOOD}-ox, --ov-extra${NORMAL} path     Overlay for extra packages [default: search]
 
 Stage Options:
     ${GOOD}-s0, --stage0${NORMAL}            Build just binutils
@@ -89,6 +90,7 @@ Extra Fun (must be run after above stages):
     ${GOOD}--ex-only${NORMAL}                Skip the stage steps above
     ${GOOD}--ex-gcc${NORMAL}                 Build extra gcc targets (gcj/ada/etc...)
     ${GOOD}--ex-gdb${NORMAL}                 Build a cross gdb
+    ${GOOD}--ex-pkg${NORMAL} pkg             Build extra packages (may be used multiple times)
 
 ${BRACKET}Target (-t)${NORMAL} takes a tuple ${BRACKET}ARCH-VENDOR-OS-LIBC${NORMAL}; see 'crossdev -t help'
 EOF
@@ -505,6 +507,28 @@ with_headers()   { [[ ${WITH_HEADERS}   == "yes" ]] ; }
 ex_fast()    { [[ ${EX_FAST}    == "yes" ]] ; }
 ex_gcc()     { [[ ${EX_GCC}     == "yes" ]] ; }
 ex_gdb()     { [[ ${EX_GDB}     == "yes" ]] ; }
+ex_pkgs()    { [[ ${#XPKGS[@]} -gt 0     ]] ; }
+
+# For each extra package, call $@ with the X* vars set up properly.
+for_each_extra_pkg() {
+	local pkg i
+
+	for (( i = 0; i < ${#XPKGS[@]}; ++i )) ; do
+		# Since the user gave us full atoms, pull them apart here.
+		pkg=${XPKGS[i]}
+		if [[ ${pkg} != */* ]]; then
+			usage 1 "arguments to --ex-pkg must be CATEGORY/PN"
+		fi
+
+		XCAT=${pkg%/*} \
+		XPKG=${pkg#*/} \
+		XVER=${XVERS[i]} \
+		XUSE=${XUSES[i]} \
+		XENV=${XENVS[i]} \
+		XOVL=${XOVLS[i]} \
+		"$@"
+	done
+}
 
 hr() {
 	local c=${COLUMNS:-0}
@@ -554,6 +578,7 @@ GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" GUSE="" GENV="" GOVL=""
 KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" KUSE="" KENV="" KOVL=""
 LCAT="sys-libs"   ; LPKG="[none]"        ; LVER="" LUSE="" LENV="" LOVL=""
 DCAT="sys-devel"  ; DPKG="gdb"           ; DVER="" DUSE="" DENV="" DOVL=""
+XPKGS=() XVERS=() XUSES=() XENVS=() XOVLS=()
 DEFAULT_VER="[latest]"
 SEARCH_OVERLAYS=""
 CROSSDEV_OVERLAY=""
@@ -593,6 +618,7 @@ while [[ $# -gt 0 ]] ; do
 	--l|--libc)        shift; LVER=$1;;
 	--lenv)            shift; LENV=$1;;
 	-ol|--ov-libc)     shift; LOVL=$1;;
+	-ox|--ov-extra)    shift; XOVLS+=( "$1" );;
 	--env)             shift; AENV=$1;;
 	-A|--abis)         shift; MULTILIB_ABIS=$1;;
 	--host-abi)        shift; HOST_ABI=$1;;
@@ -604,6 +630,7 @@ while [[ $# -gt 0 ]] ; do
 	--ex-only)         EX_FAST="yes";;
 	--ex-gcc)          EX_GCC="yes";;
 	--ex-gdb)          EX_GDB="yes";;
+	--ex-pkg)          shift; XPKGS+=( "$1" );;
 	--with-*)          eval $(set_withval $1);;
 	--without-*)       eval $(set_withval $1);;
 	-f|--force)        FORCE="yes";;
@@ -647,6 +674,16 @@ show_target_cfg() {
 		libc L
 	)
 	ex_gdb && pkgs+=( gdb D )
+
+	if ex_pkgs ; then
+		show_extra_pkg() {
+			echo "ex_${XPKG}_category=${XCAT}"
+			echo "ex_${XPKG}_pn=${XPKG}"
+			crosspkgs+=( "ex_${XPKG}" )
+		}
+		for_each_extra_pkg show_extra_pkg
+		echo "extrapkgs='${crosspkgs[*]}'"
+	fi
 
 	echo "arch=${TARCH}"
 	echo "target=${CTARGET}"
@@ -801,6 +838,9 @@ einfo "Extra: gcc pass:       DO IT"
 }
 ex_gdb && {
 einfo "Extra: gdb:            DO IT"
+}
+ex_pkgs && {
+einfo "Extra:                 ${XPKGS[*]}"
 }
 echo
 einfo "CROSSDEV_OVERLAY:      ${CROSSDEV_OVERLAY}"
@@ -1073,6 +1113,7 @@ done
 for v in B G K L D ; do
 	set_portage ${v}
 done
+for_each_extra_pkg set_portage X
 set_metadata
 
 # filter out revdep rebuild stuff #182601
@@ -1230,5 +1271,10 @@ fi
 EOPTS="${EOPTS_UP} --newuse"
 ex_gcc && USE="${GUSE} ${USE}" doemerge ${GPKG} ${GPKG}-extra
 ex_gdb && USE="${DUSE} ${USE}" doemerge ${DPKG}
+if ex_pkgs ; then
+	for pkg in "${XPKGS[@]}" ; do
+		doemerge "${pkg#*/}"
+	done
+fi
 
 exit 0
