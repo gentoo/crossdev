@@ -23,18 +23,18 @@ config_site_names() {
 	local x
 
 	case ${CHOST} in
-	*-linux-*)          sites="${sites} linux ${site_arch}-linux" ;;
-	*-darwin*)          sites="${sites} darwin ${site_arch}-darwin" ;;
+	*-linux-*)           sites="${sites} linux ${site_arch}-linux" ;;
+	*-darwin*)           sites="${sites} darwin ${site_arch}-darwin" ;;
 	esac
 
 	case ${CHOST} in
-	*-linux-uclibc)     sites="${sites} linux-uclibc ${site_arch}-linux-uclibc" ;;
-	*-linux-gnu)        sites="${sites} linux-gnu ${site_arch}-linux-gnu" ;;
+	*-linux-uclibc*)     sites="${sites} linux-uclibc ${site_arch}-linux-uclibc" ;;
+	*-linux-gnu*)        sites="${sites} linux-gnu ${site_arch}-linux-gnu" ;;
 	esac
 
 	case ${CHOST} in
-	*-linux-uclibceabi) sites="${sites} linux-uclibceabi ${site_arch}-linux-uclibceabi" ;;
-	*-linux-gnueabi)    sites="${sites} linux-gnueabi ${site_arch}-linux-gnueabi" ;;
+	*-linux-uclibceabi*) sites="${sites} linux-uclibceabi ${site_arch}-linux-uclibceabi" ;;
+	*-linux-gnueabi*)    sites="${sites} linux-gnueabi ${site_arch}-linux-gnueabi" ;;
 	esac
 
 	for x in ${sites} ${CHOST}; do
