@@ -416,15 +416,8 @@ uninstall() {
 	rm -f /etc/revdep-rebuild/05cross-${CTARGET}
 	rmdir /etc/revdep-rebuild 2>/dev/null
 
-	rmdir /var/db/pkg/cross-${CTARGET} 2>/dev/null
-	if [[ -d /var/db/pkg/cross-${CTARGET} ]] ; then
-		export CLEAN_DELAY=0
-		cd /var/db/pkg
-		local pkgs=( cross-${CTARGET}/* )
-		emerge -qC ${pkgs[@]/#/=} || exit 1
-	else
-		ewarn "${CTARGET}: no packages installed; will clean out known files"
-	fi
+	# Unmerge all toolchain packages for this target.
+	qmerge -Uqy $(qlist -IC "cross-${CTARGET}/")
 
 	# clean out known toolchain files (binutils/gcc)
 	for f in \
