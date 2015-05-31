@@ -8,6 +8,10 @@ gl_cv_func_wcwidth_works=yes
 # sys-apps/dbus-1.3.0
 ac_cv_have_abstract_sockets=yes
 
+# autoconf-provided macros.
+# The AC_FUNC_WAIT3 macro uses AC_RUN.  Iit's obsolete, but some still use it.
+ac_cv_func_wait3_rusage=yes
+
 # app-admin/sudo-1.7.2_p1
 sudo_cv_uid_t_len=10
 sudo_cv_func_unsetenv_void=no
