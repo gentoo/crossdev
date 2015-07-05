@@ -30,6 +30,7 @@ config_site_names() {
 	case ${CHOST} in
 	*-linux-uclibc*)     sites="${sites} linux-uclibc ${site_arch}-linux-uclibc" ;;
 	*-linux-gnu*)        sites="${sites} linux-gnu ${site_arch}-linux-gnu" ;;
+	*-linux-musl*)       sites="${sites} linux-musl ${site_arch}-linux-musl" ;;
 	esac
 
 	case ${CHOST} in
