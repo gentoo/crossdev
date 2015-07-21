@@ -20,7 +20,7 @@ fi
 
 # Portage defaults CBUILD to CHOST, so we have to remove CHOST
 # from the env to get a "good" value for CBUILD
-query_vars="CBUILD CFLAGS CXXFLAGS CPPFLAGS"
+query_vars="CBUILD CFLAGS CXXFLAGS CPPFLAGS LDFLAGS"
 clean_vars="${query_vars} CHOST SYSROOT PORTAGE_CONFIGROOT"
 eval $(env $(printf -- '-u %s ' ${clean_vars}) \
 	portageq envvar -v ${query_vars} | sed s:^:_E_:)
@@ -28,7 +28,8 @@ eval $(env $(printf -- '-u %s ' ${clean_vars}) \
 : ${BUILD_CFLAGS=${_E_CFLAGS}}
 : ${BUILD_CXXFLAGS=${_E_CXXFLAGS}}
 : ${BUILD_CPPFLAGS=${_E_CPPFLAGS}}
-export CBUILD BUILD_CFLAGS BUILD_CXXFLAGS BUILD_CPPFLAGS
+: ${BUILD_LDFLAGS=${_E_LDFLAGS}}
+export CBUILD BUILD_CFLAGS BUILD_CXXFLAGS BUILD_CPPFLAGS BUILD_LDFLAGS
 
 : ${CROSS_CMD:=emerge --root-deps=rdeps}
 exec ${CROSS_CMD} "$@"
