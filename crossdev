@@ -325,7 +325,7 @@ parse_repo_config() {
 			} else if ($1 ~ /^\[/) {
 				if (repo_name && loc)
 					repos[prio] = repo_name ":" loc
-				repo_name = gensub(/\[([^\]]*)\]/, "\\1", "", $1)
+				repo_name = gensub(/\[([^\]]*)\]/, "\\1", 1, $1)
 				loc = prio = ""
 			} else if ($1 == "priority") {
 				prio = $3
