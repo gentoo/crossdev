@@ -421,7 +421,7 @@ uninstall() {
 
 	# clean out known toolchain files (binutils/gcc)
 	for f in \
-		addr2line ar as c++filt dlltool dllwrap embedspu \
+		addr2line ar as c++filt dlltool dllwrap dwp embedspu \
 		gcc-{ar,nm,ranlib} gccbug gprof ld nm objcopy objdump \
 		ranlib readelf size strings strip windmc windres
 	do
