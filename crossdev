@@ -718,18 +718,18 @@ if [[ ${HCHOST} == "${CTARGET}" ]] ; then
 fi
 
 # grab user settings
+d="${CONFIGROOT}/crossdev/${CTARGET}"
 for v in MULTILIB_ABIS USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS ASFLAGS ; do
-	d="${CONFIGROOT}/crossdev/${CTARGET}"
 	if [[ -e ${d}/${v} ]] ; then
 		# yes, quotes are needed in this instance (export $var="...")
 		export ${v}="$(<"${d}"/${v})"
 		einfo "Restoring user setting '${v}' to '${!v}'"
 	fi
-	if [[ -e ${d}/env ]] ; then
-		einfo "Restoring generic user env settings"
-		source "${d}"/env
-	fi
 done
+if [[ -e ${d}/env ]] ; then
+	einfo "Restoring generic user env settings"
+	source "${d}"/env
+fi
 
 # parse multilib settings until profiles are sane
 multilib_env() {
