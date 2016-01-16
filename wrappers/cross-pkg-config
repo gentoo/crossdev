@@ -37,7 +37,7 @@ if [ "$1" = "--cross-pkg-config-install" ] ; then
 		-e "s:@CROSS_PKG_CONFIG_PATH@:${pkg_path}:" \
 		"${pkg_config}"
 	rm -f "${pkg_config}".tmp
-	chmod a+rx "{$pkg_config}"
+	chmod a+rx "${pkg_config}"
 	exit 0
 fi
 
