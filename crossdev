@@ -587,7 +587,7 @@ CROSSDEV_OVERLAY=""
 # not tested, or doesn't make sense, or no one simply cares about them
 GUSE_DISABLE="-boundschecking -d -gcj -gtk -libffi -mudflap -objc -objc++ -objc-gc"
 # These are disabled only for stage1 gcc
-GUSE_DISABLE_STAGE_1="${GUSE_DISABLE} -fortran -go nocxx -cxx -openmp -sanitize"
+GUSE_DISABLE_STAGE_1="${GUSE_DISABLE} -fortran -go -cxx -openmp -sanitize -vtv"
 GUSE_DISABLE_STAGE_2="${GUSE_DISABLE}"
 WITH_HEADERS="COW"   WITH_DEF_HEADERS="yes" #227065 gcc-4.3+ is a pita w/out headers
 EX_FAST="no"
