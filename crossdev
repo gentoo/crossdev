@@ -739,7 +739,7 @@ if [[ -e ${d}/env ]] ; then
 fi
 
 # parse multilib settings until profiles are sane
-multilib_env() {
+load_multilib_env() {
 	local var=$1
 	eval $(
 	# see what target to parse
@@ -764,7 +764,10 @@ multilib_env() {
 	else
 		single_abi=false
 	fi
-	multilib_env
+	if ! multilib_env ; then
+		echo "die 'could not load multilib settings for ${var}'"
+		exit 1
+	fi
 	${single_abi} && MULTILIB_ABIS=${DEFAULT_ABI}
 
 	# output the desired env
@@ -792,10 +795,10 @@ multilib_env() {
 	)
 }
 # Load settings for the host.
-MULTILIB_ABIS=${HOST_ABI} multilib_env HCHOST
+MULTILIB_ABIS=${HOST_ABI} load_multilib_env HCHOST
 HOST_ABI=${_MULTILIB_ABIS}
 # Load settings for the target.
-multilib_env CTARGET
+load_multilib_env CTARGET
 
 DEFAULT_ABI=${MULTILIB_ABIS%% *}
 if [[ -z ${MULTILIB_USE} ]] ; then
