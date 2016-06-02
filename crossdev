@@ -19,7 +19,7 @@ source /etc/init.d/functions.sh || exit 1
 esyslog() { :; }
 die_logs() {
 	echo
-	eerror "$1"
+	eerror "error: $1"
 
 	shift
 	local log
@@ -33,6 +33,7 @@ die_logs() {
 }
 die() { die_logs "$*"; }
 has() { [[ " ${@:2} " == *" $1 "* ]]; }
+xmkdir() { mkdir "$@" || die "could not mkdir $*"; }
 
 usage() {
 	local exit_status=${1:-0}
@@ -400,7 +401,7 @@ setup_portage_vars() {
 
 	# make sure we have a valid logdir
 	: ${PORT_LOGDIR:=/var/log/portage}
-	mkdir -p "${PORT_LOGDIR}"
+	xmkdir -p "${PORT_LOGDIR}"
 }
 
 uninstall() {
@@ -1038,7 +1039,7 @@ set_metadata() {
 	repo_name=$(cat "${f}" 2>/dev/null)
 	: ${repo_name:="crossdev"}
 
-	mkdir -p "${meta}"
+	xmkdir -p "${meta}"
 	if [[ -e ${layout} ]] ; then
 		if ! grep -qs "^${autogen_tag}" "${layout}" ; then
 			einfo "leaving metadata/layout.conf alone in ${CROSSDEV_OVERLAY}"
@@ -1093,7 +1094,7 @@ set_metadata() {
 	done
 
 	# write out that layout.conf!
-	cat <<-EOF > "${layout}"
+	cat <<-EOF > "${layout}" || die "could not write ${layout}"
 	${autogen_tag}
 	# Delete the above line if you want to manage this file yourself
 	masters = ${masters% }
@@ -1102,7 +1103,7 @@ set_metadata() {
 	EOF
 }
 
-mkdir -p "${CONFIGROOT}" "${CROSSDEV_OVERLAY}"/{cross-${CTARGET},profiles} || die "wtf!?"
+xmkdir -p "${CONFIGROOT}" "${CROSSDEV_OVERLAY}"/{cross-${CTARGET},profiles}
 for f in "${CONFIGROOT}" "${CROSSDEV_OVERLAY}"/profiles ; do
 	f+="/categories"
 	check_trailing_newline "${f}"
@@ -1112,7 +1113,7 @@ done
 cd "${CONFIGROOT}" || die "wtf!?"
 for f in package.{env,keywords,mask,use} env/cross-${CTARGET} profile/package.use.{force,mask} ; do
 	[[ -f ${f} ]] && die "please convert ${CONFIGROOT}/${f} to a directory"
-	mkdir -p "${f}" || die "wtf!?"
+	xmkdir -p "${f}"
 	rm -f "${f}/cross-${CTARGET}"
 done
 
@@ -1123,7 +1124,7 @@ for_each_extra_pkg set_portage X
 set_metadata
 
 # filter out revdep rebuild stuff #182601
-mkdir -p /etc/revdep-rebuild
+xmkdir -p /etc/revdep-rebuild
 echo "SEARCH_DIRS_MASK=/usr/${CTARGET}" > /etc/revdep-rebuild/05cross-${CTARGET}
 
 hr
@@ -1131,7 +1132,7 @@ hr
 #######################################
 ### Create links for helper scripts ###
 
-mkdir -p /usr/${CTARGET}
+xmkdir -p /usr/${CTARGET}
 emerge-wrapper --target ${CTARGET} --init || exit 1
 
 #################
