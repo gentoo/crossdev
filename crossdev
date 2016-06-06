@@ -21,7 +21,7 @@ EROOT=${ROOT%/}"${EPREFIX}"/
 : ${PORTAGE_CONFIGROOT:=${EROOT}}
 CONFIGROOT="${PORTAGE_CONFIGROOT}/etc/portage"
 
-source "${EPREFIX}"/etc/init.d/functions.sh || exit 1
+source "${EPREFIX}"/lib/gentoo/functions.sh || exit 1
 esyslog() { :; }
 die_logs() {
 	echo
