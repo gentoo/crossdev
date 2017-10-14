@@ -1153,9 +1153,8 @@ emerge-wrapper --target ${CTARGET} --init || exit 1
 
 #################
 emerged_with_use() {
-	local pkg=$1 use=$2 alt
-	case $pkg in *lib*|musl) alt="/usr/${CTARGET}" ;; esac
-	grep -qs ${use} "${EPREFIX}"${alt}/var/db/pkg/cross-${CTARGET}/${pkg}-*/USE
+	local pkg=$1 use=$2
+	grep -qs ${use} "${EPREFIX}"/var/db/pkg/cross-${CTARGET}/${pkg}-*/USE
 }
 set_eopts_on_pkg_status() {
 	emerged_with_use "$@" \
@@ -1249,9 +1248,6 @@ if ! ex_fast ; then
 				# care about at this point -- we aren't compiling yet
 				USE="${LUSE} ${USE}" \
 				CROSSCOMPILE_OPTS="headers-only" \
-				ROOT="${EPREFIX}"/usr/${CTARGET} \
-				ALT_BUILD_HEADERS="${ROOT}"/usr/include \
-				EPREFIX="/" \
 				EOPTS="${EOPTS} --nodeps" \
 					doemerge ${LPKG} ${LPKG}-headers
 			fi
@@ -1279,8 +1275,6 @@ if ! ex_fast ; then
 		set_eopts_on_pkg_status ${LPKG} crosscompile_opts_headers-only
 
 		USE="${LUSE} ${USE}" \
-		ROOT=${EPREFIX}/usr/${CTARGET} \
-		EPREFIX="/" \
 		CROSSCOMPILE_OPTS="" \
 			doemerge ${LPKG}
 	fi
