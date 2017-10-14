@@ -224,12 +224,14 @@ parse_target() {
 		# this is a linux+ target, not microcontroller (below)
 		avr32*) :;;
 
-		avr*) KPKG="[none]";
-		      LCAT="dev-embedded"; LPKG="avr-libc";
-		      GUSE="-fortran -go" # doesn't work
+		avr*) KPKG="[none]"
+		      LCAT="dev-embedded"
+		      LPKG="avr-libc"
+		      GUSE="-fortran -go -pie nopie" # doesn't work
 		      MULTILIB_USE="yes" #377039
-		      WITH_DEF_HEADERS="no"
-		      MAKE_SYMLINK="yes";;
+		      STAGE_DEFAULT=${STAGE_LIBC}
+		      MAKE_SYMLINK="yes"
+		      WITH_DEF_HEADERS="no";;
 
 		# due to upstream lameness, build C/C++ at first glance
 		*-cygwin)
@@ -1027,15 +1029,13 @@ set_portage() {
 	case ${CTARGET} in
 		# avr requires multilib, that provides
 		# libgcc for all sub-architectures #378387
-		avr*)      set_use_force ${pkg} multilib
-			;;
-		*)        set_use_force ${pkg} -multilib
-			;;
+		avr*)   set_use_force ${pkg} multilib;
+			set_use_mask ${pkg} -multilib;;
+		*)      set_use_force ${pkg} -multilib;;
 	esac
 
 	set_keywords ${pkg} ${ver}
 	set_use ${pkg} ${use}
-	set_use_mask ${pkg} -multilib
 	set_links ${cat} ${pkg} "${ovl}"
 	set_env ${l} ${pkg} "${env}"
 }
@@ -1297,7 +1297,7 @@ if ! ex_fast ; then
 	# this is to make sure that avr linker can find its a**, er, ldscripts
 	if [[ ${MAKE_SYMLINK} == "yes" ]] ; then
 		case ${CTARGET} in
-			avr*)   [[ -e ${EPREFIX}/usr/${CTARGET}/lib/ldscripts ]] || \
+			avr*)   ( ! [[ -h ${EPREFIX}/usr/${CTARGET}/lib/ldscripts ]] && [[ -d ${EPREFIX}/usr/${CTARGET}/lib ]] ) && \
 					ln -s ${EPREFIX}/usr/$CHOST/${CTARGET}/lib/ldscripts ${EPREFIX}/usr/${CTARGET}/lib/
 				;;
 			*)      ;;
