@@ -452,7 +452,7 @@ uninstall() {
 	# clean out files from crossdev itself
 	[[ -e ${EPREFIX}/var/db/pkg/cross-${CTARGET} ]] && rmdir "${EPREFIX}"/var/db/pkg/cross-${CTARGET}
 	rm -f "${EPREFIX}"/usr/bin/${CTARGET}-{emerge,fix-root,pkg-config} "${EPREFIX}"/usr/bin/emerge-${CTARGET}
-	[[ -e ${EPREFIX}/usr/${CTARGET}/lib/ldscripts ]] && rm "${EPREFIX}"/usr/${CTARGET}/lib/ldscripts
+	[[ -h ${EPREFIX}/usr/${CTARGET}/lib/ldscripts ]] && rm "${EPREFIX}"/usr/${CTARGET}/lib/ldscripts
 
 	for f in make.{conf,globals,profile} ; do
 		f="${EPREFIX}/usr/${CTARGET}/etc/${f}"
@@ -1292,7 +1292,7 @@ if ! ex_fast ; then
 	if [[ ${MAKE_SYMLINK} == "yes" ]] ; then
 		case ${CTARGET} in
 			avr*)   ( ! [[ -h ${EPREFIX}/usr/${CTARGET}/lib/ldscripts ]] && [[ -d ${EPREFIX}/usr/${CTARGET}/lib ]] ) && \
-					ln -s ${EPREFIX}/usr/$CHOST/${CTARGET}/lib/ldscripts ${EPREFIX}/usr/${CTARGET}/lib/
+					ln -s ${EPREFIX}/usr/${CHOST}/${CTARGET}/lib/ldscripts ${EPREFIX}/usr/${CTARGET}/lib/
 				;;
 			*)      ;;
 		esac
