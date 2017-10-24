@@ -227,8 +227,9 @@ parse_target() {
 		avr*) KPKG="[none]"
 		      LCAT="dev-embedded"
 		      LPKG="avr-libc"
-		      GUSE="-fortran -go -pie nopie" # doesn't work
+		      GUSE+=" -fortran -go -pie nopie" # doesn't work
 		      MULTILIB_USE="yes" #377039
+		      BUSE+=" cxx"
 		      STAGE_DEFAULT=${STAGE_LIBC}
 		      MAKE_SYMLINK="yes"
 		      WITH_DEF_HEADERS="no";;
@@ -306,7 +307,7 @@ parse_target() {
 			LPKG="newlib"
 			KPKG="[none]"
 			STAGE_DEFAULT=${STAGE_LIBC}
-			GUSE+=" -openmp" #489798
+			GUSE+=" cxx -openmp" #489798
 			MULTILIB_USE="yes" #407275
 			WITH_DEF_HEADERS="no"
 			;;
@@ -1229,7 +1230,7 @@ USE="${USE} -selinux"
 if ! ex_fast ; then
 
 	# stage 0: binutils
-	doemerge ${BPKG}
+	USE="${BUSE}" doemerge ${BPKG}
 
 	# stage1: bare C compiler
 	if is_s1 ; then
@@ -1292,7 +1293,7 @@ if ! ex_fast ; then
 	if [[ ${MAKE_SYMLINK} == "yes" ]] ; then
 		case ${CTARGET} in
 			avr*)   ( ! [[ -h ${EPREFIX}/usr/${CTARGET}/lib/ldscripts ]] && [[ -d ${EPREFIX}/usr/${CTARGET}/lib ]] ) && \
-					ln -s ${EPREFIX}/usr/${CHOST}/${CTARGET}/lib/ldscripts ${EPREFIX}/usr/${CTARGET}/lib/
+					ln -s ${EPREFIX}/usr/${HCHOST}/${CTARGET}/lib/ldscripts ${EPREFIX}/usr/${CTARGET}/lib/
 				;;
 			*)      ;;
 		esac
