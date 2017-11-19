@@ -652,8 +652,6 @@ while [[ $# -gt 0 ]] ; do
 	--show-fail-log)   SHOW_FAIL_LOG="yes";;
 	--show-repo-cfg)   show_repo_cfg "$2";;
 	-P|--portage)      UOPTS="${UOPTS} $2"; shift;;
-	-b|-d|-p|-v|-q)    UOPTS="${UOPTS} $1";;
-	-pv|-vp)           UOPTS="${UOPTS} -p -v";;
 	-h|--help)         usage;;
 	-*)                eerror "UNKNOWN OPTION: '$1'" ; usage 1;;
 	*)                 parse_target $1;;
