@@ -139,6 +139,7 @@ parse_target() {
 		   - h8300    http://h8300-hms.sourceforge.net/
 		   - mingw32  http://www.mingw.org/
 		   - mingw64  http://mingw-w64.sourceforge.net/
+		   - mmix     http://www-cs-faculty.stanford.edu/~knuth/mmix.html
 		   - msp430   http://www.ti.com/msp430
 		   - nds32    http://github.com/nds32
 		   - nios2    http://www.altera.com/products/ip/processors/nios2/ni2-index.html
@@ -239,6 +240,13 @@ parse_target() {
 		# https://parisc.wiki.kernel.org/index.php/Userspace64
 		hppa64*)
 		      STAGE_DEFAULT=${STAGE_C_ONLY}
+		      WITH_DEF_HEADERS="no";;
+
+		# added in bug #609602
+		mmix*)
+		      KPKG="[none]"
+		      LPKG="newlib"
+		      STAGE_DEFAULT=${STAGE_LIBC}
 		      WITH_DEF_HEADERS="no";;
 
 		# due to upstream lameness, build C/C++ at first glance
