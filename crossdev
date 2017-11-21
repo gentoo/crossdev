@@ -234,6 +234,13 @@ parse_target() {
 		      MAKE_SYMLINK="yes"
 		      WITH_DEF_HEADERS="no";;
 
+		# Has no glibc support yet (or even ABI defined). Can
+		# only compile linux kernel:
+		# https://parisc.wiki.kernel.org/index.php/Userspace64
+		hppa64*)
+		      STAGE_DEFAULT=${STAGE_C_ONLY}
+		      WITH_DEF_HEADERS="no";;
+
 		# due to upstream lameness, build C/C++ at first glance
 		*-cygwin)
 		      GUSE_DISABLE_STAGE_1+=" -nocxx cxx";;
