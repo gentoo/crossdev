@@ -69,7 +69,7 @@ Options:
 Overlay Options:
     ${GOOD}-oS, --overlays${NORMAL} list     Space delimited list of overlays to search
                                 [default: \`portageq repositories_configuration\`]
-    ${GOOD}-oO, --ov-output${NORMAL} path    Overlay to write crossdev package links
+    ${GOOD}-oO, --ov-output${NORMAL} path    Parent directory of overlay to write crossdev package links
                                 [default: uses repo with name 'crossdev', or
                                  'cross-\${CTARGET}', or falls back to first
                                  from --overlays list]
@@ -1043,8 +1043,8 @@ set_portage() {
 	case ${CTARGET} in
 		# avr requires multilib, that provides
 		# libgcc for all sub-architectures #378387
-		avr*)   set_use_force ${pkg} multilib;
-			set_use_mask ${pkg} -multilib;;
+		avr*)   set_use_force ${pkg} multilib -pie;
+			set_use_mask ${pkg} -multilib pie;;
 		*)      set_use_force ${pkg} -multilib;;
 	esac
 
