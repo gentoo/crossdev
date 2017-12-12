@@ -1045,6 +1045,9 @@ set_portage() {
 		# libgcc for all sub-architectures #378387
 		avr*)   set_use_force ${pkg} multilib -pie;
 			set_use_mask ${pkg} -multilib pie;;
+		*-newlib|*-elf|*-eabi)
+			set_use_force ${pkg} multilib;
+			set_use_mask ${pkg} -multilib;;
 		*)      set_use_force ${pkg} -multilib;;
 	esac
 
