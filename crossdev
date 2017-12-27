@@ -323,6 +323,8 @@ parse_target() {
 			KPKG="[none]"
 			STAGE_DEFAULT=${STAGE_LIBC}
 			GUSE+=" cxx -openmp" #489798
+			# asan needs OS support to implement sanitizers
+			GUSE+=" -sanitize"
 			MULTILIB_USE="yes" #407275
 			WITH_DEF_HEADERS="no"
 			;;
