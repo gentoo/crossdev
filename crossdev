@@ -323,8 +323,6 @@ parse_target() {
 			KPKG="[none]"
 			STAGE_DEFAULT=${STAGE_LIBC}
 			GUSE+=" cxx -openmp" #489798
-			# asan needs OS support to implement sanitizers
-			GUSE+=" -sanitize"
 			MULTILIB_USE="yes" #407275
 			WITH_DEF_HEADERS="no"
 			;;
@@ -335,6 +333,30 @@ parse_target() {
 			KPKG="[none]"
 			;;
 	esac
+
+	local sanitizer_support=no
+	# Whitelist asan on explicitly supported arches fo linux.
+	# Broken examples:
+	# - musl libc
+	# - bare metal targets
+	# Untested examples:
+	# - *BSD
+	case ${CTARGET} in
+		# glibc targets
+		*-gnu*)
+			case ${CTARGET} in
+				mips64*)
+					# has some support code, fails to build
+					;;
+				x86_64*|i?86*|arm*|aarch64|powerpc64)
+					sanitizer_support=yes
+					;;
+			esac
+			;;
+	esac
+	if [[ $sanitizer_support = "no" ]]; then
+		GUSE+=" -sanitize"
+	fi
 }
 
 parse_repo_config() {
