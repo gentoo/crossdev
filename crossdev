@@ -335,7 +335,7 @@ parse_target() {
 	esac
 
 	local sanitizer_support=no
-	# Whitelist asan on explicitly supported arches fo linux.
+	# Whitelist asan on explicitly supported arches for linux.
 	# Broken examples:
 	# - musl libc
 	# - bare metal targets
@@ -356,6 +356,28 @@ parse_target() {
 	esac
 	if [[ $sanitizer_support = "no" ]]; then
 		GUSE+=" -sanitize"
+	fi
+
+	local vtv_support=no
+	# Whitelist asan on explicitly supported arches for linux.
+	# Broken examples:
+	# - musl libc
+	# - bare metal targets
+	# - powerpc
+	# Untested examples:
+	# - *BSD
+	case ${CTARGET} in
+		# glibc targets
+		*-gnu*)
+			case ${CTARGET} in
+				x86_64*|i?86*|arm*|aarch64)
+					vtv_support=yes
+					;;
+			esac
+			;;
+	esac
+	if [[ $vtv_support = "no" ]]; then
+		GUSE+=" -vtv"
 	fi
 }
 
