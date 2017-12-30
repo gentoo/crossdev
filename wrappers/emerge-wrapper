@@ -52,6 +52,7 @@ cross_wrap_etc()
 	case ${CHOST} in
 	*gnu*)    LIBC=glibc ;;
 	*uclibc*) LIBC=uclibc ;;
+	*musl*)   LIBC=musl ;;
 	*mingw*)  LIBC=mingw ;;
 	*)        emit_setup_warning "No LIBC is known for this target." ;;
 	esac
