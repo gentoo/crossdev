@@ -1219,11 +1219,22 @@ emerged_with_use() {
 	local pkg=$1 use=$2
 	grep -qs ${use} "${EPREFIX}"/var/db/pkg/cross-${CTARGET}/${pkg}-*/USE
 }
-# Force package rebuild if USE-flag is set otherwise install package only if flag is missing.
+# Force package rebuild if any of passed USE-flag is set otherwise install package only if flag is missing.
+# $1    - pkg
+# $2... - USE flags to check
 set_eopts_on_pkg_status() {
-	emerged_with_use "$@" \
-		&& EOPTS=${EOPTS_DEF} \
-		|| EOPTS=${EOPTS_UP}
+	local pkg=$1 flag
+	shift
+
+	for flag in "$@"; do
+		if emerged_with_use "${pkg}" "${flag}"; then
+			# Force rebuild
+			EOPTS=${EOPTS_DEF}
+			return
+		fi
+	done
+	# Install if missing
+	EOPTS=${EOPTS_UP}
 }
 doemerge() {
 	local category="cross-${CTARGET}"
