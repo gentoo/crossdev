@@ -1312,7 +1312,7 @@ if ! ex_fast ; then
 		# first install headers if requested
 		if with_headers ; then
 			# install kernel headers (since the C library often uses them)
-			USE="${KUSE} ${USE}" \
+			USE="${KUSE} ${USE} headers-only" \
 			CROSSCOMPILE_OPTS="headers-only" \
 				doemerge ${KPKG} ${KPKG}-quick
 
@@ -1321,7 +1321,7 @@ if ! ex_fast ; then
 				# we have to use --nodeps as glibc itself might have
 				# a dependency on newer gcc versions that we don't
 				# care about at this point -- we aren't compiling yet
-				USE="${LUSE} ${USE}" \
+				USE="${LUSE} ${USE} headers-only" \
 				CROSSCOMPILE_OPTS="headers-only" \
 				EOPTS="${EOPTS} --nodeps" \
 					doemerge ${LPKG} ${LPKG}-headers
@@ -1336,7 +1336,7 @@ if ! ex_fast ; then
 
 	# stage2: kernel headers
 	if is_s2 ; then
-		set_eopts_on_pkg_status ${KPKG} crosscompile_opts_headers-only
+		set_eopts_on_pkg_status ${KPKG} crosscompile_opts_headers-only headers-only
 
 		USE="${KUSE} ${USE}" \
 		CROSSCOMPILE_OPTS="" \
@@ -1347,7 +1347,7 @@ if ! ex_fast ; then
 	if is_s3 ; then
 		[[ -z ${LPKG} ]] && die "Invalid target '${CTARGET}': unknown libc"
 
-		set_eopts_on_pkg_status ${LPKG} crosscompile_opts_headers-only
+		set_eopts_on_pkg_status ${LPKG} crosscompile_opts_headers-only headers-only
 
 		USE="${LUSE} ${USE}" \
 		CROSSCOMPILE_OPTS="" \
