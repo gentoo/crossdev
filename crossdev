@@ -1219,6 +1219,7 @@ emerged_with_use() {
 	local pkg=$1 use=$2
 	grep -qs ${use} "${EPREFIX}"/var/db/pkg/cross-${CTARGET}/${pkg}-*/USE
 }
+# Force package rebuild if USE-flag is set otherwise install package only if flag is missing.
 set_eopts_on_pkg_status() {
 	emerged_with_use "$@" \
 		&& EOPTS=${EOPTS_DEF} \
