@@ -348,7 +348,7 @@ parse_target() {
 				mips64*)
 					# has some support code, fails to build
 					;;
-				x86_64*|i?86*|arm*|aarch64|powerpc64)
+				x86_64*|i?86*|arm*|aarch64*|powerpc*)
 					sanitizer_support=yes
 					;;
 			esac
