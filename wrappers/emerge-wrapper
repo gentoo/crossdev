@@ -53,6 +53,7 @@ cross_wrap_etc()
 	*gnu*)    LIBC=glibc ;;
 	*uclibc*) LIBC=uclibc ;;
 	*musl*)   LIBC=musl ;;
+	*cygwin*) LIBC=Cygwin ;;
 	*mingw*)  LIBC=mingw ;;
 	*)        emit_setup_warning "No LIBC is known for this target." ;;
 	esac
