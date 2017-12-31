@@ -5,6 +5,11 @@ ac_cv_func_realloc_0_nonnull=yes
 # sys-devel/gettext-0.17
 gl_cv_func_wcwidth_works=yes
 
+# coreutils
+#   https://bugs.gentoo.org/177061
+#   https://bugs.gentoo.org/553988
+gl_cv_func_re_compile_pattern_working=yes
+
 # sys-apps/dbus-1.3.0
 ac_cv_have_abstract_sockets=yes
 

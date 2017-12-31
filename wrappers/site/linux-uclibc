@@ -67,3 +67,8 @@ ac_cv_ulong=yes
 ac_cv_ushort=yes
 ac_cv_va_copy=C99
 ac_cv_va_val_copy=yes
+
+# coreutils
+#   https://bugs.gentoo.org/177061
+#   https://bugs.gentoo.org/553988
+gl_cv_func_re_compile_pattern_working=yes
