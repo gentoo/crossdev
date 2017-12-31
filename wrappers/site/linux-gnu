@@ -64,7 +64,6 @@ vim_cv_memmove_handles_overlap=yes
 ac_cv_va_copy=yes
 
 # app-shells/bash-4.0
-bash_cv_job_control_missing=present
 bash_cv_sys_named_pipes=present
 
 # x11-libs/startup-notification-0.10

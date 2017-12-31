@@ -41,6 +41,9 @@ ac_cv_file__dev_urandom=yes
 ac_cv_file__dev_random=yes
 ac_cv_file__dev_arandom=no
 
+# app-shells/bash-4.0
+bash_cv_job_control_missing=present
+
 yeti_cv_func_scanf_modif_size_t=z
 
 gl_cv_func_btowc_eof=yes
