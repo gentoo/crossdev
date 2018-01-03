@@ -393,7 +393,7 @@ parse_repo_config() {
 	local flat_config=$(echo "${repo_config}" | gawk '
 		function push(arr, idx, ele) {
 			if (idx in arr)
-				arr[idx][length(arr) + 1] = ele
+				arr[idx][length(arr[idx]) + 1] = ele
 			else
 				arr[idx][0] = ele
 		}
