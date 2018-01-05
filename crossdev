@@ -501,8 +501,8 @@ uninstall() {
 	# clean out known toolchain files (binutils/gcc)
 	for f in \
 		addr2line ar as c++filt dlltool dllwrap dwp embedspu \
-		gcc-{ar,nm,ranlib} gccbug gprof ld nm objcopy objdump \
-		ranlib readelf size strings strip windmc windres
+		gcc-{ar,nm,ranlib} gccbug gcov-{dump,tool} gprof ld nm \
+		objcopy objdump ranlib readelf size strings strip windmc windres
 	do
 		rm -f "${EPREFIX}"/usr/bin/${CTARGET}-${f} "${EPREFIX}"/usr/${CTARGET}/bin/${f}
 	done
