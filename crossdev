@@ -228,7 +228,7 @@ parse_target() {
 		avr*) KPKG="[none]"
 		      LCAT="dev-embedded"
 		      LPKG="avr-libc"
-		      GUSE+=" -fortran -go -pie nopie" # doesn't work
+		      GUSE+=" -fortran -go" # doesn't work
 		      MULTILIB_USE="yes" #377039
 		      BUSE+=" cxx"
 		      STAGE_DEFAULT=${STAGE_LIBC}
@@ -334,6 +334,10 @@ parse_target() {
 			;;
 	esac
 
+	# Target-specific defaults (workarounds for upstream bugs). User
+	# can override them by passing 'USE=foo crossdev ...'. Useful when
+	# one wants to fix upstream bugs.
+
 	local sanitizer_support=no
 	# Whitelist asan on explicitly supported arches for linux.
 	# Broken examples:
@@ -378,6 +382,36 @@ parse_target() {
 	esac
 	if [[ $vtv_support = "no" ]]; then
 		GUSE+=" -vtv"
+	fi
+
+	local pie_support=yes
+	# Blacklist rare targets that:
+	# 1. don't support -fPIC in compiler
+	# 2. have -fPIE broken
+	case ${CTARGET} in
+		# [1.]: no -fPIC flag support:
+		#       check as '$CC -fPIC -c -x c - </dev/null'
+		avr*|mmix*) pie_support=no;;
+		# [2.] mingw32 startup code is broken: bug #644930
+		mingw32|i686-w64-mingw32) pie_support=no;;
+	esac
+	if [[ $pie_support = "no" ]]; then
+		# pie is >=gcc-6, nopie is <gcc-6
+		GUSE+=" -pie nopie"
+	fi
+
+	local ssp_support=yes
+	# Blacklist rare targets that:
+	# 1. don't support -fstack-protector in compiler
+	# 2. have -fstack-protector broken
+	case ${CTARGET} in
+		# [1.]: no -fstack-protector flag support:
+		#       check as '$CC -fstack-protector -c -x c - </dev/null'
+		alpha*|avr*|hppa*|ia64*|mmix*|nios2*) ssp_support=no;;
+	esac
+	if [[ $ssp_support = "no" ]]; then
+		# ssp is >=gcc-6, nossp is <gcc-6
+		GUSE+=" -ssp nossp"
 	fi
 }
 
@@ -1089,8 +1123,8 @@ set_portage() {
 	case ${CTARGET} in
 		# avr requires multilib, that provides
 		# libgcc for all sub-architectures #378387
-		avr*)   set_use_force ${pkg} multilib -pie;
-			set_use_mask ${pkg} -multilib pie;;
+		avr*)   set_use_force ${pkg} multilib
+			set_use_mask ${pkg} -multilib;;
 		*-newlib|*-elf|*-eabi)
 			set_use_force ${pkg} multilib;
 			set_use_mask ${pkg} -multilib;;
