@@ -323,6 +323,7 @@ parse_target() {
 			KPKG="[none]"
 			STAGE_DEFAULT=${STAGE_LIBC}
 			GUSE+=" cxx -openmp" #489798
+			GUSE+=" -fortran" #589672, needs syscalls
 			MULTILIB_USE="yes" #407275
 			WITH_DEF_HEADERS="no"
 			;;
