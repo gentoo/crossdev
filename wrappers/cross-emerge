@@ -10,7 +10,7 @@ fi
 export CHOST
 
 EPREFIX="@GENTOO_PORTAGE_EPREFIX@"
-if [[ ${EPREFIX} == "@"GENTOO_PORTAGE_EPREFIX"@" ]] ; then
+if [ ${EPREFIX} = "@"GENTOO_PORTAGE_EPREFIX"@" ] ; then
 	EPREFIX=""
 fi
 
