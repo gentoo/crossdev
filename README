@@ -1,0 +1,281 @@
+What is crossdev
+----------------
+
+crossdev is a cross-compiler environment generator for Gentoo.
+
+It is useful for various purposes:
+
+- build cross-compiler toolchain for an operating system
+- build cross-compiler toolchain for embedded targets (bare metal)
+- cross-compile whole Gentoo on a new (or existing) target
+- cross-compile your favourite tool for every target out there
+  just to make sure it still compiles and works. Countless bugs
+  were found fixed like that :)
+
+Crossdev nano HOWTO
+-------------------
+
+So you want to cross-compile a Gentoo package (say busybox):
+
+# crossdev -t s390x-unknown-linux-gnu
+# (optional) ARCH=s390 PORTAGE_CONFIGROOT=/usr/s390x-unknown-linux-gnu eselect profile set default/linux/s390/17.0/s390x
+# USE=static s390x-unknown-linux-gnu emerge -v1 busybox
+# file /usr/s390x-unknown-linux-gnu/bin/busybox
+/usr/s390x-unknown-linux-gnu/bin/busybox: ELF 64-bit MSB executable, IBM S/390, version 1 (GNU/Linux), statically linked, for GNU/Linux 3.2.0, stripped
+
+Done!
+
+You can even use qemu-user to run this binary (or even chroot
+to /usr/s390x-unknown-linux-gnu!
+
+https://wiki.gentoo.org/wiki/Crossdev_qemu-static-user-chroot
+
+Supported platforms
+-------------------
+
+Cross-compilation is fairly well supported to linux targets.
+Windows is not too broken either.
+
+But prepare for rough corners. This doc will try to help you
+understand what crossdev does and does not do.
+
+A few examples of targets that worked today (produce running
+executables or kernels if applies):
+
+ aarch64-unknown-linux-gnu-7.3.0
+ alpha-unknown-linux-gnu-7.3.0
+ arm-none-eabi-7.3.0
+ armv5tel-softfloat-linux-gnueabi-7.3.0
+ armv7a-hardfloat-linux-gnueabi-7.3.0
+ armv7a-unknown-linux-gnueabi-7.3.0
+ avr-7.3.0
+ hppa-unknown-linux-gnu-7.3.0
+ hppa2.0-unknown-linux-gnu-7.3.0
+ hppa64-unknown-linux-gnu-7.3.0
+ i686-pc-gnu-7.3.0
+ i686-w64-mingw32-7.3.0
+ ia64-unknown-linux-gnu-7.3.0
+ m68k-unknown-linux-gnu-7.3.0
+ mips-unknown-linux-gnu-7.3.0
+ mips64-unknown-linux-gnu-7.3.0
+ mips64el-unknown-linux-gnu-7.3.0
+ mipsel-unknown-linux-gnu-7.3.0
+ mmix-7.3.0
+ nios2-unknown-linux-gnu-7.3.0
+ powerpc-unknown-linux-gnu-7.3.0
+ powerpc64-unknown-linux-gnu-7.3.0
+ powerpc64le-unknown-linux-gnu-7.3.0
+ s390-unknown-linux-gnu-7.3.0
+ s390x-unknown-linux-gnu-7.3.0
+ sh4-unknown-linux-gnu-7.3.0
+ sparc-unknown-linux-gnu-7.3.0
+ sparc64-unknown-linux-gnu-7.3.0
+ x86_64-HEAD-linux-gnu-7.3.0
+ x86_64-UNREG-linux-gnu-7.3.0
+ x86_64-pc-linux-gnu-7.3.0
+ x86_64-w64-mingw32-7.3.0
+
+A few more things are likely to Just Work
+and many more can be made work with a litle touch.
+
+How crossdev works (high-level overview)
+----------------------------------------
+
+crossdev is a tiny shell wrapper around emerge. Wrapper overrides
+a few variabled to aim emerge to another target.
+
+Crossdev leverages following features of portage (and ::gentoo ebulds):
+
+- ability to override ROOT=/usr/<target> to install cross-compiled
+  packages into a new root on a filesystem to avoid cluttering host.
+
+- ability to override PORTAGE_CONFIGROOT=/usr/<target> to untangle
+  from host's portage configuration.
+
+  Namely crossdev populates /usr/<target>/etc/portage/ with defaults
+  suitable for cross-compiling (ARCH, KERNEL, ELIBC variables and so on).
+  You can change all of it.
+
+- set CBUILD/CHOST/CTARGET variables accordingly to force build
+  system into cross-compiling mode. For autotools-based system
+  it means running the following configure script:
+    ./configure --build=${CBUILD} --host=${CHOST} --target=${CTARGET}
+
+If toolchains were simple programs crossdev would be a one-liner script:
+
+  ARCH=...    \
+  CBUILD=...  \
+  CHOST=...   \
+  CTARGET=... \
+  ROOT=...    \
+      emerge "$@"
+
+Unfortunately todays' toolchains have loops in their build-time dependencies:
+
+- cross-compiler itself normally needs a libc built for <target> because
+  libc defines various aspects of userland ABI and features provided.
+- and libc for <target> needs a cross-comiler because it's written in C
+
+That's where crossdev comes in useful. It unties this vicious compiler<->libc
+circle by carefully rinning the following emerge commands (assume s390x-linux
+example).
+
+Here is what crossdev actually does:
+
+1. create an overlay with new ebuilds (symlinks to existing ebuilds)
+2. build cross-binutils
+    $ emerge cross-s390x-unknown-linux-gnu/binutils
+3. Install minimal set of system headers (kernel and libc)
+   $ USE="headers-only" emerge cross-s390x-unknown-linux-gnu/linux-headers
+   $ USE="headers-only" emerge cross-s390x-unknown-linux-gnu/glibc
+4. Build minimal GCC without libc support (not able link final executables yet)
+   $ USE="-*" emerge cross-s390x-unknown-linux-gnu/gcc
+5. Build complete libc
+   $ USE="-headers-only" emerge cross-s390x-unknown-linux-gnu/linux-headers
+   $ USE="-headers-only" emerge cross-s390x-unknown-linux-gnu/glibc
+6. Build full GCC (able to link final binaries and can do c++)
+   $ USE="" emerge cross-s390x-unknown-linux-gnu/gcc
+
+Done!
+
+How crossdev works (more details)
+---------------------------------
+
+This section contains more details on what actually happens.
+Here we expand on each step briefly outlined in previous section:
+
+1. create an overlay with new ebuilds (symlinks to existing ebuilds)
+   <skipping actual commands>. After this step the outcomes are:
+
+   - overlay layout is formed:
+
+     $ ls -l cross-overlay/cross-s390x-unknown-linux-gnu
+     binutils -> /gentoo-ebuilds/gentoo/sys-devel/binutils
+     gcc -> /gentoo-ebuilds/gentoo/sys-devel/gcc
+     glibc -> /gentoo-ebuilds/gentoo/sys-libs/glibc
+     linux-headers -> /gentoo-ebuilds/gentoo/sys-kernel/linux-headers
+
+   - /usr/cross-s390x-unknown-linux-gnu (aka $SYSROOT) layout is set:
+
+     $ ls -l /usr/s390x-unknown-linux-gnu/etc/portage/
+     make.conf
+     make.profile -> /gentoo-ebuilds/gentoo/profiles/embedded
+     profile/
+
+     Here we override ARCH, LIBC, KERNEL, CBUILD, CHOST, CTARGET and a
+     few other variables.
+
+
+   - a few convenience wrappers are created:
+
+     /usr/bin/s390x-unknown-linux-gnu-emerge -> cross-emerge
+     /usr/bin/s390x-unknown-linux-gnu-pkg-config -> cross-pkg-config
+     /usr/bin/s390x-unknown-linux-gnu-fix-root -> cross-fix-root
+
+   This way we share ebuild code and still can install cross-compilers
+   independently. Each with it's owv version of libc.
+
+2. build cross-binutils
+   $ emerge cross-s390x-unknown-linux-gnu/binutils
+
+   This way we can install the same version of binutils aiming different
+   targets. As a result we get tools like:
+   s390x-unknown-linux-gnu-ar (static library archiver)
+   s390x-unknown-linux-gnu-as (assembler)
+   s390x-unknown-linux-gnu-ld (linker)
+   ... <many others>
+
+   Nothing special here.
+
+3. Install minimal set of system headers (kernel and libc)
+   $ USE="headers-only" emerge cross-s390x-unknown-linux-gnu/linux-headers
+   $ USE="headers-only" emerge cross-s390x-unknown-linux-gnu/glibc
+
+   As we don't have cross-compiler yet we just copy a bunch on
+   header files into
+       /usr/s390x-unknown-linux-gnu/usr/include
+   and setup symlinks like:
+       /usr/s390x-unknown-linux-gnu/sys-include -> usr/include
+   to make cross-gcc happy.
+
+   These symlinks are target-dependent. A few unusual examples:
+
+   - windows (mingw): /usr/x86_64-w64-mingw32/mingw -> usr
+   - hurd: /usr/i686-pc-gnu/include -> usr/include
+   - DOS (didn't try yet): /usr/i686-pc-gnu/dev/env/DJDIR/include -> ../../../usr/include
+
+   Side note: we could have omited symlink creation completely
+   and build gcc with parameter:
+     --with-native-system-header-dir=${EPREFIX}/usr/include
+   That way ${SYSROOT} would be even more like normal root.
+   Worth a try this one line :)
+
+4. Build minimal GCC without libc support (not able link final executables yet)
+   $ USE="-*" emerge cross-s390x-unknown-linux-gnu/gcc
+
+   Here gcc uses headers from step [3.] to find out what
+   target libc can do:
+
+   - POSIX support
+   - trigonometry functions
+   - threading
+   - vital constants
+
+   As a result we only get C code generator. No knowledge
+   of how to link executables or shared libraries as those
+   require bits of libc.
+
+   For tiniest targets (bare-metal) this can be a final step to get basic toolchain.
+
+5. Build complete libc
+   $ USE="-headers-only" emerge cross-s390x-unknown-linux-gnu/linux-headers
+   $ USE="-headers-only" emerge cross-s390x-unknown-linux-gnu/glibc
+
+   Here we rebuild full libc against system headers. As a result we get C startup
+   files and can link full programs!
+
+6. Build full GCC (able to link final binaries and can do c++)
+   $ USE="" emerge cross-s390x-unknown-linux-gnu/gcc
+
+   Here we get full c++ support, various default flags enabled (pie, sanitizers,
+   stack protectors and many other things).
+
+   This thing is ready for large-scale operations.
+
+Various notes (AKA dirty little tricks)
+---------------------------------------
+
+- config.site
+
+  Some ./configure scripts rely on runtime feature testing. We would
+  still like to enable things even in cross-environment.
+
+  crossdev installs /usr/share/config.site with a bunch of cache
+  variables preset for targets. It might be a nice place to drop
+  more things into. Or a source of all your cross-compilation
+  problems :)
+
+- eclass inheritance
+
+  To find out various things about target crossdev loads multilib.eclass
+  and tries to find out default ABI supported by the target.
+
+- crossdev is just a tiny shell script around emerge :)
+
+  It's full source code of comparable to the size of this README.
+
+- USE=headers-only
+
+  Many toolchain ebuilds (mostly libcs and kernel headers) are aware
+  of headers-only install specifically for crossdev and similar tools
+  to be able to build cross-toolchains.
+
+- How to test crossdev layout generation:
+
+  $ mkdir -p foo
+  $ PORTAGE_CONFIGROOT=$(pwd)/foo EPREFIX=$(pwd)/foo ./crossdev -t mmix -P -p
+
+  This needs some local patching. TODO: fix it to Just Work (perhaps with
+  additional --test options).
+
+Happy cross-compiling!
