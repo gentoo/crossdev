@@ -38,7 +38,11 @@ cross_wrap_etc()
 
 	cp -a "${PREFIX}"/share/crossdev/etc ${SYSROOT}/     || return 1
 
-	local conf=${SYSROOT}/etc/portage/make.conf
+	local confs=(
+		${SYSROOT}/etc/portage/make.conf
+		${SYSROOT}/etc/portage/profile/make.defaults
+		${SYSROOT}/etc/portage/profile/use.force
+	)
 
 	# Re-use existing CHOST->portage ARCH mapping code
 	ARCH=$(
@@ -58,12 +62,25 @@ cross_wrap_etc()
 	*)        emit_setup_warning "No LIBC is known for this target." ;;
 	esac
 
+	KERNEL="__KERNEL__"
+	case ${CHOST} in
+	*linux*)  KERNEL=linux ;;
+	*)        emit_setup_warning "No KERNEL is known for this target." ;;
+	esac
+	if [[ -n ${KERNEL} ]]; then
+		USE_FORCE_KERNEL="kernel_${KERNEL}"
+	else
+		USE_FORCE_KERNEL=""
+	fi
+
 	sed -i \
 		-e "s:__LIBC__:${LIBC}:g" \
 		-e "s:__ARCH__:${ARCH}:g" \
+		-e "s:__KERNEL__:${KERNEL}:g" \
+		-e "s:__USE_FORCE_KERNEL__:${USE_FORCE_KERNEL}:g" \
 		-e "s:__CHOST__:${CHOST}:g" \
 		-e "s:__CBUILD__:${CBUILD}:g" \
-		"${conf}"
+		"${confs[@]}"
 
 	# Try to figure out the libc version & os headers to avoid installing over top of it.
 	# XXX: Would be nice to use virtual/libc and virtual/os-headers here ...

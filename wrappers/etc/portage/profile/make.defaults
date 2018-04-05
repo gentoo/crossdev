@@ -1,0 +1,3 @@
+ARCH="__ARCH__"
+KERNEL="-linux __KERNEL__"
+ELIBC="__LIBC__"
