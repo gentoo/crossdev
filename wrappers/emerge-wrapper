@@ -67,6 +67,7 @@ cross_wrap_etc()
 
 	# Try to figure out the libc version & os headers to avoid installing over top of it.
 	# XXX: Would be nice to use virtual/libc and virtual/os-headers here ...
+	# TODO: this does not work as crossdev calls --init before any packages are installed
 	cd "${SYSROOT}/etc/portage"
 	mkdir -p profile
 	qlist -ICv "cross-${CHOST}/" | \
