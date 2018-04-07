@@ -538,7 +538,7 @@ uninstall() {
 		gcc-{ar,nm,ranlib} gccbug gcov-{dump,tool} gprof ld nm \
 		objcopy objdump ranlib readelf size strings strip windmc windres
 	do
-		rm -f "${EPREFIX}"/usr/bin/${CTARGET}-${f} "${EPREFIX}"/usr/${CTARGET}/bin/${f}
+		rm -f "${EPREFIX}"/usr/bin/${CTARGET}-${f}
 	done
 	rm -f "${EPREFIX}"/usr/${CTARGET}/{sys-include,usr}
 	rmdir "${EPREFIX}"/usr/${CTARGET}/{include/asm,include} 2>/dev/null
