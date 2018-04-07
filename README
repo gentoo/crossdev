@@ -117,7 +117,7 @@ Unfortunately todays' toolchains have loops in their build-time dependencies:
 - and libc for <target> needs a cross-comiler because it's written in C
 
 That's where crossdev comes in useful. It unties this vicious compiler<->libc
-circle by carefully rinning the following emerge commands (assume s390x-linux
+circle by carefully running the following emerge commands (assume s390x-linux
 example).
 
 Here is what crossdev actually does:
