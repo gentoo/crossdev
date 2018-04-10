@@ -1248,6 +1248,20 @@ hr
 xmkdir -p "${EPREFIX}"/usr/${CTARGET}
 emerge-wrapper --target ${CTARGET} --init || exit 1
 
+#############################################################
+### Create directories usually created by sys-apps/baselayout
+###
+### Why we do that at all:
+### For multilib-aware targets (ppc64, s390x, sparc64, x86_64) Gentoo
+### normally uses libdir=lib64.
+### For crossdev it means /lib and /usr/lib does not get created at all
+### but gcc relies on their presence by refering to =/lib64 as
+### =/usr/lib/../lib64 when builds itself (see https://bugs.gentoo.org/652724)
+###
+### Thus we create non-symlinked layout early.
+xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib
+xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib
+
 #################
 emerged_with_use() {
 	local pkg=$1 use=$2
