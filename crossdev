@@ -393,7 +393,8 @@ parse_target() {
 		#       check as '$CC -fPIC -c -x c - </dev/null'
 		avr*|mmix*) pie_support=no;;
 		# [2.] mingw32 startup code is broken: bug #644930
-		mingw32|i686-w64-mingw32) pie_support=no;;
+		#      at least on i686-w64-mingw32 and x86_64-w64-mingw32
+		mingw*|*-mingw*) pie_support=no;;
 	esac
 	if [[ $pie_support = "no" ]]; then
 		# pie is >=gcc-6, nopie is <gcc-6
