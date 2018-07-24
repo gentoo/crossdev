@@ -50,8 +50,7 @@ executables or kernels if applies):
  alpha-unknown-linux-gnu-7.3.0
  arm-none-eabi-7.3.0
  armv5tel-softfloat-linux-gnueabi-7.3.0
- armv7a-hardfloat-linux-gnueabi-7.3.0
- armv7a-unknown-linux-gnueabi-7.3.0
+ armv7a-unknown-linux-gnueabihf-7.3.0
  avr-7.3.0
  hppa-unknown-linux-gnu-7.3.0
  hppa2.0-unknown-linux-gnu-7.3.0
