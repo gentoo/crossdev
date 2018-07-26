@@ -25,6 +25,7 @@ config_site_names() {
 	case ${CHOST} in
 	*-linux-*)           sites="${sites} linux ${site_arch}-linux" ;;
 	*-darwin*)           sites="${sites} darwin ${site_arch}-darwin" ;;
+	mingw*|*-mingw*)     sites="${sites} mingw ${site_arch}-mingw" ;;
 	esac
 
 	case ${CHOST} in

@@ -1,0 +1,2 @@
+# prevent use of wine to convert windows/unix pathnames
+lt_cv_to_host_file_cmd=func_convert_file_noop
