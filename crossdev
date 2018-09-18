@@ -397,13 +397,14 @@ parse_target() {
 		# [2.] mingw32 startup code is broken: bug #644930
 		#      at least on i686-w64-mingw32 and x86_64-w64-mingw32
 		mingw*|*-mingw*) pie_support=no;;
-		# Some bare-metal targets don't work with pie as-is
+		# Many bare-metal targets don't work with pie as-is
 		*-elf|*-eabi)
-			case ${CTARGET} in
-				# mips can't generate freestanding PIC:
-				#   cc1: error: position-independent code requires ‘-mabicalls’
-				mips*) pie_support=no;;
-			esac
+			# mips can't generate freestanding PIC:
+			#   cc1: error: position-independent code requires ‘-mabicalls’
+			# arm firmware packages don't expect pie-by-default:
+			#   https://lists.gnupg.org/pipermail/gnuk-users/2018-August/000086.html
+			#   https://github.com/gl-sergei/u2f-token/issues/14
+			pie_support=no
 			;;
 	esac
 	if [[ $pie_support = "no" ]]; then
