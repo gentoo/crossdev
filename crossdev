@@ -280,13 +280,13 @@ parse_target() {
 		      LPKG="newlib";;
 		ppu*) TARCH=ppc64;;
 
-		mips64*-gnuabin32)
+		mips64*-gnuabin32|mipsisa64*-gnuabin32)
 		      [[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="n32";;
-		mips64*-gnuabi64|\
-		mips64*-gnuabin64)
+		mips64*-gnuabi64|mipsisa64*-gnuabi64|\
+		mips64*-gnuabin64|mipsisa64*-gnuabin64)
 		      [[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="n64";;
-		mips64*-gnuabi32|\
-		mips64*-gnuabio32)
+		mips64*-gnuabi32|mipsisa64*-gnuabi32|\
+		mips64*-gnuabio32|mipsisa64*-gnuabio32)
 		      [[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="o32";;
 		ee*)  TARCH=mips;
 		      KPKG="[none]"
@@ -351,7 +351,7 @@ parse_target() {
 		# glibc targets
 		*-gnu*)
 			case ${CTARGET} in
-				mips64*)
+				mips64*|mipsisa64*)
 					# has some support code, fails to build
 					;;
 				x86_64*|i?86*|arm*|aarch64*|powerpc*)
