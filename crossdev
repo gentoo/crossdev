@@ -365,7 +365,7 @@ parse_target() {
 	fi
 
 	local vtv_support=no
-	# Whitelist asan on explicitly supported arches for linux.
+	# Whitelist vtv on explicitly supported arches for linux.
 	# Broken examples:
 	# - musl libc
 	# - bare metal targets
