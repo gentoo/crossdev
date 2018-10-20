@@ -8,3 +8,4 @@ PREFIX ?= $(EPREFIX)/usr
 
 INSTALL_DIR  = install -m 755 -d
 INSTALL_EXEC = install -m 755
+INSTALL_DATA = install -m 644

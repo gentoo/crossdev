@@ -2,7 +2,11 @@
 # Copyright 2009-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
+# provided by crossdev
 SITEDIR="@SITEDIR@"
+
+# user override
+ETC_SITEDIR="@ETC_SITEDIR@"
 
 config_site_arch() {
 	local host="${CHOST%%-*}"
@@ -41,6 +45,7 @@ config_site_names() {
 
 	for x in ${sites} ${CHOST}; do
 		[ -e "${SITEDIR}/${x}" ] && echo "${SITEDIR}/${x}"
+		[ -e "${ETC_SITEDIR}/${x}" ] && echo "${ETC_SITEDIR}/${x}"
 	done
 }
 
