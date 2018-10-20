@@ -8,14 +8,14 @@ FNAMES = cross-emerge  cross-fix-root  cross-pkg-config  emerge-wrapper
 SITE = $(PREFIX)/share/crossdev/include/site
 
 all:
-	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" cross-emerge
-	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" emerge-wrapper
-	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" etc/portage/make.conf
 
 install:
 	$(INSTALL_DIR) $(DESTDIR)/$(PREFIX)/bin/ $(DESTDIR)/$(SITE)
 	$(INSTALL_EXEC) $(FNAMES) $(DESTDIR)/$(PREFIX)/bin/
+	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" $(DESTDIR)/$(PREFIX)/bin/cross-emerge
+	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" $(DESTDIR)/$(PREFIX)/bin/emerge-wrapper
 	cp -a etc $(DESTDIR)/$(PREFIX)/share/crossdev/
+	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" $(DESTDIR)/$(PREFIX)/share/crossdev/etc/portage/make.conf
 	cp -a site $(DESTDIR)/$(PREFIX)/share/crossdev/include/
 	sed -i -e s@__PREFIX__@$(PREFIX)@g $(DESTDIR)/$(PREFIX)/bin/emerge-wrapper
 	sed -i -e s@__TOPDIR__@$(SITE)@g $(DESTDIR)/$(SITE)/config.site
