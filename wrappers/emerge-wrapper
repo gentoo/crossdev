@@ -13,9 +13,9 @@ if [[ $1 == "--help" || $1 == "-h" ]] ; then
 	exit 0
 fi
 
-PREFIX="__PREFIX__"
+PREFIX="@PREFIX@"
 # Enable this script to be manually installed while debugging
-[[ ${PREFIX} == \_\_\P\R\E\F\I\X\_\_ ]] && PREFIX="/usr"
+[[ ${PREFIX} == "@"PREFIX"@" ]] && PREFIX="/usr"
 
 err() { echo "emerge-wrapper: $*" 1>&2; exit 1; }
 
