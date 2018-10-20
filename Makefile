@@ -6,9 +6,9 @@ include settings.mk
 all:
 
 install:
-	$(INSTALL_DIR) $(DESTDIR)/$(PREFIX)/bin/
-	$(INSTALL_EXEC) crossdev $(DESTDIR)/$(PREFIX)/bin/
-	sed -i -e "s:@GENTOO_PORTAGE_EPREFIX@:$(EPREFIX):g" $(DESTDIR)/$(PREFIX)/bin/crossdev
+	$(INSTALL_DIR) $(DESTDIR)$(PREFIX)/bin/
+	$(INSTALL_EXEC) crossdev $(DESTDIR)$(PREFIX)/bin/
+	sed -i -e "s:@GENTOO_PORTAGE_EPREFIX@:$(EPREFIX):g" $(DESTDIR)$(PREFIX)/bin/crossdev
 	$(MAKE) -C wrappers install
 
 PV = $(shell test -e .git && date --date="`git log -1 --format=%ci`" +%Y%m%d)

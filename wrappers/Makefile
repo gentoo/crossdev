@@ -10,16 +10,16 @@ SITE = $(PREFIX)/share/crossdev/include/site
 all:
 
 install:
-	$(INSTALL_DIR) $(DESTDIR)/$(PREFIX)/bin/ $(DESTDIR)/$(SITE)
-	$(INSTALL_EXEC) $(FNAMES) $(DESTDIR)/$(PREFIX)/bin/
-	sed -i -e "s:@GENTOO_PORTAGE_EPREFIX@:$(EPREFIX):g" $(DESTDIR)/$(PREFIX)/bin/cross-emerge
-	sed -i -e "s:@GENTOO_PORTAGE_EPREFIX@:$(EPREFIX):g" $(DESTDIR)/$(PREFIX)/bin/emerge-wrapper
-	cp -a etc $(DESTDIR)/$(PREFIX)/share/crossdev/
-	sed -i -e "s:@GENTOO_PORTAGE_EPREFIX@:$(EPREFIX):g" $(DESTDIR)/$(PREFIX)/share/crossdev/etc/portage/make.conf
-	cp -a site $(DESTDIR)/$(PREFIX)/share/crossdev/include/
-	sed -i -e s:@PREFIX@:$(PREFIX):g $(DESTDIR)/$(PREFIX)/bin/emerge-wrapper
-	sed -i -e s:@TOPDIR@:$(SITE):g $(DESTDIR)/$(SITE)/config.site
-	mv $(DESTDIR)/$(SITE)/config.site $(DESTDIR)/$(PREFIX)/share/
-	ln -sf $(PORTDIR)/profiles/embedded $(DESTDIR)/$(PREFIX)/share/crossdev/etc/portage/make.profile
+	$(INSTALL_DIR) $(DESTDIR)$(PREFIX)/bin/ $(DESTDIR)$(SITE)
+	$(INSTALL_EXEC) $(FNAMES) $(DESTDIR)$(PREFIX)/bin/
+	sed -i -e "s:@GENTOO_PORTAGE_EPREFIX@:$(EPREFIX):g" $(DESTDIR)$(PREFIX)/bin/cross-emerge
+	sed -i -e "s:@GENTOO_PORTAGE_EPREFIX@:$(EPREFIX):g" $(DESTDIR)$(PREFIX)/bin/emerge-wrapper
+	cp -a etc $(DESTDIR)$(PREFIX)/share/crossdev/
+	sed -i -e "s:@GENTOO_PORTAGE_EPREFIX@:$(EPREFIX):g" $(DESTDIR)$(PREFIX)/share/crossdev/etc/portage/make.conf
+	cp -a site $(DESTDIR)$(PREFIX)/share/crossdev/include/
+	sed -i -e s:@PREFIX@:$(PREFIX):g $(DESTDIR)$(PREFIX)/bin/emerge-wrapper
+	sed -i -e s:@TOPDIR@:$(SITE):g $(DESTDIR)$(SITE)/config.site
+	mv $(DESTDIR)$(SITE)/config.site $(DESTDIR)$(PREFIX)/share/
+	ln -sf $(PORTDIR)/profiles/embedded $(DESTDIR)$(PREFIX)/share/crossdev/etc/portage/make.profile
 
 .PHONY: all install
