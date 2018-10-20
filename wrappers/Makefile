@@ -6,7 +6,6 @@ include ../settings.mk
 PORTDIR ?= $(shell portageq envvar PORTDIR)
 FNAMES = cross-emerge  cross-fix-root  cross-pkg-config  emerge-wrapper
 SITE = $(PREFIX)/share/crossdev/include/site
-TOPDIR =
 
 all:
 	sed -i -e "s,@GENTOO_PORTAGE_EPREFIX@,$(EPREFIX),g" cross-emerge
