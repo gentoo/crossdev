@@ -308,8 +308,8 @@ parse_target() {
 		*-dietlibc) LPKG="dietlibc"; LCAT="dev-libs";;
 		*-gnu*)     LPKG="glibc";;
 		*-klibc)    LPKG="klibc";;
-		*-uclibc*)  LPKG="uclibc";;
-		*-uclinux)  LPKG="uclibc";;
+		*-uclibc*)  LPKG="uclibc-ng";;
+		*-uclinux)  LPKG="uclibc-ng";;
 		*-musl*)    LPKG="musl";;
 
 		# Windows targets
