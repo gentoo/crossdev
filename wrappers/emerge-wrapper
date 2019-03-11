@@ -65,6 +65,7 @@ cross_wrap_etc()
 	KERNEL="__KERNEL__"
 	case ${CHOST} in
 	*linux*)  KERNEL=linux ;;
+	*mingw*)  KERNEL=Winnt ;;
 	*)        emit_setup_warning "No KERNEL is known for this target." ;;
 	esac
 	if [[ -n ${KERNEL} ]]; then
