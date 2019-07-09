@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2008-2011 Gentoo Foundation
+# Copyright 2008-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 if [ -z "${CHOST}" ] ; then
@@ -9,14 +9,15 @@ if [ -z "${CHOST}" ] ; then
 fi
 export CHOST
 
-EPREFIX="@GENTOO_PORTAGE_EPREFIX@"
-if [ "${EPREFIX}" = "@"GENTOO_PORTAGE_EPREFIX"@" ] ; then
-	EPREFIX=""
+BROOT="@GENTOO_PORTAGE_EPREFIX@"
+if [ "${BROOT}" = "@"GENTOO_PORTAGE_EPREFIX"@" ] ; then
+	BROOT=""
 fi
 
-: ${SYSROOT=${EPREFIX}/usr/${CHOST}}
-: ${PORTAGE_CONFIGROOT=${SYSROOT}}
-export SYSROOT PORTAGE_CONFIGROOT
+: ${EPREFIX=}
+: ${SYSROOT=${BROOT}/usr/${CHOST}}
+: ${PORTAGE_CONFIGROOT=${SYSROOT}${EPREFIX}}
+export EPREFIX SYSROOT PORTAGE_CONFIGROOT
 
 if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
 	echo "cross-emerge: CHOST is not set properly"
