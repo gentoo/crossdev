@@ -24,7 +24,7 @@ emit_setup_warning()
 	if ! ${setup_warning} ; then
 		setup_warning=true
 		echo "!!! WARNING - Cannot auto-configure CHOST ${CHOST};"
-		echo "!!! You should edit ${conf}"
+		echo "!!! You should edit ${confs[*]}"
 		echo "!!! by hand to complete your configuration."
 	fi
 	echo "!!!  $*"
