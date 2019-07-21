@@ -1,0 +1,22 @@
+certificate version 0.1
+pusher 21C632129C6D7DE4 1563716504 +0100
+pushee git+ssh://git.gentoo.org/proj/crossdev.git
+nonce 1563716504-08dc91032434dca8f98f4f5c5aa6c5e4f1dae23b
+
+2652a5494f4910700b18298796f7f7fefdf0ba78 cd2aa636cc5d0476bff29d50fbaab7591b48903e refs/heads/master
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEPxcZ3tkwcedKm2a8EiZBXQDdMTcFAl00a5gACgkQEiZBXQDd
+MTeyRQ//SCuB7KSkyEP4s6f+uXpxB+5mxhRZXaKXmPnWzMWzlM+lYhCUE/XtyqnQ
+Rk8QVvzY63DXEeBy4uwRNlIZIDQG5mPzidrDQgLj7rp+GT1lGq3JmBxk5E+5wh/r
+tilhtX6Mjoi+GnupuRU5N0r5+qFl+JE05FIeLMMvQqPsgt72z6x/9NbFu5xlMTUb
+P+Jp4uH4FzNE9SzlPn6xd3ND7CzpASwZ6V2UXucGzGlLjDVDQIsBCZiV2nVvBQBw
+ngdAuaTkSYDFEC6btu4IwGQBwZ2w2tHTvyzdHamjBcHbGBMH0QWvxpv6Jek1DW0c
+4za4tIH3YrpT78cFnL6pMHLCxevF9m6lDzGYtQjZCvfcSogprtx2mC1ibTtoenqh
+XRlzUdQbiobXcc3YlmGnUFEJkFoczzjZh128IniSd4LPrgPc+X4ue0PuOPZyNijQ
+0ghkGvvF5fEHw8ocwOEnDSQexiPz4JOBYFBysxpJ9xBIBHkVuuay5wWIfceOURtP
+pWau2YrFUe8C3zS+G3KbHIWljxxt8wmZOEd7xnSWnxbzoun5UeSj/VOu9f//1Uz9
+wbZH2TpouOS/tMGM0ZQr0MUp85r4RC+y/YHLgviuOHV39bYDr9mtq3SHnwSygBrc
+TUhpGxV7ZhTt4oX9bSuuabDJqwQbGIjoQ6Qq45AdoCxXnIuHZF0=
+=XwHE
+-----END PGP SIGNATURE-----
