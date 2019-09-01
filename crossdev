@@ -110,7 +110,13 @@ STAGE_C_KERNEL=2
 STAGE_LIBC=3
 STAGE_C_CPP=4
 STAGE_DEFAULT=${STAGE_C_CPP}
-STAGE_DISP=( "binutils" "C compiler only" "kernel headers" "C compiler & libc" "C/C++ compiler" )
+STAGE_DISP=(
+	"binutils"
+	"C compiler only"
+	"kernel headers"
+	"C compiler & libc"
+	"C/C++ compiler"
+)
 
 parse_target() {
 	CTARGET=${1#cross-}
