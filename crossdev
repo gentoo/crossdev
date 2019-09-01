@@ -708,7 +708,14 @@ GUSE_DISABLE="-boundschecking -d -gcj -gtk -libffi -mudflap -objc -objc++ -objc-
 # These are disabled only for stage1 gcc. Normally need libc present.
 GUSE_DISABLE_STAGE_1="${GUSE_DISABLE} -fortran -go -jit -cxx -mpx -openmp -sanitize -vtv"
 GUSE_DISABLE_STAGE_2="${GUSE_DISABLE}"
-WITH_HEADERS="COW"   WITH_DEF_HEADERS="yes" #227065 gcc-4.3+ is a pita w/out headers
+
+# Past history of WITH_DEF_HEADERS:
+# - ????-2005: "no"
+# - 2005-2019: "yes": #227065 gcc-4.3+ is a pita w/out headers
+# - 2019-????: "no" again: glibc does not really support headers install
+#              at least on riscv-*: #686248
+WITH_HEADERS="COW"
+WITH_DEF_HEADERS="no"
 EX_FAST="no"
 EX_GCC="no"
 EX_GDB="no"
