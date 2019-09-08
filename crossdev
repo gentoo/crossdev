@@ -264,11 +264,15 @@ parse_target() {
 		# these are the mingw64 targets that binutils seems to use
 		x86_64-*-mingw*|*-w64-mingw*)
 		      KPKG="[none]";
-		      LCAT="dev-util"; LPKG="mingw64-runtime";;
+		      LCAT="dev-util"; LPKG="mingw64-runtime"
+		      WITH_DEF_HEADERS="yes" # gcc can't boot without headers: bug #693770
+		      ;;
 
 		mingw*|*-mingw*)
 		      KCAT="dev-util"; KPKG="w32api";
-		      LCAT="dev-util"; LPKG="mingw-runtime";;
+		      LCAT="dev-util"; LPKG="mingw-runtime"
+		      WITH_DEF_HEADERS="yes" # gcc can't boot without headers: bug #693770
+		      ;;
 
 		msp430*)
 		      BVER=">=2.24.90";
