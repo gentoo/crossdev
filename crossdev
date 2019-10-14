@@ -269,9 +269,8 @@ parse_target() {
 		      ;;
 
 		mingw*|*-mingw*)
-		      KCAT="dev-util"; KPKG="w32api";
-		      LCAT="dev-util"; LPKG="mingw-runtime"
-		      WITH_DEF_HEADERS="yes" # gcc can't boot without headers: bug #693770
+		      # bug #584858
+		      die "'${CTARGET}' target is not supported anymore, use i686-w64-mingw32"
 		      ;;
 
 		msp430*)
