@@ -144,7 +144,6 @@ parse_target() {
 		   - avr      http://www.nongnu.org/avr-libc/
 		   - bfin     http://blackfin.uclinux.org/
 		   - h8300    http://h8300-hms.sourceforge.net/
-		   - mingw32  http://www.mingw.org/
 		   - mingw64  http://mingw-w64.sourceforge.net/
 		   - mmix     http://www-cs-faculty.stanford.edu/~knuth/mmix.html
 		   - msp430   http://www.ti.com/msp430
