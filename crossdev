@@ -150,7 +150,6 @@ parse_target() {
 		   - nds32    http://github.com/nds32
 		   - nios2    http://www.altera.com/products/ip/processors/nios2/ni2-index.html
 		   - xc16x    http://www.infineon.com/
-		   - ee / iop / dvp (ps2) [Playstation 2 targets]
 		   - ppu / spu (cell) [Cell/Playstation 3 targets]
 		Softfloat toolchains:
 		   Include 'softfloat' in the 'vendor' field
@@ -166,7 +165,6 @@ parse_target() {
 		case ${CTARGET} in
 			cell)    aliases=( ppu spu-elf );;
 			mingw64) aliases=( x86_64-w64-mingw32 );;
-			ps2)     aliases=( ee iop dvp );;
 		esac
 		if [[ ${#aliases[@]} -eq 1 ]] ; then
 			CTARGET=${aliases[0]}
@@ -297,18 +295,6 @@ parse_target() {
 		mips64*-gnuabi32|mipsisa64*-gnuabi32|\
 		mips64*-gnuabio32|mipsisa64*-gnuabio32)
 		      [[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="o32";;
-		ee*)  TARCH=mips;
-		      KPKG="[none]"
-		      GVER="3.2.2"; BVER="2.14";
-		      STAGE_DEFAULT=${STAGE_C_ONLY};
-		      GUSE=${GUSE_DISABLE_STAGE_1};;
-		iop*) TARCH=mips;
-		      GVER="3.2.2"; BVER="2.14";
-		      STAGE_DEFAULT=${STAGE_C_ONLY};
-		      GUSE=${GUSE_DISABLE_STAGE_1};;
-		dvp*) TARCH=mips;
-		      GVER="3.2.2"; BVER="2.14";
-		      STAGE_DEFAULT=${STAGE_BINUTILS};;
 	esac
 
 	# Tweak packages based upon CTARGET
