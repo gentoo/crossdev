@@ -941,7 +941,7 @@ einfo "Target System:         ${CTARGET}"
 einfo "Stage:                 ${STAGE} (${STAGE_DISP[${STAGE}]})"
 einfo "USE=multilib:          ${MULTILIB_USE}"
 [[ ${DEFAULT_ABI} != "${MULTILIB_ABIS}" ]] && def_out=" (default: ${DEFAULT_ABI})" || def_out=
-einfo "ABIs:                  ${MULTILIB_ABIS}${def_out}"
+einfo "Target ABIs:           ${MULTILIB_ABIS}${def_out}"
 echo
 ex_fast || {
 is_s0 && {
