@@ -486,6 +486,7 @@ show_repo_cfg() {
 setup_portage_vars() {
 	local arch=${ARCH} arch_set=${ARCH+set}
 	local chost=${CHOST} chost_set=${CHOST+set}
+	local abi
 	unset ARCH CHOST
 	eval $(portageq envvar -v PORT_LOGDIR PORTAGE_TMPDIR ARCH CHOST)
 	parse_repo_config
@@ -495,6 +496,17 @@ setup_portage_vars() {
 	[[ ${arch_set} == "set" ]] && ARCH=${arch} || unset ARCH
 	HCHOST=${CHOST}
 	[[ ${chost_set} == "set" ]] && CHOST=${chost} || unset CHOST
+
+	# Collect all CHOST* visible for for host. We need to make sure
+	# not to clobber any of native CHOSTs.
+	HCHOSTS=(${HCHOST})
+	for abi in $(portageq envvar ABI MULTILIB_ABIS DEFAULT_ABI); do
+		HCHOSTS+=($(portageq envvar CHOST_${abi}))
+	done
+	# uniq
+	HCHOSTS=(
+		$(printf "%s\n" "${HCHOSTS[@]}" | sort -u)
+	)
 
 	# see if user told us where to write things, otherwise
 	# set up some repos.conf magic if possible.  if not,
@@ -682,6 +694,7 @@ UOPTS=
 TARCH=
 HARCH=
 HCHOST=
+HCHOSTS=()
 CTARGET=
 MULTILIB_ABIS="default"
 MULTILIB_USE=""
@@ -844,6 +857,15 @@ if [[ ${HCHOST} == "${CTARGET}" ]] ; then
 	exit 1
 fi
 
+for hchost in "${HCHOSTS[@]}"; do
+	if [[ ${hchost} == "${CTARGET}" ]] ; then
+		eerror "Refusing to create a cross-compiler using the same"
+		eerror "target name as your host utils."
+		eerror "Consider using sys-devel/multilib-gcc-wrapper package."
+		exit 1
+	fi
+done
+
 # grab user settings
 d="${CONFIGROOT}/crossdev/${CTARGET}"
 for v in MULTILIB_ABIS USE BVER GVER KVER LVER STAGE CFLAGS LDFLAGS ASFLAGS ; do
@@ -935,7 +957,7 @@ info() {
 hr -
 einfo "crossdev version:      ${CROSSDEV_VER}"
 einfo "Host Portage ARCH:     ${HARCH}"
-einfo "Host Portage System:   ${HCHOST}"
+einfo "Host Portage System:   ${HCHOST} (${HCHOSTS[*]})"
 einfo "Target Portage ARCH:   ${TARCH}"
 einfo "Target System:         ${CTARGET}"
 einfo "Stage:                 ${STAGE} (${STAGE_DISP[${STAGE}]})"
