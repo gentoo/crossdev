@@ -681,6 +681,7 @@ EOPTS=
 UOPTS=
 TARCH=
 HARCH=
+HCHOST=
 CTARGET=
 MULTILIB_ABIS="default"
 MULTILIB_USE=""
@@ -934,6 +935,7 @@ info() {
 hr -
 einfo "crossdev version:      ${CROSSDEV_VER}"
 einfo "Host Portage ARCH:     ${HARCH}"
+einfo "Host Portage System:   ${HCHOST}"
 einfo "Target Portage ARCH:   ${TARCH}"
 einfo "Target System:         ${CTARGET}"
 einfo "Stage:                 ${STAGE} (${STAGE_DISP[${STAGE}]})"
