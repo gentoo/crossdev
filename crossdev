@@ -530,7 +530,8 @@ uninstall() {
 	# clean out portage config files
 	[[ -d ${CROSSDEV_OVERLAY}/cross-${CTARGET} ]] \
 		&& rm -r ${CROSSDEV_OVERLAY}/cross-${CTARGET}
-	for f in categories package.{env,mask,keywords,use} profile/package.use.{force,mask} ; do
+	# crossdev stopped creating 'package.keywords' in Jan 2020
+	for f in categories package.{accept_keywords,env,mask,keywords,use} profile/package.use.{force,mask} ; do
 		f="${CONFIGROOT}/${f}"
 		rm -f "${f}"/cross-${CTARGET}
 		rmdir "${f}" 2>/dev/null
@@ -1016,7 +1017,7 @@ _set_portage_file() {
 set_keywords() {
 	local pkg=$1 ver=$2 output
 	[[ -z ${pkg} ]] && return 0
-	output=$(_set_portage_file ${pkg} package.keywords)
+	output=$(_set_portage_file ${pkg} package.accept_keywords)
 
 	if [[ ${ver} == "["*"]" ]] || [[ -z ${ver} ]] ; then
 		local keywords=""
@@ -1254,7 +1255,7 @@ for f in "${CONFIGROOT}" "${CROSSDEV_OVERLAY}"/profiles ; do
 		|| echo cross-${CTARGET} >> "${f}"
 done
 cd "${CONFIGROOT}" || die "wtf!?"
-for f in package.{env,keywords,mask,use} env/cross-${CTARGET} profile/package.use.{force,mask} ; do
+for f in package.{accept_keywords,env,mask,use} env/cross-${CTARGET} profile/package.use.{force,mask} ; do
 	[[ -f ${f} ]] && die "please convert ${CONFIGROOT}/${f} to a directory"
 	xmkdir -p "${f}"
 	rm -f "${f}/cross-${CTARGET}"
