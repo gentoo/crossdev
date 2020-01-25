@@ -270,18 +270,6 @@ parse_target() {
 		      die "'${CTARGET}' target is not supported anymore, use i686-w64-mingw32"
 		      ;;
 
-		msp430*)
-		      BVER=">=2.24.90";
-		      GVER=">=4.9.1";
-		      LVER=">=2.1.0";
-		      DVER=">=7.7";;
-
-		nios2*)
-		      BVER=">=2.24";
-		      GVER=">=4.9.1";
-		      LVER=">=2.21";
-		      KVER=">=4.0";;
-
 		spu*) TARCH=ppc64;
 		      KPKG="[none]";
 		      LPKG="newlib";;
