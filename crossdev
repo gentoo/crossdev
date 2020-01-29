@@ -503,11 +503,14 @@ setup_portage_vars() {
 	# set up some repos.conf magic if possible.  if not,
 	# install our stuff to the first overlay in the list.
 	if [[ -z ${CROSSDEV_OVERLAY} ]] ; then
-		local repo
-		for repo in "cross-${CTARGET}" crossdev ; do
-			repo=$(echo "${REPO_CONFIG}" | sed -n "/^${repo}:/s,^[^:]*:,,p")
-			if [[ -n ${repo} ]] ; then
-				CROSSDEV_OVERLAY=${repo}
+		local repo_path repo_name
+		for repo_name in "cross-${CTARGET}" crossdev ; do
+			repo_path=$(echo "${REPO_CONFIG}" | sed -n "/^${repo_name}:/s,^[^:]*:,,p")
+			if [[ -n ${repo_path} ]] ; then
+				CROSSDEV_OVERLAY=${repo_path}
+				# if we end up installing our stuff, save the name of the repo
+				# for further use in metadata/layout.conf
+				CROSSDEV_OVERLAY_NAME=${repo_name}
 				break
 			fi
 		done
@@ -702,6 +705,7 @@ XPKGS=() XVERS=() XUSES=() XENVS=() XOVLS=()
 DEFAULT_VER="[latest]"
 SEARCH_OVERLAYS=""
 CROSSDEV_OVERLAY=""
+CROSSDEV_OVERLAY_NAME="crossdev"
 # These flags are always disabled for cross-gcc; either usually/always broken, or
 # not tested, or doesn't make sense, or no one simply cares about them
 GUSE_DISABLE="-boundschecking -d -gcj -gtk -libffi -mudflap -objc -objc++ -objc-gc"
@@ -1181,7 +1185,7 @@ set_metadata() {
 	# See if this repo is already named.
 	f="${CROSSDEV_OVERLAY}/profiles/repo_name"
 	repo_name=$(cat "${f}" 2>/dev/null)
-	: ${repo_name:="crossdev"}
+	: ${repo_name:="${CROSSDEV_OVERLAY_NAME}"}
 
 	xmkdir -p "${meta}"
 	if [[ -e ${layout} ]] ; then
