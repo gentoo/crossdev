@@ -516,6 +516,30 @@ setup_portage_vars() {
 		done
 
 		: ${CROSSDEV_OVERLAY:=$(echo "${SEARCH_OVERLAYS}" | head -1)}
+	else
+		# Check if there is a repos.conf entry whose
+		# location matches ${CROSSDEV_OVERLAY}
+		local repo_name conf_base i=""
+
+		repo_name="$(echo "${REPO_CONFIG}" | sed -n "\|:${CROSSDEV_OVERLAY}$|s,:.*,,p")"
+		if [[ -n ${repo_name} ]]; then
+			# Match the name specified in the corresponding repos.conf entry
+			CROSSDEV_OVERLAY_NAME="${repo_name}"
+		else
+			# Derive the name
+			: ${CROSSDEV_OVERLAY_NAME:="$(basename "${CROSSDEV_OVERLAY}")"}
+			# Note that there is no repos.conf entry and set up the path for the conf file
+			# We'll create the conf file itself in set_metadata()
+			conf_base="${CONFIGROOT}/repos.conf/${CROSSDEV_OVERLAY_NAME}"
+			while [[ -e "${conf_base}${i}.conf" ]]; do
+				# If there is a file collision with the conf file we target,
+				# we'll first append '1' before '.conf' and try.
+				# If that doesn't work, we'll retry with an incremented number
+				# Incrementing an empty string returns '1' in the shell
+				i=$((i + 1))
+			done
+			CROSSDEV_OVERLAY_CREATE_REPOS_CONF="${conf_base}${i}.conf"
+		fi
 	fi
 
 	# make sure we have a valid logdir
@@ -705,7 +729,8 @@ XPKGS=() XVERS=() XUSES=() XENVS=() XOVLS=()
 DEFAULT_VER="[latest]"
 SEARCH_OVERLAYS=""
 CROSSDEV_OVERLAY=""
-CROSSDEV_OVERLAY_NAME="crossdev"
+CROSSDEV_OVERLAY_NAME=""
+CROSSDEV_OVERLAY_CREATE_REPOS_CONF=""
 # These flags are always disabled for cross-gcc; either usually/always broken, or
 # not tested, or doesn't make sense, or no one simply cares about them
 GUSE_DISABLE="-boundschecking -d -gcj -gtk -libffi -mudflap -objc -objc++ -objc-gc"
@@ -1249,6 +1274,17 @@ set_metadata() {
 	repo-name = ${repo_name}
 	$(printf '%b' "${this_manifests}")
 	EOF
+
+	# If there is no repos.conf entry for the output overlay, create one here
+	if [[ -n ${CROSSDEV_OVERLAY_CREATE_REPOS_CONF} ]]; then
+		cat <<-EOF > "${CROSSDEV_OVERLAY_CREATE_REPOS_CONF}" || die "could not create the repo conf"
+		${autogen_tag}
+		[${repo_name}]
+		location = ${CROSSDEV_OVERLAY}
+		masters = ${masters% }
+		auto-sync = no
+		EOF
+	fi
 }
 
 xmkdir -p "${CONFIGROOT}" "${CROSSDEV_OVERLAY}"/{cross-${CTARGET},profiles}
