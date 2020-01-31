@@ -555,8 +555,13 @@ uninstall() {
 	ewarn "Uninstalling target '${CTARGET}' ..."
 
 	# clean out portage config files
-	[[ -d ${CROSSDEV_OVERLAY}/cross-${CTARGET} ]] \
-		&& rm -r ${CROSSDEV_OVERLAY}/cross-${CTARGET}
+	if [[ -d ${CROSSDEV_OVERLAY}/cross-${CTARGET} ]]; then
+		rm -r "${CROSSDEV_OVERLAY}"/cross-${CTARGET}
+		# if we remove all the package in the category,
+		# might as well remove the category itself
+		sed -e "/cross-${CTARGET}/d" \
+		    -i "${CROSSDEV_OVERLAY}"/profiles/categories
+	fi
 	# crossdev stopped creating 'package.keywords' in Jan 2020
 	for f in categories package.{accept_keywords,env,mask,keywords,use} profile/package.use.{force,mask} ; do
 		f="${CONFIGROOT}/${f}"
