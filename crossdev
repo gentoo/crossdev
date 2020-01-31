@@ -580,6 +580,20 @@ uninstall() {
 			[[ ${i} -eq 2 ]] && rm -r "${CROSSDEV_OVERLAY}"
 		fi
 	fi
+	# Remove the repos.conf entry if the output overlay is completely removed
+	if [[ ! -e "${CROSSDEV_OVERLAY}" ]]; then
+		# There is no easy way to reverse map an overlay entry
+		# to a particular file under repos.conf
+		# We'll scan every conf file for a match on repo name and
+		# remove if the file is managed by crossdev
+		while IFS="" read -d $'\0' -r f ; do
+			grep -qs "^${AUTOGEN_TAG}" "${f}" || continue
+			if grep -qs "^\[${CROSSDEV_OVERLAY_NAME}\]$" "${f}"; then
+				rm -f "${f}"
+				break
+			fi
+		done < <(find "${CONFIGROOT}"/repos.conf -type f -print0)
+	fi
 	# crossdev stopped creating 'package.keywords' in Jan 2020
 	for f in categories package.{accept_keywords,env,mask,keywords,use} profile/package.use.{force,mask} ; do
 		f="${CONFIGROOT}/${f}"
