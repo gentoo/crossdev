@@ -218,7 +218,6 @@ parse_target() {
 		powerpc*)   TARCH=ppc;;
 		sparc*)     TARCH=sparc;;
 		s390*)      TARCH=s390;;
-		sh*)        TARCH=sh;;
 		x86_64*)    TARCH=amd64;;
 		*)          TARCH="*";;
 	esac
