@@ -855,6 +855,14 @@ for with in HEADERS ; do
 	[[ ${!var} == "COW" ]] && eval ${var}=${!defvar}
 done
 
+# ::gentoo has no stable 'mingw64-runtime'. Let's default to 'latest'
+# unles suser specified something else.
+echo "LPKG=${LPKG}"
+echo "LVER=${LVER}"
+if [[ ${LPKG} == "mingw64-runtime" && ${LVER} == "[stable]" ]]; then
+	LVER="[latest]"
+fi
+
 show_target_cfg() {
 	local pkgs crosspkgs=()
 
