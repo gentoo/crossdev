@@ -595,7 +595,7 @@ uninstall() {
 		done < <(find "${CONFIGROOT}"/repos.conf -type f -print0)
 	fi
 	# crossdev stopped creating 'package.keywords' in Jan 2020
-	for f in categories package.{accept_keywords,env,mask,keywords,use} profile/package.use.{force,mask} ; do
+	for f in package.{accept_keywords,env,mask,keywords,use} profile/package.use.{force,mask} ; do
 		f="${CONFIGROOT}/${f}"
 		rm -f "${f}"/cross-${CTARGET}
 		rmdir "${f}" 2>/dev/null
@@ -1336,13 +1336,13 @@ set_metadata() {
 	fi
 }
 
-xmkdir -p "${CONFIGROOT}" "${CROSSDEV_OVERLAY}"/{cross-${CTARGET},profiles}
-for f in "${CONFIGROOT}" "${CROSSDEV_OVERLAY}"/profiles ; do
-	f+="/categories"
-	check_trailing_newline "${f}"
-	grep -qs "^cross-${CTARGET}$" "${f}" \
-		|| echo cross-${CTARGET} >> "${f}"
-done
+xmkdir -p "${CROSSDEV_OVERLAY}"/{cross-${CTARGET},profiles}
+f="${CROSSDEV_OVERLAY}"/profiles/categories
+check_trailing_newline "${f}"
+grep -qs "^cross-${CTARGET}$" "${f}" \
+	|| echo cross-${CTARGET} >> "${f}"
+
+xmkdir -p "${CONFIGROOT}"
 cd "${CONFIGROOT}" || die "wtf!?"
 for f in package.{accept_keywords,env,mask,use} env/cross-${CTARGET} profile/package.use.{force,mask} ; do
 	[[ -f ${f} ]] && die "please convert ${CONFIGROOT}/${f} to a directory"
