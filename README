@@ -46,10 +46,12 @@ understand what crossdev does and does not do.
 A few examples of targets that worked today (produce running
 executables or kernels if applies):
 
+ aarch64-gentoo-linux-musl
  aarch64-unknown-linux-gnu
  alpha-unknown-linux-gnu
  arm-none-eabi
  armv5tel-softfloat-linux-gnueabi
+ armv6zk-unknown-linux-musleabihf
  armv7a-unknown-linux-gnueabihf
  avr
  hppa-unknown-linux-gnu
@@ -64,7 +66,9 @@ executables or kernels if applies):
  mips64el-unknown-linux-gnu
  mipsel-unknown-linux-gnu
  mmix
+ msp430-elf
  nios2-unknown-linux-gnu
+ or1k-linux-musl
  powerpc-unknown-linux-gnu
  powerpc64-unknown-linux-gnu
  powerpc64le-unknown-linux-gnu
@@ -73,10 +77,12 @@ executables or kernels if applies):
  sh4-unknown-linux-gnu
  sparc-unknown-linux-gnu
  sparc64-unknown-linux-gnu
+ vax-unknown-linux-gnu
  x86_64-HEAD-linux-gnu
  x86_64-UNREG-linux-gnu
  x86_64-pc-linux-gnu
  x86_64-w64-mingw32
+ xtensa-esp32-elf
 
 A few more targets are likely to Just Work.
 And many more can be made to work with a litle touch.
