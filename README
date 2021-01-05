@@ -46,37 +46,37 @@ understand what crossdev does and does not do.
 A few examples of targets that worked today (produce running
 executables or kernels if applies):
 
- aarch64-unknown-linux-gnu-7.3.0
- alpha-unknown-linux-gnu-7.3.0
- arm-none-eabi-7.3.0
- armv5tel-softfloat-linux-gnueabi-7.3.0
- armv7a-unknown-linux-gnueabihf-7.3.0
- avr-7.3.0
- hppa-unknown-linux-gnu-7.3.0
- hppa2.0-unknown-linux-gnu-7.3.0
- hppa64-unknown-linux-gnu-7.3.0
- i686-pc-gnu-7.3.0
- i686-w64-mingw32-7.3.0
- ia64-unknown-linux-gnu-7.3.0
- m68k-unknown-linux-gnu-7.3.0
- mips-unknown-linux-gnu-7.3.0
- mips64-unknown-linux-gnu-7.3.0
- mips64el-unknown-linux-gnu-7.3.0
- mipsel-unknown-linux-gnu-7.3.0
- mmix-7.3.0
- nios2-unknown-linux-gnu-7.3.0
- powerpc-unknown-linux-gnu-7.3.0
- powerpc64-unknown-linux-gnu-7.3.0
- powerpc64le-unknown-linux-gnu-7.3.0
- s390-unknown-linux-gnu-7.3.0
- s390x-unknown-linux-gnu-7.3.0
- sh4-unknown-linux-gnu-7.3.0
- sparc-unknown-linux-gnu-7.3.0
- sparc64-unknown-linux-gnu-7.3.0
- x86_64-HEAD-linux-gnu-7.3.0
- x86_64-UNREG-linux-gnu-7.3.0
- x86_64-pc-linux-gnu-7.3.0
- x86_64-w64-mingw32-7.3.0
+ aarch64-unknown-linux-gnu
+ alpha-unknown-linux-gnu
+ arm-none-eabi
+ armv5tel-softfloat-linux-gnueabi
+ armv7a-unknown-linux-gnueabihf
+ avr
+ hppa-unknown-linux-gnu
+ hppa2.0-unknown-linux-gnu
+ hppa64-unknown-linux-gnu
+ i686-pc-gnu
+ i686-w64-mingw32
+ ia64-unknown-linux-gnu
+ m68k-unknown-linux-gnu
+ mips-unknown-linux-gnu
+ mips64-unknown-linux-gnu
+ mips64el-unknown-linux-gnu
+ mipsel-unknown-linux-gnu
+ mmix
+ nios2-unknown-linux-gnu
+ powerpc-unknown-linux-gnu
+ powerpc64-unknown-linux-gnu
+ powerpc64le-unknown-linux-gnu
+ s390-unknown-linux-gnu
+ s390x-unknown-linux-gnu
+ sh4-unknown-linux-gnu
+ sparc-unknown-linux-gnu
+ sparc64-unknown-linux-gnu
+ x86_64-HEAD-linux-gnu
+ x86_64-UNREG-linux-gnu
+ x86_64-pc-linux-gnu
+ x86_64-w64-mingw32
 
 A few more targets are likely to Just Work.
 And many more can be made to work with a litle touch.
