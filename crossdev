@@ -130,6 +130,7 @@ parse_target() {
 		   - hppa (parisc)                             - ia64
 		   - i386 / i486 / i586 / i686 (x86)           - m68k
 		   - mips / mipsel / mips64 / mips64el
+		   - or1k
 		   - powerpc (ppc) / powerpc64 (ppc64)
 		   - riscv32 / riscv64
 		   - sparc / sparc64                           - s390 / s390x
