@@ -99,7 +99,8 @@ export PKG_CONFIG_LIBDIR="${SYSROOT}/usr/${libdir}/pkgconfig:${SYSROOT}/usr/shar
 if [ -n "${EXTRA_PKG_CONFIG_LIBDIR}" ] ; then
 	PKG_CONFIG_LIBDIR="${EXTRA_PKG_CONFIG_LIBDIR}:${PKG_CONFIG_LIBDIR}"
 fi
-export PKG_CONFIG_SYSROOT_DIR="${SYSROOT}"
+: ${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}
+export PKG_CONFIG_SYSROOT_DIR
 
 #
 # Sanity check the output to catch common errors that do not
