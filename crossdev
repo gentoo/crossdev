@@ -99,7 +99,7 @@ Extra Fun (must be run after above stages):
     ${GOOD}--ex-gdb${NORMAL}                 Build a cross gdb
     ${GOOD}--ex-pkg${NORMAL} pkg             Build extra packages (may be used multiple times)
 
-${BRACKET}Target (-t)${NORMAL} takes a tuple ${BRACKET}ARCH-VENDOR-OS-LIBC${NORMAL}; see 'crossdev -t help'
+${BRACKET}Target (-t)${NORMAL} takes a tuple ${BRACKET}ARCHITECTURE-VENDOR-OS-LIBC${NORMAL}; see 'crossdev -t help'
 EOF
 	[[ -n $* ]] && echo && eerror "Error: $*"
 	exit ${exit_status}
@@ -125,23 +125,30 @@ parse_target() {
 
 	if [[ ${CTARGET} == "help" ]] ; then
 		cat <<-EOF
-		Supported Architectures:
-		   - alpha                                     - arm / armeb / aarch64
-		   - hppa (parisc)                             - ia64
-		   - i386 / i486 / i586 / i686 (x86)           - m68k
+		Target (-t) takes a tuple ARCHITECTURE-VENDOR-OS-LIBC:
+
+		Supported Architectures (ARCHITECTURE):
+		   - alpha
+		   - arm / armeb / aarch64
+		   - hppa (parisc)
+		   - ia64
+		   - i386 / i486 / i586 / i686 (x86)
+		   - m68k
 		   - mips / mipsel / mips64 / mips64el
 		   - or1k
 		   - powerpc (ppc) / powerpc64 (ppc64)
 		   - riscv32 / riscv64
-		   - sparc / sparc64                           - s390 / s390x
-		   - sh / sh[1-5] / sh64                       - x86_64 (amd64)
-		Supported C Libraries:
+		   - sparc / sparc64
+		   - s390 / s390x
+		   - sh / sh[1-5] / sh64
+		   - x86_64 (amd64)
+		Supported C Libraries (LIBC):
 		   - glibc (gnu)
 		   - klibc       [prob wont work]
 		   - musl
 		   - newlib      [bare metal/no operating system]
 		   - uclibc      [not all arches are ported]
-		Special Targets:
+		Special Targets (full tuple):
 		   - avr      http://www.nongnu.org/avr-libc/
 		   - bfin     http://blackfin.uclinux.org/
 		   - h8300    http://h8300-hms.sourceforge.net/
