@@ -254,6 +254,12 @@ parse_target() {
 		      STAGE_DEFAULT=${STAGE_C_ONLY}
 		      WITH_DEF_HEADERS="no";;
 
+		ia64*)
+			# gcc's libgcc needs glibc headers for unwinder.
+			# Thus gcc-stage1 can't be built without glibc headers.
+			WITH_DEF_HEADERS="yes"
+			;;
+
 		# added in bug #609602
 		mmix*)
 		      KPKG="[none]"
