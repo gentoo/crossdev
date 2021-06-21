@@ -968,6 +968,9 @@ fi
 # parse multilib settings until profiles are sane
 load_multilib_env() {
 	local var=$1
+	# TODO: avoid eval+subshell and use subshell only. It will make error
+	# handling simpler.
+	local eval_result=failed
 	eval $(
 	# see what target to parse
 	CTARGET=${!var}
@@ -1016,7 +1019,9 @@ load_multilib_env() {
 			echo ${_v}=\'${!d}\'
 		done
 	done
+	echo "eval_result='succeeded'"
 	)
+	[[ $eval_result = succeeded ]] || die "could not load multilib settings for '${var}'"
 }
 # Load settings for the host.
 MULTILIB_ABIS=${HOST_ABI} load_multilib_env HCHOST
