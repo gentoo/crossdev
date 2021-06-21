@@ -17,7 +17,7 @@ PREFIX="@PREFIX@"
 # Enable this script to be manually installed while debugging
 [[ ${PREFIX} == "@"PREFIX"@" ]] && PREFIX="/usr"
 
-err() { echo "emerge-wrapper: $*" 1>&2; exit 1; }
+err() { echo "emerge-wrapper: ERROR: $*" 1>&2; exit 1; }
 
 emit_setup_warning()
 {
@@ -47,9 +47,11 @@ cross_wrap_etc()
 	# Re-use existing CHOST->portage ARCH mapping code
 	ARCH=$(
 		inherit() { :; }
+		die() { err "toolchain-funcs.eclass$*"; }
 		. "${MAIN_REPO_PATH}"/eclass/toolchain-funcs.eclass
 		tc-arch
 	)
+	[[ $? -ne 0 ]] && err "Failed calling 'tc-arch' from toolchain-funcs.eclass."
 	[[ ${ARCH} == "unknown" ]] && emit_setup_warning "No ARCH is known for this target."
 
 	LIBC="__LIBC__"
