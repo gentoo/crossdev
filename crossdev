@@ -991,10 +991,7 @@ load_multilib_env() {
 	else
 		single_abi=false
 	fi
-	if ! multilib_env ; then
-		echo "die 'could not load multilib settings for ${var}'"
-		exit 1
-	fi
+	multilib_env || die "die 'could not load multilib settings for ${var}'"
 	${single_abi} && MULTILIB_ABIS=${DEFAULT_ABI}
 
 	# output the desired env
