@@ -502,7 +502,7 @@ setup_portage_vars() {
 	HCHOST=${CHOST}
 	[[ ${chost_set} == "set" ]] && CHOST=${chost} || unset CHOST
 
-	# Collect all CHOST* visible for for host. We need to make sure
+	# Collect all CHOST* visible for host. We need to make sure
 	# not to clobber any of native CHOSTs.
 	HCHOSTS=(${HCHOST})
 	for abi in $(portageq envvar ABI MULTILIB_ABIS DEFAULT_ABI); do
