@@ -284,7 +284,7 @@ Various notes (AKA dirty little tricks)
 - How to test crossdev layout generation:
 
   $ mkdir -p foo
-  $ PORTAGE_CONFIGROOT=$(pwd)/foo EPREFIX=$(pwd)/foo ./crossdev -t mmix -P -p
+  $ PORTAGE_CONFIGROOT=$(pwd)/foo EPREFIX=$(pwd)/foo PORT_LOGDIR=$(pwd)/foo ./crossdev -t mmix -P -p
 
   This needs some local patching. TODO: fix it to Just Work (perhaps with
   additional --test options).
