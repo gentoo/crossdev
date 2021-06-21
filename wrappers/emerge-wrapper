@@ -48,7 +48,7 @@ cross_wrap_etc()
 	ARCH=$(
 		inherit() { :; }
 		die() { err "toolchain-funcs.eclass$*"; }
-		. "${MAIN_REPO_PATH}"/eclass/toolchain-funcs.eclass
+		EAPI=7 . "${MAIN_REPO_PATH}"/eclass/toolchain-funcs.eclass
 		tc-arch
 	)
 	[[ $? -ne 0 ]] && err "Failed calling 'tc-arch' from toolchain-funcs.eclass."

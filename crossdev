@@ -983,7 +983,7 @@ load_multilib_env() {
 	for p in ${SEARCH_OVERLAYS} ${MAIN_REPO_PATH} ; do
 		p+="/eclass/multilib.eclass"
 		if [[ -e ${p} ]] ; then
-			. "${p}"
+			EAPI=7 . "${p}"
 			break
 		fi
 	done
