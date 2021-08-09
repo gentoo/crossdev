@@ -60,6 +60,7 @@ executables or kernels if applies):
  i686-pc-gnu
  i686-w64-mingw32
  ia64-unknown-linux-gnu
+ loongarch64-unknown-linux-gnu
  m68k-unknown-linux-gnu
  mips-unknown-linux-gnu
  mips64-unknown-linux-gnu
