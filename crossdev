@@ -136,6 +136,7 @@ parse_target() {
 		   - hppa (parisc)
 		   - ia64
 		   - i386 / i486 / i586 / i686 (x86)
+		   - loongarch64
 		   - m68k
 		   - mips / mipsel / mips64 / mips64el
 		   - or1k
@@ -208,7 +209,7 @@ parse_target() {
 				CTARGET="${CTARGET}-unknown-linux-gnueabihf";;
 			arm*)
 				CTARGET="${CTARGET}-unknown-linux-gnueabi";;
-			aarch64*|alpha*|cris*|hppa*|ia64*|m68*|mips*|powerpc*|riscv*|sparc*|sh*|tile*)
+			aarch64*|alpha*|cris*|hppa*|ia64*|loongarch*|m68*|mips*|powerpc*|riscv*|sparc*|sh*|tile*)
 				CTARGET="${CTARGET}-unknown-linux-gnu";;
 			bfin*|h8300*|msp430*|nds32*|nios2*|spu*|xc16x*)
 				CTARGET="${CTARGET}-elf";;
@@ -223,6 +224,7 @@ parse_target() {
 		hppa*)      TARCH=hppa;;
 		ia64*)      TARCH=ia64;;
 		i?86*)      TARCH=x86;;
+		loongarch*) TARCH=loong;;
 		m68*)       TARCH=m68k;;
 		mips*)      TARCH=mips;;
 		powerpc64*) TARCH=ppc64;;
@@ -262,6 +264,13 @@ parse_target() {
 			# gcc's libgcc needs glibc headers for unwinder.
 			# Thus gcc-stage1 can't be built without glibc headers.
 			WITH_DEF_HEADERS="yes"
+			;;
+
+		loongarch*)
+			# have to bring in the experimental LoongArch patchset before
+			# everything is upstream
+			KUSE+=" experimental-loong"
+			LUSE+=" experimental-loong"
 			;;
 
 		# added in bug #609602
