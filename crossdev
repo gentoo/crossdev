@@ -59,12 +59,15 @@ Options:
     ${GOOD}--env${NORMAL} env                Specify env settings for all packages (see below)
     ${GOOD}--[bdgkl]env${NORMAL} env         Specify env settings for binutils/gdb/gcc/kernel/libc
                                 Note: make sure to quote: 'VAR="some value"\nFOO="cow"'
+    ${GOOD}--[bdgkl]cat${NORMAL} category    Use binutils/gdb/gcc/kernel/libc package from category
+    ${GOOD}--[bdgkl]pkg${NORMAL} pkg         Use binutils/gdb/gcc/kernel/libc package with given name
     ${GOOD}-f, --force${NORMAL}              I don't need a seat belt!
     ${GOOD}-S, --stable${NORMAL}             Use latest stable versions as default
     ${GOOD}-C, --clean${NORMAL} target       Uninstall specified target
     ${GOOD}-P, --portage${NORMAL} opts       Options to pass to emerge (see emerge(1))
     ${GOOD}--with[out]-headers${NORMAL}      Build C library headers before C compiler?
     ${GOOD}--show-fail-log${NORMAL}          If the build fails, dump the failing log
+
 
 Overlay Options:
     ${GOOD}-oS, --overlays${NORMAL} list     Space delimited list of overlays to search
@@ -821,18 +824,28 @@ while [[ $# -gt 0 ]] ; do
 	--b|--binutils)    shift; BVER=$1;;
 	--benv)            shift; BENV=$1;;
 	-ob|--ov-binutils) shift; BOVL=$1;;
+	--bcat)            shift; BCAT=$1;;
+	--bpkg)            shift; BPKG=$1;;
 	--d|--gdb)         shift; DVER=$1;;
 	--denv)            shift; DENV=$1;;
 	-od|--ov-gdb)      shift; DOVL=$1;;
+	--dcat)            shift; DCAT=$1;;
+	--dpkg)            shift; DPKG=$1;;
 	--g|--gcc)         shift; GVER=$1;;
 	--genv)            shift; GENV=$1;;
 	-og|--ov-gcc)      shift; GOVL=$1;;
+	--gcat)            shift; GCAT=$1;;
+	--gpkg)            shift; GPKG=$1;;
 	--k|--kernel)      shift; KVER=$1;;
 	--kenv)            shift; KENV=$1;;
 	-ok|--ov-kernel)   shift; KOVL=$1;;
+	--kcat)            shift; KCAT=$1;;
+	--kpkg)            shift; KPKG=$1;;
 	--l|--libc)        shift; LVER=$1;;
 	--lenv)            shift; LENV=$1;;
 	-ol|--ov-libc)     shift; LOVL=$1;;
+	--lcat)            shift; LCAT=$1;;
+	--lpkg)            shift; LPKG=$1;;
 	-ox|--ov-extra)    shift; XOVLS+=( "$1" );;
 	--env)             shift; AENV=$1;;
 	-A|--abis)         shift; MULTILIB_ABIS=$1;;
