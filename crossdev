@@ -742,9 +742,9 @@ hr() {
 			|| c=${c##* }
 	fi
 	local ext=${1:-  _  -  ~  -}
-	local sext=${ext/?/ }
+	local sext=${ext//?/ }
 	local br=$(printf "%$((c + ${#ext}))s")
-	local banner=${br/${sext}/${ext}}
+	local banner=${br//${sext}/${ext}}
 	echo "${banner:0:${c}}"
 }
 ver_get_op() {
