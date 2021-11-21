@@ -422,9 +422,6 @@ parse_target() {
 		# [1.]: no -fstack-protector flag support:
 		#       check as '$CC -fstack-protector -c -x c - </dev/null'
 		alpha*|avr*|hppa*|ia64*|mmix*|nios2*) ssp_support=no;;
-		# [2.]: musl does not provide __stack_chk_fail_local:
-		#       and is broken on ARCH=x86 and ppc32: https://bugs.gentoo.org/706210
-		i[3-6]86-*-musl*|powerpc-*-musl*|powerpcle-*-musl*) ssp_support=no;;
 	esac
 	if [[ $ssp_support = "no" ]]; then
 		# ssp is >=gcc-6, nossp is <gcc-6
