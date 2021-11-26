@@ -95,7 +95,7 @@ cross_wrap_bin()
 
 	pushd "${0%/*}" >/dev/null
 	local wrapper
-	for wrapper in build emerge fix-root pkg-config ; do
+	for wrapper in ebuild emerge fix-root pkg-config ; do
 		ln -sf cross-${wrapper} ${CHOST}-${wrapper}
 	done
 	# some people like their tab completion
