@@ -409,9 +409,11 @@ parse_target() {
 			pie_support=no
 			;;
 	esac
+	# Running a hardened profile on the host forces pie #831165
 	if [[ $pie_support = "no" ]]; then
 		# pie is >=gcc-6, nopie is <gcc-6
-		GUSE+=" -pie nopie"
+		GMASK+=" pie -nopie"
+		GFORCE+=" nopie"
 	fi
 
 	local ssp_support=yes
@@ -423,9 +425,11 @@ parse_target() {
 		#       check as '$CC -fstack-protector -c -x c - </dev/null'
 		alpha*|avr*|hppa*|ia64*|mmix*|nios2*) ssp_support=no;;
 	esac
+	# Running a hardened profile on the host forces ssp #831165
 	if [[ $ssp_support = "no" ]]; then
 		# ssp is >=gcc-6, nossp is <gcc-6
-		GUSE+=" -ssp nossp"
+		GMASK+=" ssp -nossp"
+		GFORCE+=" nossp"
 	fi
 }
 
@@ -726,6 +730,8 @@ for_each_extra_pkg() {
 		XUSE=${XUSES[i]} \
 		XENV=${XENVS[i]} \
 		XOVL=${XOVLS[i]} \
+		XMASK=${XMASKS[i]} \
+		XFORCE=${XFORCES[i]} \
 		"$@"
 	done
 }
@@ -775,12 +781,13 @@ MULTILIB_USE=""
 HOST_ABI="default"
 STAGE=""
 AENV=""
-BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" BUSE="" BENV="" BOVL=""
-GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" GUSE="" GENV="" GOVL=""
-KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" KUSE="" KENV="" KOVL=""
-LCAT="sys-libs"   ; LPKG="[none]"        ; LVER="" LUSE="" LENV="" LOVL=""
-DCAT="sys-devel"  ; DPKG="gdb"           ; DVER="" DUSE="" DENV="" DOVL=""
-XPKGS=() XVERS=() XUSES=() XENVS=() XOVLS=()
+# Only GMASK/GFORCE are currently used
+BCAT="sys-devel"  ; BPKG="binutils"      ; BVER="" BUSE="" BENV="" BOVL="" BMASK="" BFORCE=""
+GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" GUSE="" GENV="" GOVL="" GMASK="" GFORCE=""
+KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" KUSE="" KENV="" KOVL="" KMASK="" KFORCE=""
+LCAT="sys-libs"   ; LPKG="[none]"        ; LVER="" LUSE="" LENV="" LOVL="" LMASK="" LFORCE=""
+DCAT="sys-devel"  ; DPKG="gdb"           ; DVER="" DUSE="" DENV="" DOVL="" DMASK="" DFORCE=""
+XPKGS=() XVERS=() XUSES=() XENVS=() XOVLS=() XMASKS=() XFORCES=()
 DEFAULT_VER="[latest]"
 SEARCH_OVERLAYS=""
 CROSSDEV_OVERLAY=""
@@ -1273,9 +1280,9 @@ set_env() {
 }
 set_portage() {
 	local l=$1
-	eval set -- \${${l}CAT} \${${l}PKG} \"\${${l}VER}\" \"\${${l}ENV}\" \"\${${l}OVL}\"
-	local cat=$1 pkg=$2 ver=$3 env=$4 ovl=$5
-	shift 5
+	eval set -- \${${l}CAT} \${${l}PKG} \"\${${l}VER}\" \"\${${l}ENV}\" \"\${${l}OVL}\" \"\${${l}MASK}\" \"\${${l}FORCE}\"
+	local cat=$1 pkg=$2 ver=$3 env=$4 ovl=$5 mask=$6 force=$7
+	shift 7
 	local use=$*
 
 	[[ ${pkg} == "[none]" ]] && return 0
@@ -1283,14 +1290,20 @@ set_portage() {
 	case ${CTARGET} in
 		# avr requires multilib, that provides
 		# libgcc for all sub-architectures #378387
-		avr*)   set_use_force ${pkg} multilib
-			set_use_mask ${pkg} -multilib;;
+		avr*)
+			mask+=" -multilib"
+			force+=" multilib"
+			;;
 		*-newlib|*-elf|*-eabi)
-			set_use_force ${pkg} multilib;
-			set_use_mask ${pkg} -multilib;;
-		*)      set_use_force ${pkg} -multilib;;
+			mask+=" -multilib"
+			force+=" multilib"
+			;;
+		*)
+			mask+=" multilib";;
 	esac
 
+	set_use_mask ${pkg} "${mask}"
+	set_use_force ${pkg} "${force}"
 	set_keywords ${pkg} ${ver}
 	set_use ${pkg} ${use}
 	set_links ${cat} ${pkg} "${ovl}"
