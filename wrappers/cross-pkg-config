@@ -21,6 +21,17 @@ error() {
 }
 
 #
+# Allow very basic checks.  This is not very sophisticated, but should get the
+# job done, practically speaking.
+#
+
+case $1 in
+--about|--help|--version)
+  exec pkg-config "$@"
+  ;;
+esac
+
+#
 # Sanity/distro checks
 #
 
