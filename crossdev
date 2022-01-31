@@ -1194,9 +1194,26 @@ set_links() {
 	fi
 	for s in ${ovl} ${SEARCH_OVERLAYS} ; do
 		if [[ -d ${s}/${cat}/${pkg} ]] ; then
-			srcdir=${s}
-			einfo "getting ${cat}/${pkg} from ${srcdir}"
-			break
+			# Versions in an additional non-crossdev overlay may not have the right keywords.
+			# e.g. suppose we have sys-devel/gcc in an overlay with just ~arch keywords.
+			# (Or not be keyworded for our target arch at all!)
+			local search_kw_string=
+
+			case "${LVER}" in
+				"[stable]")
+					search_kw_string="^[~]${TARCH}"
+					;;
+				*)
+					search_kw_string="${TARCH}"
+					;;
+			esac
+
+			if grep -qre "KEYWORDS=.*${search_kw_string}" "${s}/${cat}/${pkg}" ; then
+				# ... so only skip if we found one which is at least stable.
+				srcdir=${s}
+				einfo "getting ${cat}/${pkg} from ${srcdir}"
+				break
+			fi
 		fi
 	done
 	ln -s "${srcdir}"/${cat}/${pkg} "${d}"
