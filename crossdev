@@ -1434,6 +1434,38 @@ emerge-wrapper --target ${CTARGET} --init || exit 1
 ### Thus we create non-symlinked layout early.
 xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib
 xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib
+###
+### We need some special riscv sauce here similar as in baselayout. Ugly.
+### step 1: set up all multilib libdirs
+### step 2: set up the compat symlink of the default abi for non-multilib
+case ${CTARGET} in
+	riscv*)
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64/lp64
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64/lp64d
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64/lp64
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64/lp64d
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32/ilp32
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32/ilp32d
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32/ilp32
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32/ilp32d
+			;;&
+	riscv64*)
+			rmdir "${EPREFIX}"/usr/${CTARGET}/lib64/${DEFAULT_ABI}
+			ln -s . "${EPREFIX}"/usr/${CTARGET}/lib64/${DEFAULT_ABI}
+			rmdir "${EPREFIX}"/usr/${CTARGET}/usr/lib64/${DEFAULT_ABI}
+			ln -s . "${EPREFIX}"/usr/${CTARGET}/usr/lib64/${DEFAULT_ABI}
+			;;
+	riscv32*)
+			rmdir "${EPREFIX}"/usr/${CTARGET}/lib32/${DEFAULT_ABI}
+			ln -s ../lib "${EPREFIX}"/usr/${CTARGET}/lib32/${DEFAULT_ABI}
+			rmdir "${EPREFIX}"/usr/${CTARGET}/usr/lib32/${DEFAULT_ABI}
+			ln -s ../lib "${EPREFIX}"/usr/${CTARGET}/usr/lib32/${DEFAULT_ABI}
+			;;
+esac
 
 #################
 emerged_with_use() {
