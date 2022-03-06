@@ -898,7 +898,7 @@ for with in HEADERS ; do
 done
 
 # ::gentoo has no stable 'mingw64-runtime' or 'newlib'.
-# Let's default to 'latest' unles suser specified something else.
+# Let's default to 'latest' unless user specified something else.
 if [[ ${LPKG} == "mingw64-runtime" && ${LVER} == "[stable]" ]]; then
 	LVER="[latest]"
 fi
