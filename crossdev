@@ -1304,7 +1304,7 @@ set_portage() {
 
 	set_use_mask ${pkg} "${mask}"
 	set_use_force ${pkg} "${force}"
-	set_keywords ${pkg} ${ver}
+	set_keywords ${pkg} "${ver}"
 	set_use ${pkg} ${use}
 	set_links ${cat} ${pkg} "${ovl}"
 	set_env ${l} ${pkg} "${env}"
