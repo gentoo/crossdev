@@ -437,7 +437,8 @@ parse_target() {
 	# Running a hardened profile on the host forces ssp #831165
 	if [[ $ssp_support = "no" ]]; then
 		# ssp is >=gcc-6, nossp is <gcc-6
-		GMASK+=" ssp -nossp"
+		# blacklist hardened too because it'll force -fstack-clash-protection
+		GMASK+=" ssp hardened -nossp"
 		GFORCE+=" nossp"
 	fi
 }
