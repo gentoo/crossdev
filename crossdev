@@ -1219,7 +1219,7 @@ set_links() {
 
 			case "${LVER}" in
 				"[stable]")
-					search_kw_string="^[~]${TARCH}"
+					search_kw_string="[^~]${TARCH}"
 					;;
 				*)
 					search_kw_string="${TARCH}"
