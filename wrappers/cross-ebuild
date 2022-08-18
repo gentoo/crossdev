@@ -1,0 +1,41 @@
+#!/bin/sh
+# Copyright 2008-2022 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+if [ -z "${CHOST}" ] ; then
+	CHOST=${0##*/}
+	CHOST=${CHOST%-ebuild}
+	CHOST=${CHOST#ebuild-}
+fi
+export CHOST
+
+BROOT="@GENTOO_PORTAGE_EPREFIX@"
+if [ "${BROOT}" = "@"GENTOO_PORTAGE_EPREFIX"@" ] ; then
+	BROOT=""
+fi
+
+: ${EPREFIX=}
+: ${SYSROOT=${BROOT}/usr/${CHOST}}
+: ${PORTAGE_CONFIGROOT=${SYSROOT}${EPREFIX}}
+export EPREFIX SYSROOT PORTAGE_CONFIGROOT
+
+if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
+	echo "cross-ebuild: CHOST is not set properly"
+	exit 1
+fi
+
+# Portage defaults CBUILD to CHOST, so we have to remove CHOST
+# from the env to get a "good" value for CBUILD
+query_vars="CBUILD CFLAGS CXXFLAGS CPPFLAGS LDFLAGS"
+clean_vars="${query_vars} CHOST SYSROOT PORTAGE_CONFIGROOT"
+eval $(env $(printf -- '-u %s ' ${clean_vars}) \
+	portageq envvar -v ${query_vars} | sed s:^:_E_:)
+: ${CBUILD=${_E_CBUILD}}
+: ${BUILD_CFLAGS=${_E_CFLAGS}}
+: ${BUILD_CXXFLAGS=${_E_CXXFLAGS}}
+: ${BUILD_CPPFLAGS=${_E_CPPFLAGS}}
+: ${BUILD_LDFLAGS=${_E_LDFLAGS}}
+export CBUILD BUILD_CFLAGS BUILD_CXXFLAGS BUILD_CPPFLAGS BUILD_LDFLAGS
+
+: ${CROSS_CMD:=ebuild}
+exec ${CROSS_CMD} "$@"
