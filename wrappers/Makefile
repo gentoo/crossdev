@@ -4,7 +4,7 @@
 include ../settings.mk
 
 PORTDIR ?= $(shell portageq envvar PORTDIR)
-FNAMES = cross-ebuild  cross-emerge  cross-fix-root  cross-pkg-config  emerge-wrapper
+FNAMES = cross-ebuild cross-emerge cross-fix-root cross-pkg-config emerge-wrapper
 SITEDIR = $(PREFIX)/share/crossdev/include/site
 ETC_SITEDIR = $(EPREFIX)/etc/crossdev/include/site
 
