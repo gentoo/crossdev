@@ -638,7 +638,7 @@ uninstall() {
 	rmdir "${EPREFIX}"/etc/revdep-rebuild 2>/dev/null
 
 	# Unmerge all toolchain packages for this target.
-	qmerge -Uqy $(qlist -IC "cross-${CTARGET}/")
+	emerge -q --rage-clean "cross-${CTARGET}/*"
 
 	# clean out known toolchain files (binutils/gcc)
 	for f in \
