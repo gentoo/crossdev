@@ -310,6 +310,8 @@ parse_target() {
 		mips64*-gnuabi32|mipsisa64*-gnuabi32|\
 		mips64*-gnuabio32|mipsisa64*-gnuabio32)
 		      [[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="o32";;
+		mips64*-musl)
+		      [[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="n64";;
 	esac
 
 	# Tweak packages based upon CTARGET
