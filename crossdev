@@ -584,9 +584,6 @@ uninstall() {
 	ewarn "Uninstalling target '${CTARGET}' ..."
 
 	# clean out portage config files
-	if grep -qs "^cross-${CTARGET}/" "${EPREFIX}"/var/lib/portage/world ; then
-		sed -i "/^cross-${CTARGET}/d" "${EPREFIX}"/var/lib/portage/world
-	fi
 	if [[ -d ${CROSSDEV_OVERLAY}/cross-${CTARGET} ]]; then
 		rm -r "${CROSSDEV_OVERLAY}"/cross-${CTARGET}
 		# if we remove all the package in the category,
