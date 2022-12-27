@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2008-2014 Gentoo Foundation
+# Copyright 2008-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 #
@@ -19,6 +19,9 @@ error() {
 	msg_to_stderr "error: $*"
 	exit 1
 }
+
+# abort infinite loop due to misconfiguration
+[ "${0##*/}" = "pkg-config" ] && error "aborting infinite loop! (make sure to delete uClinux-dist/tools/pkg-config)"
 
 #
 # Allow very basic checks.  This is not very sophisticated, but should get the
@@ -48,32 +51,49 @@ if [ "$1" = "--cross-pkg-config-install" ] ; then
 	exit 0
 fi
 
-unset EXTRA_PKG_CONFIG_LIBDIR
+export PKG_CONFIG_LIBDIR=
+unset PREFIX
+
 if [ -z "${CHOST}" ] ; then
 	CHOST=${0##*/}
 	CHOST=${CHOST%-pkg-config}
 fi
-if [ -z "${SYSROOT}" ] ; then
-	if [ "@CROSS_PKG_CONFIG_INSTALLED@" = "installed" ] ; then
-		# Manual install
-		SYSROOT="@CROSS_PKG_CONFIG_PATH@"
-	elif [ -n "${ROOT}" ] ; then
-		# Gentoo
-		SYSROOT=${ROOT}
-	elif [ -n "${STAGEDIR}" ] ; then
-		# uClinux-dist
-		SYSROOT=${STAGEDIR}
-		EXTRA_PKG_CONFIG_LIBDIR=${UCLINUX_PKG_CONFIG_LIBDIR}
+
+if [ -n "${ESYSROOT+x}" ] ; then
+	# Gentoo EAPI 7+
+	: ${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}
+	PREFIX=${ESYSROOT%/}
+	PREFIX=${PREFIX#${SYSROOT%/}}
+elif [ -n "${ROOT+x}" ] ; then
+	# Gentoo EAPI 0-6
+	if [ -n "${SYSROOT%/}" ]; then
+		: ${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}
+		PREFIX=${EPREFIX%/}
 	else
-		# /usr/<target>
-		SYSROOT="/usr/${CHOST}"
-		if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
-			error "Need \$ROOT or \$STAGEDIR set first"
-		fi
+		: ${PKG_CONFIG_SYSROOT_DIR=}
+		PREFIX=${PORTAGE_OVERRIDE_EPREFIX%/}
+	fi
+elif [ -n "${SYSROOT+x}" ] ; then
+	# Generic
+	: ${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}
+elif [ "@CROSS_PKG_CONFIG_INSTALLED@" = "installed" ] ; then
+	# Manual install
+	: ${PKG_CONFIG_SYSROOT_DIR="@CROSS_PKG_CONFIG_PATH@"}
+elif [ -n "${STAGEDIR}" ] ; then
+	# uClinux-dist
+	: ${PKG_CONFIG_SYSROOT_DIR=${STAGEDIR}}
+	PKG_CONFIG_LIBDIR=${UCLINUX_PKG_CONFIG_LIBDIR}
+else
+	# /usr/<target>
+	: ${PKG_CONFIG_SYSROOT_DIR=/usr/${CHOST}}
+
+	if [ -z "${CHOST}" ] || [ ! -d "${PKG_CONFIG_SYSROOT_DIR}" ] ; then
+		error "Need \$ROOT or \$STAGEDIR set first"
 	fi
 fi
-# abort infinite loop due to misconfiguration
-[ "${0##*/}" = "pkg-config" ] && error "aborting infinite loop! (make sure to delete uClinux-dist/tools/pkg-config)"
+
+export PKG_CONFIG_SYSROOT_DIR=${PKG_CONFIG_SYSROOT_DIR%/}
+PKG_CONFIG_ESYSROOT_DIR=${PKG_CONFIG_SYSROOT_DIR}${PREFIX}
 
 #
 # Some distributions pollute the pkg-config environment.
@@ -94,20 +114,15 @@ if [ -z "${libdir}" ] ; then
 	# Fall back to probing the compiler.
 	libdir=$(realpath "$(${CC:-${CHOST}-gcc} ${CFLAGS} ${LDFLAGS} -print-file-name=pkgconfig)/..")
 	# Chopping the basename isn't exactly correct, but it's good enough for now.
-	libdir=$(basename "${libdir}")
+	libdir=${libdir##*/}
 fi
 : ${libdir:=lib}
-export PKG_CONFIG_SYSTEM_LIBRARY_PATH="/usr/${libdir}:/${libdir}"
+export PKG_CONFIG_SYSTEM_LIBRARY_PATH="${PREFIX}/usr/${libdir}:${PREFIX}/${libdir}"
 
 #
 # Set the pkg-config search paths to our staging directory.
 #
-export PKG_CONFIG_LIBDIR="${SYSROOT}/usr/${libdir}/pkgconfig:${SYSROOT}/usr/share/pkgconfig"
-if [ -n "${EXTRA_PKG_CONFIG_LIBDIR}" ] ; then
-	PKG_CONFIG_LIBDIR="${EXTRA_PKG_CONFIG_LIBDIR}:${PKG_CONFIG_LIBDIR}"
-fi
-: ${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}
-export PKG_CONFIG_SYSROOT_DIR
+PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR}${PKG_CONFIG_LIBDIR:+:}${PKG_CONFIG_ESYSROOT_DIR}/usr/${libdir}/pkgconfig:${PKG_CONFIG_ESYSROOT_DIR}/usr/share/pkgconfig"
 
 #
 # Sanity check the output to catch common errors that do not
@@ -118,20 +133,20 @@ ret=$?
 
 # We turn the output into a newline separate string of options, then use grep
 # to look for bad -Is and -Ls.  Bad -Is and -Ls are ones that point to things
-# outside the ${SYSROOT}.
-bad_lines=$(echo "${output}" |   # Get the pkg-config output.
-	tr -s ' ' '\n' |             # Put each flags on its own line.
-	grep '^-[LI]' |              # Find all -I and -L lines.
-	grep -v -E "..${SYSROOT}"    # Find all things outside the SYSROOT.
-	)
+# outside the ${PKG_CONFIG_ESYSROOT_DIR}.
+bad_lines=$(
+	printf "%s\n" ${output} |                # Put each flags on its own line.
+	grep '^-[LI]' |                          # Find all -I and -L lines.
+	grep -v "^..${PKG_CONFIG_ESYSROOT_DIR}"  # Find all things outside the sysroot.
+)
 if [ -n "${bad_lines}" ] ; then
 	warn "### falling down so here is a dump state ######"
 	pkg-config --debug "$@" 1>&2
 	warn "### end of dump ###############################"
 	warn "### suspicious compile flags dumped here ######"
-	echo "${bad_lines}"
+	printf "%s\n" "${bad_lines}"
 	warn "### end of flag dump ##########################"
 	error "host -I or -L paths detected: ${output}"
 fi
-[ -n "${output}" ] && echo "${output}"
+[ -n "${output}" ] && printf "%s\n" "${output}"
 exit ${ret}
