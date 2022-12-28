@@ -289,8 +289,8 @@ parse_target() {
 		      KPKG="[none]";
 		      LCAT="dev-util"; LPKG="mingw64-runtime"
 		      WITH_DEF_HEADERS="yes" # gcc can't boot without headers: bug #693770
-		      GUSE+=" -hardened" # gcc ICEs as libssp/ssp.c:186:1: internal compiler error: in seh_emit_stackalloc
-		      GMASK+=" hardened"
+		      GMASK+=" default-stack-clash-protection hardened"
+		      GUSE+=" -default-stack-clash-protection -hardened" # gcc ICEs as libssp/ssp.c:186:1: internal compiler error: in seh_emit_stackalloc
 		      ;;
 
 		mingw*|*-mingw*)
@@ -440,7 +440,7 @@ parse_target() {
 	if [[ $ssp_support = "no" ]]; then
 		# ssp is >=gcc-6, nossp is <gcc-6
 		# blacklist hardened too because it'll force -fstack-clash-protection
-		GMASK+=" ssp hardened -nossp"
+		GMASK+=" default-stack-clash-protection ssp hardened -nossp"
 		GFORCE+=" nossp"
 	fi
 }
