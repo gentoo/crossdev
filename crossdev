@@ -1225,6 +1225,8 @@ set_links() {
 					;;
 			esac
 
+			# TODO: Import eapi7-ver.eclass and prefer the best version
+			# rather than just the first we find.
 			if grep -qre "KEYWORDS=.*${search_kw_string}" "${s}/${cat}/${pkg}" ; then
 				# ... so only skip if we found one which is at least stable.
 				srcdir=${s}
