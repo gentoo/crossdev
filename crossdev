@@ -244,21 +244,23 @@ parse_target() {
 		# this is a linux+ target, not microcontroller (below)
 		avr32*) :;;
 
-		avr*) KPKG="[none]"
-		      LCAT="dev-embedded"
-		      LPKG="avr-libc"
-		      GUSE+=" -fortran -go" # doesn't work
-		      MULTILIB_USE="yes" #377039
-		      BUSE+=" cxx"
-		      STAGE_DEFAULT=${STAGE_LIBC}
-		      WITH_DEF_HEADERS="no";;
+		avr*)
+			KPKG="[none]"
+			LCAT="dev-embedded"
+			LPKG="avr-libc"
+			GUSE+=" -fortran -go" # doesn't work
+			MULTILIB_USE="yes" #377039
+			BUSE+=" cxx"
+			STAGE_DEFAULT=${STAGE_LIBC}
+			WITH_DEF_HEADERS="no"
+			;;
 
 		# Has no glibc support yet (or even ABI defined). Can
 		# only compile linux kernel:
 		# https://parisc.wiki.kernel.org/index.php/Userspace64
 		hppa64*)
-		      STAGE_DEFAULT=${STAGE_C_ONLY}
-		      WITH_DEF_HEADERS="no";;
+			STAGE_DEFAULT=${STAGE_C_ONLY}
+			WITH_DEF_HEADERS="no";;
 
 		ia64*)
 			# gcc's libgcc needs glibc headers for unwinder.
@@ -275,58 +277,80 @@ parse_target() {
 
 		# added in bug #609602
 		mmix*)
-		      KPKG="[none]"
-		      LPKG="newlib"
-		      STAGE_DEFAULT=${STAGE_LIBC}
-		      WITH_DEF_HEADERS="no";;
+			KPKG="[none]"
+			LPKG="newlib"
+			STAGE_DEFAULT=${STAGE_LIBC}
+			WITH_DEF_HEADERS="no"
+			;;
 
 		# due to upstream lameness, build C/C++ at first glance
 		*-cygwin)
-		      GUSE_DISABLE_STAGE_1+=" -nocxx cxx";;
+			GUSE_DISABLE_STAGE_1+=" -nocxx cxx"
+			;;
 
 		# these are the mingw64 targets that binutils seems to use
 		x86_64-*-mingw*|*-w64-mingw*)
-		      KPKG="[none]";
-		      LCAT="dev-util"; LPKG="mingw64-runtime"
-		      WITH_DEF_HEADERS="yes" # gcc can't boot without headers: bug #693770
-		      GMASK+=" default-stack-clash-protection hardened"
-		      GUSE+=" -default-stack-clash-protection -hardened" # gcc ICEs as libssp/ssp.c:186:1: internal compiler error: in seh_emit_stackalloc
-		      ;;
+			KPKG="[none]";
+			LCAT="dev-util"
+			LPKG="mingw64-runtime"
+			WITH_DEF_HEADERS="yes" # gcc can't boot without headers: bug #693770
+			GMASK+=" default-stack-clash-protection hardened"
+			GUSE+=" -default-stack-clash-protection -hardened" # gcc ICEs as libssp/ssp.c:186:1: internal compiler error: in seh_emit_stackalloc
+			;;
 
 		mingw*|*-mingw*)
-		      # bug #584858
-		      die "'${CTARGET}' target is not supported anymore, use i686-w64-mingw32"
-		      ;;
+			# bug #584858
+			die "'${CTARGET}' target is not supported anymore, use i686-w64-mingw32"
+			;;
 
-		spu*) TARCH=ppc64;
-		      KPKG="[none]";
-		      LPKG="newlib";;
-		ppu*) TARCH=ppc64;;
+		spu*)
+			TARCH=ppc64
+			KPKG="[none]"
+			LPKG="newlib"
+			;;
+		ppu*)
+			TARCH=ppc64
+			;;
 
 		mips64*-gnuabin32|mipsisa64*-gnuabin32)
-		      [[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="n32";;
-		mips64*-gnuabi64|mipsisa64*-gnuabi64|\
-		mips64*-gnuabin64|mipsisa64*-gnuabin64)
-		      [[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="n64";;
-		mips64*-gnuabi32|mipsisa64*-gnuabi32|\
-		mips64*-gnuabio32|mipsisa64*-gnuabio32)
-		      [[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="o32";;
+			[[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="n32"
+			;;
+		mips64*-gnuabi64|mipsisa64*-gnuabi64|mips64*-gnuabin64|mipsisa64*-gnuabin64)
+			[[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="n64"
+			;;
+		mips64*-gnuabi32|mipsisa64*-gnuabi32|mips64*-gnuabio32|mipsisa64*-gnuabio32)
+			[[ ${MULTILIB_ABIS} == "default" ]] && MULTILIB_ABIS="o32"
+			;;
 	esac
 
 	# Tweak packages based upon CTARGET
 	case ${CTARGET} in
 		# Normal Linux host, just diff libc
-		*-dietlibc) LPKG="dietlibc"; LCAT="dev-libs";;
-		*-gnu*)     LPKG="glibc";;
-		*-klibc)    LPKG="klibc";;
-		*-uclibc*)  LPKG="uclibc-ng";;
-		*-uclinux)  LPKG="uclibc-ng";;
-		*-musl*)    LPKG="musl";;
+		*-dietlibc)
+			LPKG="dietlibc"
+			LCAT="dev-libs"
+			;;
+		*-gnu*)
+			LPKG="glibc"
+			;;
+		*-klibc)
+			LPKG="klibc"
+			;;
+		*-uclibc*)
+			LPKG="uclibc-ng"
+			;;
+		*-uclinux)
+			LPKG="uclibc-ng"
+			;;
+		*-musl*)
+			LPKG="musl"
+			;;
 
 		# Windows targets
 		*-cygwin)
-			LCAT="dev-libs"; LPKG="cygwin";
-			KPKG="[none]";
+			LCAT="dev-libs"
+			LPKG="cygwin"
+			KPKG="[none]"
 			;;
 
 		# Bare metal targets
@@ -407,10 +431,13 @@ parse_target() {
 	case ${CTARGET} in
 		# [1.]: no -fPIC flag support:
 		#       check as '$CC -fPIC -c -x c - </dev/null'
-		avr*|mmix*) pie_support=no;;
+		avr*|mmix*)
+			pie_support=no
+			;;
 		# [2.] mingw32 startup code is broken: bug #644930
 		#      at least on i686-w64-mingw32 and x86_64-w64-mingw32
-		mingw*|*-mingw*) pie_support=no;;
+		mingw*|*-mingw*) pie_support=no
+			;;
 		# Many bare-metal targets don't work with pie as-is
 		*-elf|*-eabi)
 			# mips can't generate freestanding PIC:
@@ -422,7 +449,7 @@ parse_target() {
 			;;
 	esac
 	# Running a hardened profile on the host forces pie #831165
-	if [[ $pie_support = "no" ]]; then
+	if [[ ${pie_support} == "no" ]]; then
 		# pie is >=gcc-6, nopie is <gcc-6
 		GMASK+=" pie -nopie"
 		GFORCE+=" nopie"
@@ -438,7 +465,7 @@ parse_target() {
 		alpha*|avr*|hppa*|ia64*|mmix*|nios2*) ssp_support=no;;
 	esac
 	# Running a hardened profile on the host forces ssp #831165
-	if [[ $ssp_support = "no" ]]; then
+	if [[ ${ssp_support} == "no" ]]; then
 		# ssp is >=gcc-6, nossp is <gcc-6
 		# blacklist hardened too because it'll force -fstack-clash-protection
 		GMASK+=" default-stack-clash-protection ssp hardened -nossp"
@@ -1451,9 +1478,9 @@ emerge-wrapper --target ${CTARGET} --init || exit 1
 ### Create directories usually created by sys-apps/baselayout
 ###
 ### Why we do that at all:
-### For multilib-aware targets (ppc64, s390x, sparc64, x86_64) Gentoo
+### For multilib-aware targets (ppc64, s390x, sparc64, x86_64), Gentoo
 ### normally uses libdir=lib64.
-### For crossdev it means /lib and /usr/lib does not get created at all
+### For crossdev, it means /lib and /usr/lib does not get created at all
 ### but gcc relies on their presence by refering to =/lib64 as
 ### =/usr/lib/../lib64 when builds itself (see https://bugs.gentoo.org/652724)
 ###
