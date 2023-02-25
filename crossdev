@@ -682,7 +682,7 @@ uninstall() {
 
 	# clean out files from crossdev itself
 	[[ -e ${EPREFIX}/var/db/pkg/cross-${CTARGET} ]] && rmdir "${EPREFIX}"/var/db/pkg/cross-${CTARGET}
-	rm -f "${EPREFIX}"/usr/bin/${CTARGET}-{emerge,fix-root,pkg-config} "${EPREFIX}"/usr/bin/emerge-${CTARGET}
+	rm -f "${EPREFIX}"/usr/bin/${CTARGET}-{emerge,ebuild,fix-root,pkg-config} "${EPREFIX}"/usr/bin/emerge-${CTARGET}
 
 	for f in make.{conf,globals,profile} ; do
 		f="${EPREFIX}/usr/${CTARGET}/etc/${f}"
