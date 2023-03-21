@@ -283,6 +283,12 @@ parse_target() {
 			WITH_DEF_HEADERS="no"
 			;;
 
+		nvptx*)
+			BPKG="nvptx-tools"
+			LPKG="newlib"
+			STAGE_DEFAULT=${STAGE_LIBC}
+			;;
+
 		# due to upstream lameness, build C/C++ at first glance
 		*-cygwin)
 			GUSE_DISABLE_STAGE_1+=" -nocxx cxx"
