@@ -1023,6 +1023,10 @@ case ${ACTION} in
 uninstall) uninstall; exit 0;;
 esac
 
+for _ in "${XPKGS[@]}"; do
+	XVERS+=( "${DEFAULT_VER}" )
+done
+
 BVER=${BVER:-${DEFAULT_VER}}
 GVER=${GVER:-${DEFAULT_VER}}
 KVER=${KVER:-${DEFAULT_VER}}
