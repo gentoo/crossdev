@@ -1,9 +1,8 @@
-# Copyright 2008-2010 Gentoo Foundation
+# Copyright 2008-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 include ../settings.mk
 
-PORTDIR ?= $(shell portageq envvar PORTDIR)
 FNAMES = cross-ebuild cross-emerge cross-fix-root cross-pkg-config emerge-wrapper
 SITEDIR = $(PREFIX)/share/crossdev/include/site
 ETC_SITEDIR = $(EPREFIX)/etc/crossdev/include/site
@@ -24,6 +23,5 @@ install:
 	sed -i -e s:@SITEDIR@:$(SITEDIR):g $(DESTDIR)$(SITEDIR)/config.site
 	sed -i -e s:@ETC_SITEDIR@:$(ETC_SITEDIR):g $(DESTDIR)$(SITEDIR)/config.site
 	mv $(DESTDIR)$(SITEDIR)/config.site $(DESTDIR)$(PREFIX)/share/
-	ln -sf $(PORTDIR)/profiles/embedded $(DESTDIR)$(PREFIX)/share/crossdev/etc/portage/make.profile
 
 .PHONY: all install
