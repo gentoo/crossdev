@@ -112,6 +112,7 @@ var="LIBDIR_${ABI}"
 eval libdir=\${${var}}
 if [ -z "${libdir}" ] ; then
 	# Fall back to probing the compiler.
+	## TODO: CLANG FIX
 	libdir=$(realpath "$(${CC:-${CHOST}-gcc} ${CFLAGS} ${LDFLAGS} -print-file-name=pkgconfig)/..")
 	# Chopping the basename isn't exactly correct, but it's good enough for now.
 	libdir=${libdir##*/}

@@ -31,7 +31,7 @@ die_logs() {
 	local log
 	eerror
 	eerror "If you file a bug, please attach the following logfiles:"
-	eerror "${PORT_LOGDIR}/cross-${CTARGET}-info.log"
+	eerror "${PORT_LOGDIR}/${CROSSDEV_OVERLAY_CATEGORY}-info.log"
 	for log in "$@" ; do
 		eerror "${log}"
 	done
@@ -48,6 +48,7 @@ cat << EOF
 Usage: ${HILITE}crossdev${NORMAL} ${GOOD}[options]${NORMAL} ${BRACKET}--target TARGET${NORMAL}
 
 Options:
+    ${GOOD}-L,  --llvm${NORMAL}              Use LLVM/Clang as a cross compiler
     ${GOOD}--b, --binutils${NORMAL} ver      Specify version of binutils to use
     ${GOOD}--g, --gcc${NORMAL} ver           Specify version of gcc to use
     ${GOOD}--k, --kernel${NORMAL} ver        Specify version of kernel headers to use
@@ -67,7 +68,6 @@ Options:
     ${GOOD}-P, --portage${NORMAL} opts       Options to pass to emerge (see emerge(1))
     ${GOOD}--with[out]-headers${NORMAL}      Build C library headers before C compiler?
     ${GOOD}--show-fail-log${NORMAL}          If the build fails, dump the failing log
-
 
 Overlay Options:
     ${GOOD}-oS, --overlays${NORMAL} list     Space delimited list of overlays to search
@@ -102,6 +102,15 @@ Extra Fun (must be run after above stages):
     ${GOOD}--ex-gdb${NORMAL}                 Build a cross gdb
     ${GOOD}--ex-pkg${NORMAL} pkg             Build extra packages (may be used multiple times)
 
+LLVM/Clang Specific Options (--llvm):
+    ${GOOD}--r, --crt${NORMAL} ver           Specify version of compiler-rt to use
+    ${GOOD}--c, --ccw${NORMAL} ver           Specify version of clang-crossdev-wrapper to use
+    ${GOOD}--[rc]env${NORMAL} env            Specify env settings for compiler-rt/clang-crossdev-wrapper
+    ${GOOD}--[rc]cat${NORMAL} category       Use compiler-rt/clang-crossdev-wrapper package from category
+    ${GOOD}--[rc]pkg${NORMAL} pkg            Use compiler-rt/clang-crossdev-wrapper package with given name
+    ${GOOD}-or, --ov-crt${NORMAL} path       Overlay for compiler-rt ebuilds [default: search]
+    ${GOOD}-oc, --ov-ccw${NORMAL} path       Overlay for clang-crossdev-wrapper ebuilds [default: search]
+
 ${BRACKET}Target (-t)${NORMAL} takes a tuple ${BRACKET}ARCHITECTURE-VENDOR-OS-LIBC${NORMAL}; see 'crossdev -t help'
 EOF
 	[[ -n $* ]] && echo && eerror "Error: $*"
@@ -123,6 +132,12 @@ STAGE_DISP=(
 
 parse_target() {
 	CTARGET=${1#cross-}
+	if [[ ${CTARGET} == "cross-*" ]] ; then
+		CTARGET=${1#cross-}
+	elif [[ ${CTARGET} == "cross_llvm-*" ]] ; then
+		CTARGET=${1#cross_llvm-}
+		LLVM="yes"
+	fi
 
 	[[ -z ${CTARGET} ]] && usage 1
 
@@ -351,6 +366,9 @@ parse_target() {
 		*-musl*)
 			LPKG="musl"
 			;;
+		*-llvm*)
+			LPKG="llvm-libc"
+			;;
 
 		# Windows targets
 		*-cygwin)
@@ -569,7 +587,7 @@ setup_portage_vars() {
 	# install our stuff to the first overlay in the list.
 	if [[ -z ${CROSSDEV_OVERLAY} ]] ; then
 		local repo_path repo_name
-		for repo_name in "cross-${CTARGET}" crossdev ; do
+		for repo_name in "${CROSSDEV_OVERLAY_CATEGORY}" crossdev ; do
 			repo_path=$(echo "${REPO_CONFIG}" | sed -n "/^${repo_name}:/s,^[^:]*:,,p")
 			if [[ -n ${repo_path} ]] ; then
 				CROSSDEV_OVERLAY=${repo_path}
@@ -620,11 +638,11 @@ uninstall() {
 	ewarn "Uninstalling target '${CTARGET}' ..."
 
 	# clean out portage config files
-	if [[ -d ${CROSSDEV_OVERLAY}/cross-${CTARGET} ]]; then
-		rm -r "${CROSSDEV_OVERLAY}"/cross-${CTARGET}
+	if [[ -d ${CROSSDEV_OVERLAY}/${CROSSDEV_OVERLAY_CATEGORY} ]]; then
+		rm -r "${CROSSDEV_OVERLAY}"/${CROSSDEV_OVERLAY_CATEGORY}
 		# if we remove all the package in the category,
 		# might as well remove the category itself
-		sed -e "/cross-${CTARGET}/d" \
+		sed -e "/${CROSSDEV_OVERLAY_CATEGORY}/d" \
 		    -i "${CROSSDEV_OVERLAY}"/profiles/categories
 	fi
 	# If profiles/categories is empty, see if we can remove the output overlay entirely
@@ -662,16 +680,21 @@ uninstall() {
 	# crossdev stopped creating 'package.keywords' in Jan 2020
 	for f in package.{accept_keywords,env,mask,keywords,use} profile/package.use.{force,mask} ; do
 		f="${CONFIGROOT}/${f}"
-		rm -f "${f}"/cross-${CTARGET}
+		rm -f "${f}"/${CROSSDEV_OVERLAY_CATEGORY}
 		rmdir "${f}" 2>/dev/null
 	done
-	rm -rf "${CONFIGROOT}"/env/cross-${CTARGET}
+	rm -rf "${CONFIGROOT}"/env/${CROSSDEV_OVERLAY_CATEGORY}
 	rmdir "${CONFIGROOT}"/env 2>/dev/null
-	rm -f "${EPREFIX}"/etc/revdep-rebuild/05cross-${CTARGET}
+	rm -f "${EPREFIX}"/etc/revdep-rebuild/05${CROSSDEV_OVERLAY_CATEGORY}
 	rmdir "${EPREFIX}"/etc/revdep-rebuild 2>/dev/null
 
+	if [[ "${LLVM}" == "yes" ]] ; then
+		rm ${EROOT}/etc/clang/cross/${CTARGET}.cfg
+		rmdir ${EROOT}/etc/clang/cross 2>/dev/null
+	fi
+
 	# Unmerge all toolchain packages for this target.
-	emerge -q --rage-clean "cross-${CTARGET}/*"
+	emerge -q --rage-clean "${CROSSDEV_OVERLAY_CATEGORY}/*"
 
 	# clean out known toolchain files (binutils/gcc)
 	for f in \
@@ -687,7 +710,7 @@ uninstall() {
 	rm -f "${EPREFIX}"/etc/env.d/{binutils,gcc}/config-${CTARGET}
 
 	# clean out files from crossdev itself
-	[[ -e ${EPREFIX}/var/db/pkg/cross-${CTARGET} ]] && rmdir "${EPREFIX}"/var/db/pkg/cross-${CTARGET}
+	[[ -e ${EPREFIX}/var/db/pkg/${CROSSDEV_OVERLAY_CATEGORY} ]] && rmdir "${EPREFIX}"/var/db/pkg/${CROSSDEV_OVERLAY_CATEGORY}
 	rm -f "${EPREFIX}"/usr/bin/${CTARGET}-{emerge,ebuild,fix-root,pkg-config} "${EPREFIX}"/usr/bin/emerge-${CTARGET}
 
 	for f in make.{conf,globals,profile} ; do
@@ -830,11 +853,14 @@ GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" GUSE="" GENV="" GOVL="" GMASK
 KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" KUSE="" KENV="" KOVL="" KMASK="" KFORCE=""
 LCAT="sys-libs"   ; LPKG="[none]"        ; LVER="" LUSE="" LENV="" LOVL="" LMASK="" LFORCE=""
 DCAT="sys-devel"  ; DPKG="gdb"           ; DVER="" DUSE="" DENV="" DOVL="" DMASK="" DFORCE=""
+RCAT="sys-libs"   ; RPKG="compiler-rt"   ; RVER="" RUSE="" RENV="" ROVL="" RMASK="" RFORCE=""
+CCAT="sys-devel"  ; CPKG="clang-crossdev-wrappers" ; CVER="" CUSE="" CENV="" COVL="" CMASK="" CFORCE=""
 XPKGS=() XVERS=() XUSES=() XENVS=() XOVLS=() XMASKS=() XFORCES=()
 DEFAULT_VER="[latest]"
 SEARCH_OVERLAYS=""
 CROSSDEV_OVERLAY=""
 CROSSDEV_OVERLAY_NAME=""
+CROSSDEV_OVERLAY_CATEGORY_PREFIX="cross-"
 CROSSDEV_OVERLAY_CREATE_REPOS_CONF=""
 AUTOGEN_TAG="# Autogenerated and managed by crossdev"
 # These flags are always disabled for cross-gcc; either usually/always broken, or
@@ -866,6 +892,7 @@ ACTION="install"
 SHOW_FAIL_LOG="no"
 SHOW_TARGET_CFG="no"
 INIT_TARGET_ONLY="no"
+LLVM="no"
 
 while [[ $# -gt 0 ]] ; do
 	case $1 in
@@ -896,8 +923,19 @@ while [[ $# -gt 0 ]] ; do
 	-ol|--ov-libc)     shift; LOVL=$1;;
 	--lcat)            shift; LCAT=$1;;
 	--lpkg)            shift; LPKG=$1;;
+	--r|--crt)         shift; RVER=$1;;
+	--renv)            shift; RENV=$1;;
+	-or|--ov-crt)      shift; ROVL=$1;;
+	--rcat)            shift; RCAT=$1;;
+	--rpkg)            shift; RPKG=$1;;
+	--c|--ccw)         shift; CVER=$1;;
+	--cenv)            shift; CENV=$1;;
+	-oc|--ov-ccw)      shift; COVL=$1;;
+	--ccat)            shift; CCAT=$1;;
+	--cpkg)            shift; CPKG=$1;;
 	-ox|--ov-extra)    shift; XOVLS+=( "$1" );;
 	--env)             shift; AENV=$1;;
+	-L|--llvm)         LLVM="yes";;
 	-A|--abis)         shift; MULTILIB_ABIS=$1;;
 	--host-abi)        shift; HOST_ABI=$1;;
 	-S|--stable)       DEFAULT_VER="[stable]";;
@@ -924,6 +962,14 @@ while [[ $# -gt 0 ]] ; do
 	esac
 	shift
 done
+
+if [[ "${LLVM}" == "yes" ]] ; then
+	WITH_HEADERS="yes"
+	CROSSDEV_OVERLAY_CATEGORY_PREFIX="cross_llvm-"
+fi
+
+CROSSDEV_OVERLAY_CATEGORY="${CROSSDEV_OVERLAY_CATEGORY_PREFIX}${CTARGET}"
+
 [[ ${SET_X} == "yes" ]] && set -x
 case ${ACTION} in
 uninstall) uninstall; exit 0;;
@@ -950,6 +996,8 @@ if [[ ${LPKG} == "newlib" && ${LVER} == "[stable]" ]]; then
 	LVER="[latest]"
 fi
 
+RVER="[latest]"
+
 show_target_cfg() {
 	local pkgs crosspkgs=()
 
@@ -973,7 +1021,7 @@ show_target_cfg() {
 
 	echo "arch=${TARCH}"
 	echo "target=${CTARGET}"
-	echo "category=cross-${CTARGET}"
+	echo "category=${CROSSDEV_OVERLAY_CATEGORY}"
 	while [[ ${#pkgs[@]} -gt 0 ]] ; do
 		local pkg=${pkgs[0]}
 		local v=${pkgs[1]}
@@ -1110,6 +1158,7 @@ fi
 ### do the emerge ###
 info() {
 hr -
+[[ "${LLVM}" == "yes" ]] && einfo "Using LLVM/Clang as cross compiler, experimental!"
 einfo "crossdev version:      ${CROSSDEV_VER}"
 einfo "Host Portage ARCH:     ${HARCH}"
 einfo "Host Portage System:   ${HCHOST} (${HCHOSTS[*]})"
@@ -1122,10 +1171,14 @@ einfo "Target ABIs:           ${MULTILIB_ABIS}${def_out}"
 echo
 ex_fast || {
 is_s0 && {
-einfo "binutils:              `pretty_atom ${BPKG}- ${BVER}`"
+[[ "${LLVM}" == "yes" ]] || einfo "binutils:              `pretty_atom ${BPKG}- ${BVER}`"
 }
 is_s1 && {
-einfo "gcc:                   `pretty_atom ${GPKG}- ${GVER}`"
+	if [[ "${LLVM}" == "yes" ]] ; then
+		einfo "compiler-rt:           `pretty_atom ${RPKG}- ${RVER}`"
+	else
+		einfo "gcc:                   `pretty_atom ${GPKG}- ${GVER}`"
+	fi
 }
 is_s2 && {
 [[ ${KPKG} != "[none]" ]] && \
@@ -1157,7 +1210,7 @@ if [[ ${INIT_TARGET_ONLY} != "yes" ]] ; then
 	(
 	info
 	emerge -v --info
-	) >& "${PORT_LOGDIR}"/cross-${CTARGET}-info.log || exit 1
+	) >& "${PORT_LOGDIR}"/${CROSSDEV_OVERLAY_CATEGORY}-info.log || exit 1
 fi
 
 ####################################
@@ -1172,8 +1225,8 @@ check_trailing_newline() { #267132
 }
 _set_portage_file() {
 	local pkg=$1 output=$2
-	[[ ! -f ${output} ]] && output+="/cross-${CTARGET}"
-	[[ -e ${output} ]] && sed -i -e "/^cross-${CTARGET}\/${pkg}/d" ${output}
+	[[ ! -f ${output} ]] && output+="/${CROSSDEV_OVERLAY_CATEGORY}"
+	[[ -e ${output} ]] && sed -i -e "/^${CROSSDEV_OVERLAY_CATEGORY}\/${pkg}/d" ${output}
 	check_trailing_newline ${output}
 	echo ${output}
 }
@@ -1189,23 +1242,23 @@ set_keywords() {
 			*)          keywords="${TARCH} ~${TARCH}";;
 		esac
 		[[ "${TARCH}" != "${HARCH}" ]] && keywords="${keywords} -${HARCH} -~${HARCH}"
-		echo "cross-${CTARGET}/${pkg} ${keywords}" >> ${output}
+		echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} ${keywords}" >> ${output}
 	else
 		local op=$(ver_get_op "${ver}")
 		if [[ -n ${op} ]] ; then
 			# user has been explicit in the version they desire
 			ver=$(ver_chop_op "${ver}")
-			echo "cross-${CTARGET}/${pkg} -*" >> ${output}
-			echo "${op}cross-${CTARGET}/${pkg}-${ver} * ~* **" >> ${output}
+			echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} -*" >> ${output}
+			echo "${op}${CROSSDEV_OVERLAY_CATEGORY}/${pkg}-${ver} * ~* **" >> ${output}
 			if [[ ${ver} != "9999" ]] ; then
 				# Disable live versions unless exactly requested.
 				output=$(_set_portage_file ${pkg} package.mask)
-				echo ">=cross-${CTARGET}/${pkg}-9999" >> ${output}
+				echo ">=${CROSSDEV_OVERLAY_CATEGORY}/${pkg}-9999" >> ${output}
 			fi
 		else
-			echo "cross-${CTARGET}/${pkg} * ~* **" >> ${output}
+			echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} * ~* **" >> ${output}
 			output=$(_set_portage_file ${pkg} package.mask)
-			echo ">cross-${CTARGET}/${pkg}-${ver}" >> ${output}
+			echo ">${CROSSDEV_OVERLAY_CATEGORY}/${pkg}-${ver}" >> ${output}
 		fi
 	fi
 }
@@ -1213,25 +1266,25 @@ set_use() {
 	local pkg=$1 output use=${@:2}
 	[[ -z ${use} ]] && return 0
 	output=$(_set_portage_file ${pkg} package.use)
-	echo "cross-${CTARGET}/${pkg} ${use}" >> ${output}
+	echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} ${use}" >> ${output}
 }
 set_use_force() {
 	local pkg=$1 output use=${@:2}
 	[[ -z ${use} ]] && return 0
 	output=$(_set_portage_file ${pkg} profile/package.use.force)
-	echo "cross-${CTARGET}/${pkg} ${use}" >> ${output}
+	echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} ${use}" >> ${output}
 }
 set_use_mask() {
 	local pkg=$1 output use=${@:2}
 	[[ -z ${use} ]] && return 0
 	output=$(_set_portage_file ${pkg} profile/package.use.mask)
-	echo "cross-${CTARGET}/${pkg} ${use}" >> ${output}
+	echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} ${use}" >> ${output}
 }
 set_links() {
 	local cat=$1 pkg=$2 ovl=$3
 	local s srcdir=${MAIN_REPO_PATH} d
 
-	d="${CROSSDEV_OVERLAY}"/cross-${CTARGET}/${pkg}
+	d="${CROSSDEV_OVERLAY}"/${CROSSDEV_OVERLAY_CATEGORY}/${pkg}
 	# if auto searching and something is already set, leave it be
 	if [[ -z ${ovl} ]] && [[ -e ${d} ]] ; then #211386 #347389
 		einfo "leaving ${cat}/${pkg} in ${CROSSDEV_OVERLAY}"
@@ -1284,7 +1337,7 @@ set_env() {
 	# the best we've got without implementing reference counting on
 	# installed paths in the PM.
 
-	output="env/cross-${CTARGET}/${pkg}.conf"
+	output="env/${CROSSDEV_OVERLAY_CATEGORY}/${pkg}.conf"
 	cat <<-EOF > "${output}"
 	SYMLINK_LIB=no
 	COLLISION_IGNORE="\${COLLISION_IGNORE} /usr/lib/debug/.build-id"
@@ -1322,7 +1375,8 @@ set_env() {
 	done >> "${output}"
 
 	output=$(_set_portage_file ${pkg} package.env)
-	echo "cross-${CTARGET}/${pkg} cross-${CTARGET}/${pkg}.conf" >> ${output}
+	echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} ${CROSSDEV_OVERLAY_CATEGORY}/${pkg}.conf" >> ${output}
+    [[ "${LLVM}" == "yes" ]] && echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} ${CROSSDEV_OVERLAY_CATEGORY}/llvm.conf" >> ${output}
 }
 set_portage() {
 	local l=$1
@@ -1382,7 +1436,7 @@ set_metadata() {
 	fi
 
 	# build up a list of possible repos where we can pull from
-	for d in "${BOVL}" "${GOVL}" "${KOVL}" "${LOVL}" "${DOVL}" ${SEARCH_OVERLAYS} "${MAIN_REPO_PATH}" ; do
+	for d in "${BOVL}" "${GOVL}" "${KOVL}" "${LOVL}" "${ROVL}"  "${DOVL}" ${SEARCH_OVERLAYS} "${MAIN_REPO_PATH}" ; do
 		[[ -z ${d} ]] && continue
 
 		name=
@@ -1445,28 +1499,35 @@ set_metadata() {
 	fi
 }
 
-xmkdir -p "${CROSSDEV_OVERLAY}"/{cross-${CTARGET},profiles}
+xmkdir -p "${CROSSDEV_OVERLAY}"/{${CROSSDEV_OVERLAY_CATEGORY},profiles}
 f="${CROSSDEV_OVERLAY}"/profiles/categories
 check_trailing_newline "${f}"
-grep -qs "^cross-${CTARGET}$" "${f}" \
-	|| echo cross-${CTARGET} >> "${f}"
+grep -qs "^${CROSSDEV_OVERLAY_CATEGORY}$" "${f}" \
+	|| echo ${CROSSDEV_OVERLAY_CATEGORY} >> "${f}"
 
 xmkdir -p "${CONFIGROOT}"
 cd "${CONFIGROOT}" || die "wtf!?"
-for f in package.{accept_keywords,env,mask,use} env/cross-${CTARGET} profile/package.use.{force,mask} ; do
+for f in package.{accept_keywords,env,mask,use} env/${CROSSDEV_OVERLAY_CATEGORY} profile/package.use.{force,mask} ; do
 	[[ -f ${f} ]] && die "please convert ${CONFIGROOT}/${f} to a directory"
 	xmkdir -p "${f}"
-	rm -f "${f}/cross-${CTARGET}"
+	rm -f "${f}/${CROSSDEV_OVERLAY_CATEGORY}"
 done
 
-for v in B G K L D ; do
-	set_portage ${v}
+pkglist=( K L )
+if [[ ${LLVM} == "yes" ]] ; then
+	pkglist+=( R C )
+else
+	pkglist+=( B G D )
+fi
+for pkg in ${pkglist[@]}; do
+	set_portage $pkg
 done
+
 for_each_extra_pkg set_portage X
 set_metadata
 
 xmkdir -p "${EPREFIX}"/etc/revdep-rebuild
-cat > "${EPREFIX}"/etc/revdep-rebuild/05cross-${CTARGET} << EOF
+cat > "${EPREFIX}"/etc/revdep-rebuild/05${CROSSDEV_OVERLAY_CATEGORY} << EOF
 # Generated by crossdev-${CROSSDEV_VER}
 # Ignore ${CTARGET} root, https://bugs.gentoo.org/182601.
 SEARCH_DIRS_MASK="${EPREFIX}/usr/${CTARGET}"
@@ -1478,7 +1539,7 @@ hr
 ### Create links for helper scripts ###
 
 xmkdir -p "${EPREFIX}"/usr/${CTARGET}
-emerge-wrapper --target ${CTARGET} --init || exit 1
+LLVM="${LLVM}" emerge-wrapper --target ${CTARGET} --init || exit 1
 
 #############################################################
 ### Create directories usually created by sys-apps/baselayout
@@ -1526,10 +1587,31 @@ case ${CTARGET} in
 			;;
 esac
 
+# HOSTCC is used by linux-headers to compile fixdeps program for CBUILD
+if [[ "${LLVM}" == "yes" ]] ; then
+	cat <<-EOF > "${CONFIGROOT}/env/${CROSSDEV_OVERLAY_CATEGORY}/llvm.conf"
+	AR=llvm-ar
+	AS=llvm-as
+	CC="${CTARGET}-clang"
+	CROSS_COMPILE="${CTARGET}-"
+	CXX="${CTARGET}-clang++"
+	DLLTOOL=llvm-dlltool
+	HOSTCC="${CC:=clang}"
+	HOSTCXX="${CXX:=clang++}"
+	LD=ld.lld
+	LLVM=1
+	NM=llvm-nm
+	OBJCOPY=llvm-objcopy
+	RANLIB=llvm-ranlib
+	READELF=llvm-readelf
+	STRIP=llvm-strip
+	EOF
+fi
+
 #################
 emerged_with_use() {
 	local pkg=$1 use=$2
-	grep -qs ${use} "${EPREFIX}"/var/db/pkg/cross-${CTARGET}/${pkg}-*/USE
+	grep -qs ${use} "${EPREFIX}"/var/db/pkg/${CROSSDEV_OVERLAY_CATEGORY}/${pkg}-*/USE
 }
 # Force package rebuild if any of passed USE-flag is set otherwise install package only if flag is missing.
 # $1    - pkg
@@ -1548,8 +1630,9 @@ set_eopts_on_pkg_status() {
 	# Install if missing
 	EOPTS=${EOPTS_UP}
 }
+
 doemerge() {
-	local category="cross-${CTARGET}"
+	local category="${CROSSDEV_OVERLAY_CATEGORY}"
 	local pn=$1
 	local atom="${category}/${pn}"
 
@@ -1565,7 +1648,7 @@ doemerge() {
 		|| logfile=${logfile}-$2.log
 
 	einfo "Log: ${logfile}"
-	ebegin "Emerging cross-${2:-${pn}}"
+	ebegin "Emerging ${CROSSDEV_OVERLAY_CATEGORY_PREFIX}${2:-${pn}}"
 
 	if has -v ${UOPTS} || has -p ${UOPTS} || has -vp ${UOPTS} || has -pv ${UOPTS} ; then
 		SHOW_FAIL_LOG="no"
@@ -1596,7 +1679,7 @@ doemerge() {
 	eend 0
 }
 
-# We include the '-u' so that we don't re-emerge packages.  Avoid
+# We include the '-u' so that we don't re-emerge packages.	Avoid
 # using --nodeps as packages have more host depends nowadays (like
 # gcc wanting updated mpfr/gmp).  Don't use --oneshot anymore to
 # follow normal emerge behavior; people can pass the -1 to portage
@@ -1610,13 +1693,67 @@ export EMERGE_DEFAULT_OPTS="--quiet-build=n"
 # screw random strictness in cross-compilers
 export FEATURES="${FEATURES} -stricter"
 
+if [[ "${LLVM}" == "yes" ]]; then
+	CLANG_CROSS_CFG_DIR=/etc/clang/cross
+	[[ -d "${CLANG_CROSS_CFG_DIR}" ]] || mkdir -p "${CLANG_CROSS_CFG_DIR}"
+
+	export CLANG_CROSS_CFG="${CLANG_CROSS_CFG_DIR}/${CTARGET}.cfg"
+	# Force --unwindlib=none for now
+	cat <<-EOF > "${CLANG_CROSS_CFG}"
+	--rtlib=compiler-rt
+	--sysroot=/usr/${CTARGET}
+	--target=${CTARGET}
+	--unwindlib=none
+	-fuse-ld=lld
+	EOF
+	# Workaround until LLVM libc supports dynamic linking and SSP
+	[[ "${LPKG}" == "llvm-libc" ]] && cat <<-EOF >> "${CLANG_CROSS_CFG}"
+	-static
+	-fno-stack-protector
+	EOF
+fi
+
 # maybe someday this work, but that day != today
 USE="${USE} -selinux"
 
 if ! ex_fast ; then
 
 	# stage 0: binutils
-	USE="${BUSE}" doemerge ${BPKG}
+	if [[ "${LLVM}" == "yes" ]] ; then
+		if [[ $(portageq has_version / "sys-devel/llvm") -ne 0 ]] ; then
+			eerror "LLVM is not installed"
+			exit 1
+		fi
+
+		best_ver=$(portageq best_version "${EPREFIX}"/ sys-devel/llvm)
+		llvm_use=$(portageq metadata "${EPREFIX}"/ installed "${best_ver}" USE)
+
+		llvm_arch=""
+		case ${CTARGET} in
+			amd64*) llvm_arch="X86" ;;
+			arm*) llvm_arch="ARM" ;;
+			aarch64*) llvm_arch="AArch64" ;;
+			riscv*) llvm_arch="RISCV" ;;
+			mips*) llvm_arch="Mips" ;;
+			loongarch*) llvm_arch="LoongArch" ;;
+			powerpc*) llvm_arch="PowerPC" ;;
+			sparc*) llvm_arch="Sparc" ;;
+		esac
+
+		supported_arch=0
+		for flag in ${llvm_use} ; do
+			if [[ ${flag} == llvm_targets_* ]] ; then
+				target=${flag#llvm_targets_}
+				[[ ${llvm_arch} == ${target} ]] && supported_arch=1
+			fi
+		done
+
+		[[ ${supported_arch} -eq 0 ]] && die "Target architecture not supported by installed LLVM toolchain"
+
+		USE="${CUSE}" doemerge ${CPKG}
+	else
+		USE="${BUSE}" doemerge ${BPKG}
+	fi
 
 	# stage1: bare C compiler
 	if is_s1 ; then
@@ -1641,9 +1778,17 @@ if ! ex_fast ; then
 		fi
 
 		# then finally get around to the C compiler
-		USE="${GUSE} ${USE} ${GUSE_DISABLE_STAGE_1}" \
-		CROSSCOMPILE_OPTS="" \
-			doemerge ${GPKG} ${GPKG}-stage1
+		if [[ "${LLVM}" == "yes" ]]; then
+			# Compile compiler-rt
+			USE="${RUSE} ${USE}" \
+			CROSSCOMPILE_OPTS="" \
+				doemerge ${RPKG}
+		else
+			USE="${GUSE} ${USE} ${GUSE_DISABLE_STAGE_1}" \
+			CROSSCOMPILE_OPTS="" \
+				doemerge ${GPKG} ${GPKG}-stage1
+		fi
+
 	fi
 
 	# stage2: kernel headers
@@ -1667,8 +1812,8 @@ if ! ex_fast ; then
 	fi
 
 	# stage4: full compiler (C/C++/etc...)
-	if is_s4 ; then
-		EOPTS="${EOPTS_UP} --newuse"
+	if is_s4 && [[ "${LLVM}" != "yes" ]] ; then
+		EOPTS="${EOPTS_UP} --newuse" \
 		USE="${GUSE} ${USE} ${GUSE_DISABLE_STAGE_2}" \
 			doemerge ${GPKG} ${GPKG}-stage2
 	fi

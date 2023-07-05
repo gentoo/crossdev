@@ -87,6 +87,26 @@ cross_wrap_etc()
 		-e "s:__CBUILD__:${CBUILD}:g" \
 		"${confs[@]}"
 
+	if [[ "${LLVM}" == "yes" ]] ; then
+		cat <<-EOF >>${SYSROOT}/etc/portage/profile/make.defaults
+	AR=llvm-ar
+	AS=llvm-as
+	CC="${CHOST}-clang"
+	CROSS_COMPILE="${CHOST}-"
+	CXX="${CHOST}-clang++"
+	DLLTOOL=llvm-dlltool
+	HOSTCC="${CC:=clang}"
+	HOSTCXX="${CXX:=clang++}"
+	LD=ld.lld
+	LLVM=1
+	NM=llvm-nm
+	OBJCOPY=llvm-objcopy
+	RANLIB=llvm-ranlib
+	READELF=llvm-readelf
+	STRIP=llvm-strip
+	EOF
+	fi
+
 	return 0
 }
 
