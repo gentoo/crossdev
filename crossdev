@@ -1730,7 +1730,7 @@ if ! ex_fast ; then
 
 		llvm_arch=""
 		case ${CTARGET} in
-			amd64*) llvm_arch="X86" ;;
+			x86*) llvm_arch="X86" ;;
 			arm*) llvm_arch="ARM" ;;
 			aarch64*) llvm_arch="AArch64" ;;
 			riscv*) llvm_arch="RISCV" ;;
