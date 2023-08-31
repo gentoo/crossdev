@@ -966,6 +966,8 @@ done
 if [[ "${LLVM}" == "yes" ]] ; then
 	WITH_HEADERS="yes"
 	CROSSDEV_OVERLAY_CATEGORY_PREFIX="cross_llvm-"
+    # To avoid bug reports
+    [[ "${LPKG}" == "glibc" ]] && die "LLVM/Clang cannot currently compile glibc"
 fi
 
 CROSSDEV_OVERLAY_CATEGORY="${CROSSDEV_OVERLAY_CATEGORY_PREFIX}${CTARGET}"
