@@ -118,7 +118,9 @@ if [ -z "${libdir}" ] ; then
 	libdir=${libdir##*/}
 fi
 : ${libdir:=lib}
-export PKG_CONFIG_SYSTEM_LIBRARY_PATH="${PREFIX}/usr/${libdir}:${PREFIX}/${libdir}"
+export \
+	PKG_CONFIG_SYSTEM_LIBRARY_PATH="${PKG_CONFIG_ESYSROOT_DIR}/usr/${libdir}:${PKG_CONFIG_ESYSROOT_DIR}/${libdir}" \
+	PKG_CONFIG_SYSTEM_INCLUDE_PATH="${PKG_CONFIG_ESYSROOT_DIR}/usr/include"
 
 #
 # Set the pkg-config search paths to our staging directory.
