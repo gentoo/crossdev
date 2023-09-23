@@ -1722,7 +1722,7 @@ if ! ex_fast ; then
 
 	# stage 0: binutils
 	if [[ "${LLVM}" == "yes" ]] ; then
-		if [[ $(portageq has_version / "sys-devel/llvm") -ne 0 ]] ; then
+		if ! portageq has_version / "sys-devel/llvm" ; then
 			eerror "LLVM is not installed"
 			exit 1
 		fi
