@@ -244,6 +244,7 @@ parse_target() {
 		mips*)      TARCH=mips;;
 		powerpc64*) TARCH=ppc64;;
 		powerpc*)   TARCH=ppc;;
+		riscv*)     TARCH=riscv;;
 		sparc*)     TARCH=sparc;;
 		s390*)      TARCH=s390;;
 		sh*)        TARCH=sh;;
