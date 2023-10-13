@@ -95,6 +95,9 @@ fi
 export PKG_CONFIG_SYSROOT_DIR=${PKG_CONFIG_SYSROOT_DIR%/}
 PKG_CONFIG_ESYSROOT_DIR=${PKG_CONFIG_SYSROOT_DIR}${PREFIX}
 
+# https://github.com/pkgconf/pkgconf/issues/205
+export PKG_CONFIG_FDO_SYSROOT_RULES=1
+
 #
 # Some distributions pollute the pkg-config environment.
 # Time to pull a captain planet on them.
