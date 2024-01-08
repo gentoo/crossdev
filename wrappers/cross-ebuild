@@ -19,8 +19,13 @@ fi
 : ${PORTAGE_CONFIGROOT=${SYSROOT}${EPREFIX}}
 export EPREFIX SYSROOT PORTAGE_CONFIGROOT
 
-if [ -z "${CHOST}" ] || [ ! -d "${SYSROOT}" ] ; then
+if [ -z "${CHOST}" ] ; then
 	echo "cross-ebuild: CHOST is not set properly"
+	exit 1
+fi
+
+if [ ! -d "${SYSROOT}" ] ; then
+	echo "cross-ebuild: ${SYSROOT} does not exist (is CHOST set properly?)"
 	exit 1
 fi
 
