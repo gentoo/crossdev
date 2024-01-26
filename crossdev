@@ -1594,7 +1594,7 @@ esac
 if [[ "${LLVM}" == "yes" ]] ; then
 	cat <<-EOF > "${CONFIGROOT}/env/${CROSSDEV_OVERLAY_CATEGORY}/llvm.conf"
 	AR=llvm-ar
-	AS=llvm-as
+	AS="${CTARGET}-clang -c"
 	CC="${CTARGET}-clang"
 	CROSS_COMPILE="${CTARGET}-"
 	CXX="${CTARGET}-clang++"
