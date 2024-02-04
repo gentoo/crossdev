@@ -1,0 +1,135 @@
+#+title: crossdev
+
+* NAME
+crossdev - manual page for crossdev
+
+* SYNOPSIS
+*crossdev* [/options/] /--target TARGET/
+
+* OPTIONS
+- *-L*, *--llvm* :: Use LLVM/Clang as a cross compiler
+
+- *--b*, *--binutils* ver :: Specify version of binutils to use
+
+- *--g*, *--gcc* ver :: Specify version of gcc to use
+
+- *--k*, *--kernel* ver :: Specify version of kernel headers to use
+
+- *--l*, *--libc* ver :: Specify version of libc to use Note: versions
+  support depend atom syntaxes:
+
+  e.g. ">=2.20" "~4.6.1" "=2.13.1-r3"
+
+- *-A*, *--abis* abis :: Specify ABIs to build, first one is the default
+
+- *--host-abi* abi :: Specify the ABI of the compiler itself
+
+- *--env* env :: Specify env settings for all packages (see below)
+
+- *--[bdgkl]env* env :: Specify env settings for
+  binutils/gdb/gcc/kernel/libc Note: make sure to quote: 'VAR="some
+  value"\nFOO="cow"'
+
+- *--[bdgkl]cat* category :: Use binutils/gdb/gcc/kernel/libc package
+  from category
+
+- *--[bdgkl]pkg* pkg :: Use binutils/gdb/gcc/kernel/libc package with
+  given name
+
+- *-f*, *--force* :: I don't need a seat belt!
+
+- *-S*, *--stable* :: Use latest stable versions as default
+
+- *-C*, *--clean* target :: Uninstall specified target
+
+- *-P*, *--portage* opts :: Options to pass to emerge (see emerge(1))
+
+- *--with[out]-headers* :: Build C library headers before C compiler?
+
+- *--show-fail-log* :: If the build fails, dump the failing log
+
+** Overlay Options:
+- *-oS*, *--overlays* list :: Space delimited list of overlays to search
+  [default: `portageq repositories_configuration`]
+
+- *-oO*, *--ov-output* path :: Parent directory of overlay to write
+  crossdev package links [default: uses repo with name 'crossdev', or
+
+- 'cross-${CTARGET}', or falls back to first :: from *--overlays* list]
+
+- *-ob*, *--ov-binutils* path :: Overlay for binutils ebuilds [default:
+  search]
+
+- *-od*, *--ov-gdb* path :: Overlay for gdb ebuilds [default: search]
+
+- *-og*, *--ov-gcc* path :: Overlay for gcc ebuilds [default: search]
+
+- *-ok*, *--ov-kernel* path :: Overlay for kernel ebuilds [default:
+  search]
+
+- *-ol*, *--ov-libc* path :: Overlay for C library ebuilds [default:
+  search]
+
+- *-ox*, *--ov-extra* path :: Overlay for extra packages [default:
+  search]
+
+** Stage Options:
+- *-s0*, *--stage0* :: Build just binutils
+
+- *-s1*, *--stage1* :: Also build a bare C compiler (no C library/
+  C++/shared GCC libs/C++ exceptions/etc...)
+
+- *-s2*, *--stage2* :: Also build kernel headers
+
+- *-s3*, *--stage3* :: Also build the C library
+
+- *-s4*, *--stage4* :: Also build a full compiler [default] (shared libs
+  GCC/various lang frontends/etc...)
+
+** External Tooling Options:
+- *--show-target-cfg* :: Display target settings that crossdev will use
+
+- *--init-target* :: Setup config/overlay/etc... files only
+
+** Extra Fun (must be run after above stages):
+- *--ex-only* :: Skip the stage steps above
+
+- *--ex-gcc* :: Build extra gcc targets (gcj/ada/etc...)
+
+- *--ex-gdb* :: Build a cross gdb
+
+- *--ex-pkg* pkg :: Build extra packages (may be used multiple times)
+
+** LLVM/Clang Specific Options (--llvm):
+- *--r*, *--crt* ver :: Specify version of compiler-rt to use
+
+- *--c*, *--ccw* ver :: Specify version of clang-crossdev-wrapper to use
+
+- *--[rc]env* env :: Specify env settings for
+  compiler-rt/clang-crossdev-wrapper
+
+- *--[rc]cat* category :: Use compiler-rt/clang-crossdev-wrapper package
+  from category
+
+- *--[rc]pkg* pkg :: Use compiler-rt/clang-crossdev-wrapper package with
+  given name
+
+- *-or*, *--ov-crt* path :: Overlay for compiler-rt ebuilds [default:
+  search]
+
+- *-oc*, *--ov-ccw* path :: Overlay for clang-crossdev-wrapper ebuilds
+  [default: search]
+
+Target (*-t*) takes a tuple ARCHITECTURE-VENDOR-OS-LIBC; see 'crossdev
+*-t* help'
+
+* SEE ALSO
+The full documentation for *crossdev* is maintained as a Texinfo manual.
+If the *info* and *crossdev* programs are properly installed at your
+site, the command
+
+#+begin_quote
+*info crossdev*
+#+end_quote
+
+should give you access to the complete manual.

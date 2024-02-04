@@ -1,0 +1,220 @@
+.TH "crossdev" "1" 
+.SH "NAME"
+.PP
+crossdev - manual page for crossdev
+.SH "SYNOPSIS"
+.PP
+\fBcrossdev\fP [/options/] \fI--target TARGET\fP
+.SH "OPTIONS"
+.TP
+\fB\fB-L\fP, \fB--llvm\fP\fP
+Use LLVM/Clang as a cross compiler
+
+.TP
+\fB\fB--b\fP, \fB--binutils\fP ver\fP
+Specify version of binutils to use
+
+.TP
+\fB\fB--g\fP, \fB--gcc\fP ver\fP
+Specify version of gcc to use
+
+.TP
+\fB\fB--k\fP, \fB--kernel\fP ver\fP
+Specify version of kernel headers to use
+
+.TP
+\fB\fB--l\fP, \fB--libc\fP ver\fP
+Specify version of libc to use Note: versions
+support depend atom syntaxes:
+
+e.g. “>=2.20” “~4.6.1” “=2.13.1-r3”
+
+.TP
+\fB\fB-A\fP, \fB--abis\fP abis\fP
+Specify ABIs to build, first one is the default
+
+.TP
+\fB\fB--host-abi\fP abi\fP
+Specify the ABI of the compiler itself
+
+.TP
+\fB\fB--env\fP env\fP
+Specify env settings for all packages (see below)
+
+.TP
+\fB\fB--[bdgkl]env\fP env\fP
+Specify env settings for
+binutils/gdb/gcc/kernel/libc Note: make sure to quote: ’VAR=“some
+value”=“cow”’
+
+.TP
+\fB\fB--[bdgkl]cat\fP category\fP
+Use binutils/gdb/gcc/kernel/libc package
+from category
+
+.TP
+\fB\fB--[bdgkl]pkg\fP pkg\fP
+Use binutils/gdb/gcc/kernel/libc package with
+given name
+
+.TP
+\fB\fB-f\fP, \fB--force\fP\fP
+I don’t need a seat belt!
+
+.TP
+\fB\fB-S\fP, \fB--stable\fP\fP
+Use latest stable versions as default
+
+.TP
+\fB\fB-C\fP, \fB--clean\fP target\fP
+Uninstall specified target
+
+.TP
+\fB\fB-P\fP, \fB--portage\fP opts\fP
+Options to pass to emerge (see emerge(1))
+
+.TP
+\fB\fB--with[out]-headers\fP\fP
+Build C library headers before C compiler?
+
+.TP
+\fB\fB--show-fail-log\fP\fP
+If the build fails, dump the failing log
+.SS "Overlay Options:"
+.TP
+\fB\fB-oS\fP, \fB--overlays\fP list\fP
+Space delimited list of overlays to search
+[default: `portageq repositories\d\s-2configuration\s+2\u`]
+
+.TP
+\fB\fB-oO\fP, \fB--ov-output\fP path\fP
+Parent directory of overlay to write
+crossdev package links [default: uses repo with name ’crossdev’, or
+
+.TP
+\fB’cross-${CTARGET}’, or falls back to first\fP
+from \fB--overlays\fP list]
+
+.TP
+\fB\fB-ob\fP, \fB--ov-binutils\fP path\fP
+Overlay for binutils ebuilds [default:
+search]
+
+.TP
+\fB\fB-od\fP, \fB--ov-gdb\fP path\fP
+Overlay for gdb ebuilds [default: search]
+
+.TP
+\fB\fB-og\fP, \fB--ov-gcc\fP path\fP
+Overlay for gcc ebuilds [default: search]
+
+.TP
+\fB\fB-ok\fP, \fB--ov-kernel\fP path\fP
+Overlay for kernel ebuilds [default:
+search]
+
+.TP
+\fB\fB-ol\fP, \fB--ov-libc\fP path\fP
+Overlay for C library ebuilds [default:
+search]
+
+.TP
+\fB\fB-ox\fP, \fB--ov-extra\fP path\fP
+Overlay for extra packages [default:
+search]
+.SS "Stage Options:"
+.TP
+\fB\fB-s0\fP, \fB--stage0\fP\fP
+Build just binutils
+
+.TP
+\fB\fB-s1\fP, \fB--stage1\fP\fP
+Also build a bare C compiler (no C library/
+C++/shared GCC libs/C++ exceptions/etc...)
+
+.TP
+\fB\fB-s2\fP, \fB--stage2\fP\fP
+Also build kernel headers
+
+.TP
+\fB\fB-s3\fP, \fB--stage3\fP\fP
+Also build the C library
+
+.TP
+\fB\fB-s4\fP, \fB--stage4\fP\fP
+Also build a full compiler [default] (shared libs
+GCC/various lang frontends/etc...)
+.SS "External Tooling Options:"
+.TP
+\fB\fB--show-target-cfg\fP\fP
+Display target settings that crossdev will use
+
+.TP
+\fB\fB--init-target\fP\fP
+Setup config/overlay/etc... files only
+.SS "Extra Fun (must be run after above stages):"
+.TP
+\fB\fB--ex-only\fP\fP
+Skip the stage steps above
+
+.TP
+\fB\fB--ex-gcc\fP\fP
+Build extra gcc targets (gcj/ada/etc...)
+
+.TP
+\fB\fB--ex-gdb\fP\fP
+Build a cross gdb
+
+.TP
+\fB\fB--ex-pkg\fP pkg\fP
+Build extra packages (may be used multiple times)
+.SS "LLVM/Clang Specific Options (--llvm):"
+.TP
+\fB\fB--r\fP, \fB--crt\fP ver\fP
+Specify version of compiler-rt to use
+
+.TP
+\fB\fB--c\fP, \fB--ccw\fP ver\fP
+Specify version of clang-crossdev-wrapper to use
+
+.TP
+\fB\fB--[rc]env\fP env\fP
+Specify env settings for
+compiler-rt/clang-crossdev-wrapper
+
+.TP
+\fB\fB--[rc]cat\fP category\fP
+Use compiler-rt/clang-crossdev-wrapper package
+from category
+
+.TP
+\fB\fB--[rc]pkg\fP pkg\fP
+Use compiler-rt/clang-crossdev-wrapper package with
+given name
+
+.TP
+\fB\fB-or\fP, \fB--ov-crt\fP path\fP
+Overlay for compiler-rt ebuilds [default:
+search]
+
+.TP
+\fB\fB-oc\fP, \fB--ov-ccw\fP path\fP
+Overlay for clang-crossdev-wrapper ebuilds
+[default: search]
+
+.PP
+Target (\fB-t\fP) takes a tuple ARCHITECTURE-VENDOR-OS-LIBC; see ’crossdev
+\fB-t\fP help’
+.SH "SEE ALSO"
+.PP
+The full documentation for \fBcrossdev\fP is maintained as a Texinfo manual.
+If the \fBinfo\fP and \fBcrossdev\fP programs are properly installed at your
+site, the command
+
+.RS
+\fBinfo crossdev\fP
+
+.RE
+
+.PP
+should give you access to the complete manual.
