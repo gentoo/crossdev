@@ -1439,7 +1439,7 @@ set_metadata() {
 	fi
 
 	# build up a list of possible repos where we can pull from
-	for d in "${BOVL}" "${GOVL}" "${KOVL}" "${LOVL}" "${ROVL}"  "${DOVL}" ${SEARCH_OVERLAYS} "${MAIN_REPO_PATH}" ; do
+	for d in "${BOVL}" "${GOVL}" "${KOVL}" "${LOVL}" "${ROVL}" "${DOVL}" ${SEARCH_OVERLAYS} "${MAIN_REPO_PATH}" ; do
 		[[ -z ${d} ]] && continue
 
 		name=
