@@ -1496,6 +1496,12 @@ set_metadata() {
 		EOF
 	fi
 
+	if [[ ! -f "${CROSSDEV_OVERLAY}"/profiles/eapi ]] ; then
+		cat <<-EOF > "${CROSSDEV_OVERLAY}"/profiles/eapi || die "could not write ${CROSSDEV_OVERLAY}/profiles/eapi"
+		${repo_name}
+		EOF
+	fi
+
 	# If there is no repos.conf entry for the output overlay, create one here
 	if [[ -n ${CROSSDEV_OVERLAY_CREATE_REPOS_CONF} ]]; then
 		cat <<-EOF > "${CROSSDEV_OVERLAY_CREATE_REPOS_CONF}" || die "could not create the repo conf"
