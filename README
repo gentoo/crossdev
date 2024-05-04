@@ -15,7 +15,7 @@ It is useful for various purposes:
 Crossdev nano HOWTO
 -------------------
 
-So you want to cross-compile a Gentoo package (say busybox to s390x):
+So you want to cross-compile a Gentoo package (say, busybox to s390x):
 
   # crossdev -t s390x-unknown-linux-gnu
   # (optional) ARCH=s390 PORTAGE_CONFIGROOT=/usr/s390x-unknown-linux-gnu eselect profile set default/linux/s390/17.0/s390x
@@ -30,7 +30,7 @@ You can use qemu-user to run this binary:
   $ qemu-s390x -L /usr/s390x-unknown-linux-gnu/ /usr/s390x-unknown-linux-gnu/bin/busybox uname -m
   s390x
 
-or even chroot to /usr/s390x-unknown-linux-gnu directory!
+or even chroot to the /usr/s390x-unknown-linux-gnu directory!
 
 https://wiki.gentoo.org/wiki/Crossdev_qemu-static-user-chroot
 
@@ -120,7 +120,7 @@ If toolchains were simple programs crossdev would be a one-liner script:
   ROOT=...    \
       emerge "$@"
 
-Unfortunately todays' toolchains have loops in their build-time dependencies:
+Unfortunately today's toolchains have cycles/loops in their build-time dependencies:
 
 - cross-compiler itself normally needs a libc built for <target> because
   libc defines various aspects of userland ABI and features provided.
@@ -153,11 +153,13 @@ Done!
 How crossdev works (more details)
 ---------------------------------
 
-This section contains more details on what actually happens.
+This section contains more details on what actually happens (what crossdev
+does for you).
+
 Here we elaborate on each step outlined in previous section:
 
 1. create an overlay with new ebuilds (symlinks to existing ebuilds)
-   <skipping numeruos mkdir and ln commands>. After this step the
+   <skipping numerous mkdir and ln commands>. After this step the
    outcomes are:
 
    - overlay layout is formed in cross-overlay/:
@@ -262,19 +264,19 @@ Various notes (AKA dirty little tricks)
   Some ./configure scripts rely on runtime feature testing. We would
   still like to enable things even in cross-environment.
 
-  crossdev installs /usr/share/config.site with a bunch of cache
+  crossdev installs /usr/share/config.site.d/80crossdev.conf with a bunch of cache
   variables preset for targets. It might be a nice place to drop
   more things into. Or it could be a source of all your cross-compilation
   problems if variables set incorrect values.
 
 - eclass importing
 
-  To find out various things about target crossdev loads multilib.eclass
-  and tries to find out default ABI supported by the target.
+  To find out various things about the target, crossdev loads multilib.eclass
+  and tries to find out the default ABI supported by the target.
 
 - crossdev is just a tiny shell script around emerge :)
 
-  It's full source code is comparable to the size of this README.
+  Its full source code is comparable to the size of this README.
 
 - USE=headers-only
 
