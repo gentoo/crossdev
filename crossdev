@@ -315,7 +315,7 @@ parse_target() {
 			KPKG="[none]";
 			LCAT="dev-util"
 			LPKG="mingw64-runtime"
-			WITH_DEF_HEADERS="yes" # gcc can't boot without headers: bug #693770
+			WITH_DEF_HEADERS="yes" # gcc can't bootstrap without headers: bug #693770
 			GMASK+=" default-stack-clash-protection hardened"
 			GUSE+=" -default-stack-clash-protection -hardened" # gcc ICEs as libssp/ssp.c:186:1: internal compiler error: in seh_emit_stackalloc
 			;;
