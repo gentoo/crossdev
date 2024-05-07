@@ -162,7 +162,7 @@ parse_target() {
 		   - sh / sh[1-5] / sh64
 		   - x86_64 (amd64)
 		Supported C Libraries (LIBC):
-		   - glibc (gnu)
+		   - gnu (glibc)
 		   - klibc       [prob wont work]
 		   - musl
 		   - newlib      [bare metal/no operating system]
