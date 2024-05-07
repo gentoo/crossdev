@@ -1498,7 +1498,7 @@ set_metadata() {
 
 	if [[ ! -f "${CROSSDEV_OVERLAY}"/profiles/eapi ]] ; then
 		cat <<-EOF > "${CROSSDEV_OVERLAY}"/profiles/eapi || die "could not write ${CROSSDEV_OVERLAY}/profiles/eapi"
-		${repo_name}
+		8
 		EOF
 	fi
 
