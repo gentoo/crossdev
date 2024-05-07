@@ -1694,7 +1694,7 @@ doemerge() {
 	eend 0
 }
 
-# We include the '-u' so that we don't re-emerge packages.	Avoid
+# We include the '-u' so that we don't re-emerge packages. Avoid
 # using --nodeps as packages have more host depends nowadays (like
 # gcc wanting updated mpfr/gmp).  Don't use --oneshot anymore to
 # follow normal emerge behavior; people can pass the -1 to portage
