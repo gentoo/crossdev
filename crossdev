@@ -354,6 +354,9 @@ parse_target() {
 			;;
 		*-gnu*)
 			LPKG="glibc"
+			# gcc would not find -lpthread without static libraries while building
+			# its copy of libgomp.
+			LUSE+=" static-libs"
 			;;
 		*-klibc)
 			LPKG="klibc"
