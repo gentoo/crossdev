@@ -37,7 +37,6 @@ cross_wrap_etc()
 	setup_warning=false
 
 	cp -a "${PREFIX}"/share/crossdev/etc ${SYSROOT}/     || return 1
-	ln -snf "${MAIN_REPO_PATH}/profiles/embedded" "${SYSROOT}/etc/portage/make.profile" || return 1
 
 	local confs=(
 		${SYSROOT}/etc/portage/make.conf
@@ -131,6 +130,7 @@ cross_wrap()
 	if [[ -d ${SYSROOT} ]] && [[ ! -d ${SYSROOT}/etc ]] ; then
 		cross_wrap_etc "$@"
 	fi
+	PORTAGE_CONFIGROOT=${SYSROOT} eselect profile set --force "${PROFILE}"
 	return $?
 }
 
@@ -159,12 +159,18 @@ CHOST=${CHOST%-emerge}
 CHOST=${CHOST#emerge-}
 export CHOST
 
+PROFILE="embedded"
+
 if [[ $1 == "--target" ]] ; then
 	CHOST=$2
 	shift 2
 fi
 
 if [[ $1 == "--init" ]] ; then
+	shift
+	if [[ $1 == "--profile" ]] ; then
+		PROFILE=$2
+	fi
 	cross_init
 	exit $?
 fi
