@@ -897,6 +897,7 @@ SHOW_FAIL_LOG="no"
 SHOW_TARGET_CFG="no"
 INIT_TARGET_ONLY="no"
 LLVM="no"
+PROFILE="embedded"
 
 while [[ $# -gt 0 ]] ; do
 	case $1 in
@@ -939,6 +940,7 @@ while [[ $# -gt 0 ]] ; do
 	--cpkg)            shift; CPKG=$1;;
 	-ox|--ov-extra)    shift; XOVLS+=( "$1" );;
 	--env)             shift; AENV=$1;;
+	--profile)	   shift; PROFILE=$1;;
 	-L|--llvm)         LLVM="yes";;
 	-A|--abis)         shift; MULTILIB_ABIS=$1;;
 	--host-abi)        shift; HOST_ABI=$1;;
@@ -1557,7 +1559,7 @@ hr
 ### Create links for helper scripts ###
 
 xmkdir -p "${EPREFIX}"/usr/${CTARGET}
-LLVM="${LLVM}" emerge-wrapper --target ${CTARGET} --init || exit 1
+LLVM="${LLVM}" emerge-wrapper --target ${CTARGET} --init --profile ${PROFILE} || exit 1
 
 #############################################################
 ### Create directories usually created by sys-apps/baselayout
