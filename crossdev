@@ -499,6 +499,21 @@ parse_target() {
 		GMASK+=" default-stack-clash-protection ssp hardened -nossp"
 		GFORCE+=" nossp"
 	fi
+
+	# Configure the cet USE flag to match the profiles. We especially
+	# don't want to enable it on i?86.
+	case ${CTARGET} in
+		x86_64-*)
+			BFORCE+=" cet"
+			GUSE+=" cet"
+			LUSE+=" cet"
+			;;
+		*)
+			BMASK+=" cet"
+			GMASK+=" cet"
+			LMASK+=" cet"
+			;;
+	esac
 }
 
 parse_repo_config() {
