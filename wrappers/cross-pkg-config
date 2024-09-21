@@ -103,8 +103,6 @@ export PKG_CONFIG_FDO_SYSROOT_RULES=1
 # Time to pull a captain planet on them.
 #
 unset PKG_CONFIG_PATH
-unset PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-unset PKG_CONFIG_ALLOW_SYSTEM_LIBS
 
 #
 # Try and figure out the appropriate libdir for this target.
