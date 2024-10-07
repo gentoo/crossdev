@@ -1736,7 +1736,8 @@ if [[ "${LLVM}" == "yes" ]]; then
 	--rtlib=compiler-rt
 	--sysroot=/usr/${CTARGET}
 	--target=${CTARGET}
-	--unwindlib=none
+	--unwindlib=libunwind
+	--stdlib=libc++
 	-fuse-ld=lld
 	EOF
 	# Workaround until LLVM libc supports dynamic linking and SSP
