@@ -1610,9 +1610,11 @@ LLVM="${LLVM}" emerge-wrapper --target ${CTARGET} --init || exit 1
 ### but gcc relies on their presence by refering to =/lib64 as
 ### =/usr/lib/../lib64 when builds itself (see https://bugs.gentoo.org/652724)
 ###
-### Thus we create non-symlinked layout early.
-xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib
+### Thus we create the layout early.
 xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib
+pushd "${EPREFIX}"/usr/${CTARGET} >/dev/null
+ln -s usr/lib lib
+popd >/dev/null
 ###
 ### We need some special riscv sauce here similar as in baselayout. Ugly.
 ### step 1: set up all multilib libdirs
