@@ -30,7 +30,12 @@ jobs:
           docker run -v $(pwd):/workspace -w /workspace \
             docker.io/gentoo/stage3:${{ matrix.stage3 }} bash -c "
             # Install dependencies
-            emerge --sync --quiet
+            # FIXME: uncomment
+            # emerge --sync --quiet
+            # FIXME: Remove this step once necessary changes are merged.
+            curl -L \
+              https://github.com/vadorovsky/gentoo/archive/refs/heads/cross-llvm.tar.gz | \
+              tar -xz -C /var/db/repos/gentoo
             emerge \
               app-eselect/eselect-repository \
               sys-apps/config-site
