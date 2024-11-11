@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: 00 4 * * *
+
+jobs:
+  crossdev:
+    strategy:
+      matrix:
+        include:
+          # `target` is the cross target.
+          # `stage3` is the host stage3.
+          - target: aarch64-unknown-linux-musl
+            stage3: musl-llvm
+            args: --llvm
+    name: crossdev target=${{ matrix.target }} stage3=${{ matrix.stage3 }}
+    runs-on: ubuntu-latest
+    container: docker.io/gentoo/stage3:${{ matrix.stage3 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          # FIXME: Uncomment
+          # emerge --sync --quiet
+          emerge \
+            app-eselect/eselect-repository \
+            sys-apps/config-site
+
+      # FIXME: Remove this step once necessary changes are merged.
+      - name: Use patched overlay
+        run: |
+          curl -L \
+            https://github.com/vadorovsky/gentoo/archive/refs/heads/cross-llvm.tar.gz | \
+            tar -xz
+
+      - name: Install crossdev
+        run: make install
+
+      - name: Create cross environment
+        run: crossdev ${{ matrix.args }} --target ${{ matrix.target }}
+
+      # zstd and its dependencies need both C and C++ toolchain. If any of them
+      # is broken, the installation will fail.
+      - name: Sanity check
+        run: ${{ matrix.target }}-emerge app-arch/zstd
