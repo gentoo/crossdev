@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: 00 4 * * *
+
+jobs:
+  crossdev:
+    strategy:
+      matrix:
+        target:
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+        stage3:
+          - latest # `openrc` (glibc+GCC) is tagged as `latest`
+          - musl
+    name: crossdev target=${{ matrix.target }} stage3=${{ matrix.stage3 }}
+    runs-on: ubuntu-latest
+    container: docker.io/gentoo/stage3:${{ matrix.stage3 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          emerge --sync --quiet
+          emerge \
+            app-eselect/eselect-repository \
+            sys-apps/config-site
+
+      - name: Install crossdev
+        run: make install
+
+      - name: Create cross environment
+        run: |
+          eselect repository create crossdev
+          crossdev ${{ matrix.args }} --target ${{ matrix.target }}
+
+      # zstd and its dependencies need both C and C++ toolchain. If any of them
+      # is broken, the installation will fail.
+      - name: Sanity check
+        run: ${{ matrix.target }}-emerge app-arch/zstd
