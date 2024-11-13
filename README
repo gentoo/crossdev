@@ -293,3 +293,18 @@ Various notes (AKA dirty little tricks)
   additional --test options).
 
 Happy cross-compiling!
+
+Testing
+-------
+
+This repository provides a script for testing crossdev in a container. It can
+be used to verify whether crossdev works for various host profiles:
+
+  $ ./scripts/container_test.sh --target aarch64-unknown-linux-musl
+  $ ./scripts/container_test.sh --tag musl --target aarch64-unknown-linux-musl
+
+--tag determines the container tag of the docker.io/gentoo/stage3 image used in
+the script and can be used to pick the appropriate host stage3/profile to use.
+
+This script is used by the CI job to test the whole matrix of supported host
+profiles and targets.
