@@ -14,35 +14,88 @@ jobs:
   crossdev:
     strategy:
       matrix:
+        # All targets which are known to be broken, are commented. Pull
+        # requests fixing them welcome!
         target:
-          - aarch64-unknown-linux-gnu
-          - aarch64-unknown-linux-musl
+          - target: aarch64-unknown-linux-gnu
+          - target: aarch64-unknown-linux-musl
+          - target: arm-unknown-linux-gnueabi
+          - target: arm-unknown-linux-gnueabihf
+          - target: arm-unknown-linux-musleabi
+          - target: arm-unknown-linux-musleabihf
+          - target: armeb-unknown-linux-gnueabi
+          - target: armeb-unknown-linux-gnueabihf
+          - target: armeb-unknown-linux-musleabi
+          - target: armeb-unknown-linux-musleabihf
+          # glibc fails to build: `attempt to use an ARM instruction on a
+          # Thumb-only processor`.
+          # - target: armv7-unknown-linux-gnueabi
+          # - target: armv7-unknown-linux-gnueabihf
+          - target: armv7-unknown-linux-musleabi
+          - target: armv7-unknown-linux-musleabihf
+          # binutils fails to configure: `machine 'loongaarch64-unknown' not
+          # recognized`
+          # - target: loongaarch64-unknown-linux-gnu
+          # - target: loongaarch64-unknown-linux-musl
+          - target: m68k-unknown-linux-gnu
+          - target: mips-unknown-linux-gnu
+          - target: mips-unknown-linux-musl
+          - target: mipsel-unknown-linux-gnu
+          - target: mipsel-unknown-linux-musl
+          - target: mips64-unknown-linux-gnu
+          # libgcc_s.so fails to build: `cannot find crti.o: No such file or
+          # directory`.
+          # - target: mips64-unknown-linux-musl
+          - target: mips64el-unknown-linux-gnu
+          # libgcc_s.so fails to build: `cannot find crti.o: No such file or
+          # directory`.
+          # - target: mips64el-unknown-linux-musl
+          - target: or1k-unknown-linux-gnu
+            args: --skip-system
+          - target: or1k-unknown-linux-musl
+            args: --skip-system
+          - target: powerpc-unknown-linux-gnu
+          - target: powerpc-unknown-linux-musl
+          - target: powerpc64-unknown-linux-gnu
+          - target: powerpc64-unknown-linux-musl
+          - target: riscv32-unknown-linux-gnu
+          # busybox fails to buils: `‘SYS_settimeofday’ undeclared`.
+          # - target: riscv32-unknown-linux-musl
+          - target: riscv64-unknown-linux-gnu
+          - target: riscv64-unknown-linux-musl
+          # glibc fails to build: `no support for pre-v8 sparc`.
+          # - target: sparc-unknown-linux-gnu
+          - target: sparc64-unknown-linux-gnu
+          - target: s390x-unknown-linux-gnu
+          # musl ebuilds don't support s390x. The target is supported upstream,
+          # we need to fix and test our ebuilds.
+          # - target: s390x-unknown-linux-musl
+          # All sh* targets fail to install binutils, because of a missing
+          # keyword.
+          # - target: sh2-unknown-linux-gnu
+          # - target: sh2-unknown-linux-musl
+          # - target: sh2eb-unknown-linux-gnu
+          # - target: sh2eb-unknown-linux-musl
+          # - target: sh4-unknown-linux-gnu
+          # - target: sh4-unknown-linux-musl
+          # - target: sh4eb-unknown-linux-gnu
+          # - target: sh4eb-unknown-linux-musl
+          - target: x86_64-unknown-linux-gnu
+          - target: x86_64-unknown-linux-musl
         stage3:
           - latest # `openrc` (glibc+GCC) is tagged as `latest`
-          - musl
-    name: crossdev target=${{ matrix.target }} stage3=${{ matrix.stage3 }}
+          - musl 
+      fail-fast: false
+    name: crossdev target=${{ matrix.target.target }} stage3=${{ matrix.stage3 }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Create cross environment
+        env:
+          CONTAINER_ENGINE: docker
         run: |
-          docker run -v $(pwd):/workspace -w /workspace \
-            docker.io/gentoo/stage3:${{ matrix.stage3 }} bash -c "
-            # Install dependencies
-            emerge --sync --quiet
-            emerge \
-              app-eselect/eselect-repository \
-              sys-apps/config-site
-
-            # Install crossdev
-            make install
-
-            # Create cross environment
-            eselect repository create crossdev
-            crossdev ${{ matrix.args }} --target ${{ matrix.target }}
-
-            # zstd and its dependencies need both C and C++ toolchain. If any of them
-            # is broken, the installation will fail.
-            run: ${{ matrix.target }}-emerge app-arch/zstd
-            "
+          ./scripts/container_test.sh \
+            --tag ${{ matrix.stage3 }} \
+            --target ${{ matrix.target.target }} \
+            ${{ matrix.target.args }}
