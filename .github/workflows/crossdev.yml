@@ -29,6 +29,8 @@ jobs:
         run: |
           docker run -v $(pwd):/workspace -w /workspace \
             docker.io/gentoo/stage3:${{ matrix.stage3 }} bash -c "
+            set -eux
+
             # Install dependencies
             emerge --sync --quiet
             emerge \
