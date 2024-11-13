@@ -42,7 +42,7 @@ jobs:
 
             # Create cross environment
             eselect repository create crossdev
-            crossdev ${{ matrix.args }} --target ${{ matrix.target }}
+            crossdev ${{ matrix.args }} --show-fail-log --target ${{ matrix.target }}
 
             # zstd and its dependencies need both C and C++ toolchain. If any of them
             # is broken, the installation will fail.
