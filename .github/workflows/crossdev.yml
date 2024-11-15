@@ -17,9 +17,53 @@ jobs:
         target:
           - aarch64-unknown-linux-gnu
           - aarch64-unknown-linux-musl
+          - arm-unknown-linux-gnueabi
+          - arm-unknown-linux-gnueabihf
+          - arm-unknown-linux-musleabi
+          - arm-unknown-linux-musleabihf
+          - armv7-unknown-linux-gnueabi
+          - armv7-unknown-linux-gnueabihf
+          - mips-unknown-linux-gnu
+          - mips-unknown-linux-musl
+          - mipsel-unknown-linux-gnu
+          - mipsel-unknown-linux-musl
+          - mips64-unknown-linux-gnu
+          - mips64-unknown-linux-musl
+          - mips64el-unknown-linux-gnu
+          - mips64el-unknown-linux-musl
+          - powerpc-unknown-linux-gnu
+          - powerpc-unknown-linux-musl
+          - powerpc64-unknown-linux-gnu
+          - powerpc64-unknown-linux-musl
+          - riscv32-unknown-linux-gnu
+          - riscv32-unknown-linux-musl
+          - riscv64-unknown-linux-gnu
+          - riscv64-unknown-linux-musl
+          - sparc-unknown-linux-gnu
+          - sparc64-unknown-linux-gnu
+          - s390x-unknown-linux-gnu
+          - s390x-unknown-linux-musl
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
         stage3:
           - latest # `openrc` (glibc+GCC) is tagged as `latest`
           - musl
+        # We exclude combinations which are known to be broken.
+        # Pull requests fixing them welcome!
+        exclude:
+          # glibc fails to build: `attempt to use an ARM instruction on a
+          # Thumb-only processor`.
+          - target: armv7-unknown-linux-gnueabi
+          # libgcc_s.so fails to build: `cannot find crti.o: No such file or
+          # directory`.
+          - target: mips64-unknown-linux-musl
+          - target: mips64el-unknown-linux-musl
+          # glibc fails to build: `no support for pre-v8 sparc`.
+          - target: sparc-unknown-linux-gnu
+          # musl ebuilds don't support s390x. The target is supported upstream,
+          # we need to fix and test our ebuilds.
+          - target: s390x-unknown-linux-musl
+      fail-fast: false
     name: crossdev target=${{ matrix.target }} stage3=${{ matrix.stage3 }}
     runs-on: ubuntu-latest
     steps:
@@ -29,6 +73,8 @@ jobs:
         run: |
           docker run -v $(pwd):/workspace -w /workspace \
             docker.io/gentoo/stage3:${{ matrix.stage3 }} bash -c "
+            set -eux
+
             # Install dependencies
             emerge --sync --quiet
             emerge \
@@ -40,9 +86,9 @@ jobs:
 
             # Create cross environment
             eselect repository create crossdev
-            crossdev ${{ matrix.args }} --target ${{ matrix.target }}
+            crossdev ${{ matrix.args }} --show-fail-log --target ${{ matrix.target }}
 
             # zstd and its dependencies need both C and C++ toolchain. If any of them
             # is broken, the installation will fail.
-            run: ${{ matrix.target }}-emerge app-arch/zstd
+            ${{ matrix.target }}-emerge @system
             "
