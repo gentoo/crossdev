@@ -303,11 +303,14 @@ parse_target() {
 			KPKG="[none]"
 			BPKG="nvptx-tools"
 			LPKG="newlib"
-			STAGE_DEFAULT=${STAGE_LIBC}
+			# Offloading targets are only really useful with
+			# openmp, unless doing standalone bare minimum testing.
+			# They also often want Fortran.
+			STAGE_DEFAULT=${STAGE_C_CPP}
+			GUSE+=" cxx openmp fortran"
 
 			# TODO: deduplicate this with newlib block below
 			GMASK+=" default-stack-clash-protection hardened ssp"
-			GUSE+=" cxx"
 			GUSE+=" -hardened" #687598, needs -fstack-check=specific support
 			GUSE+=" -default-stack-clash-protection -ssp" # SSP isn't supported for freestanding anyway
 			MULTILIB_USE="yes" #407275
