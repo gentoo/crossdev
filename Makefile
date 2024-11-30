@@ -11,7 +11,7 @@ install:
 	sed -i -e "s:@GENTOO_PORTAGE_EPREFIX@:$(EPREFIX):g" $(DESTDIR)$(PREFIX)/bin/crossdev
 	$(MAKE) -C wrappers install
 
-PV = $(shell test -e .git && date --date="`git log -1 --format=%ci`" +%Y%m%d)
+PV = $(shell test -e .git && git describe)
 P = crossdev-$(PV)
 COMP = xz
 dist:
