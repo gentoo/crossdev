@@ -1427,7 +1427,8 @@ set_portage() {
 			mask+=" -multilib"
 			force+=" multilib"
 			;;
-		*-newlib|*-elf|*-eabi)
+		nvptx*|*-newlib|*-elf|*-eabi)
+			# nvptx: needs multilib because of https://gcc.gnu.org/legacy-ml/gcc-help/2020-01/msg00106.html.
 			mask+=" -multilib"
 			force+=" multilib"
 			;;
