@@ -490,7 +490,7 @@ parse_target() {
 	case ${CTARGET} in
 		# [1.]: no -fstack-protector flag support:
 		#       check as '$CC -fstack-protector -c -x c - </dev/null'
-		alpha*|avr*|hppa*|ia64*|mmix*|nios2*) ssp_support=no;;
+		alpha*|avr*|hppa*|ia64*|nvptx*|mmix*|nios2*) ssp_support=no;;
 	esac
 	# Running a hardened profile on the host forces ssp #831165
 	if [[ ${ssp_support} == "no" ]]; then
