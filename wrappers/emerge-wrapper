@@ -62,7 +62,7 @@ cross_wrap_etc()
 	*musl*)   LIBC=musl ;;
 	*cygwin*) LIBC=Cygwin ;;
 	*mingw*)  LIBC=mingw ;;
-	*-newlib|*-elf|*-eabi) LIBC=newlib ;;
+	nvptx*|*-newlib|*-elf|*-eabi) LIBC=newlib ;;
 	*)        emit_setup_warning "No LIBC is known for this target." ;;
 	esac
 
