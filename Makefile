@@ -15,8 +15,10 @@ PV = $(shell test -e .git && git describe)
 P = crossdev-$(PV)
 COMP = xz
 dist:
-	git archive --prefix=$(P)/ HEAD | sed 's:@CDEVPV@:$(PV):g' > $(P).tar
+	sed -i -e 's:@CDEVPV@:$(PV):g' crossdev
+	git archive --prefix=$(P)/ HEAD > $(P).tar
 	-$(COMP) -f $(P).tar
 	du -b $(P).tar*
+	sed -i -e 's:$(PV):@CDEVPV@:g' crossdev
 
 .PHONY: all dist install
