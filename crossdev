@@ -307,8 +307,7 @@ parse_target() {
 
 			# TODO: deduplicate this with newlib block below
 			GMASK+=" default-stack-clash-protection hardened ssp"
-			GUSE+=" cxx -openmp" #489798
-			GUSE+=" -fortran" #589672, needs syscalls
+			GUSE+=" cxx"
 			GUSE+=" -hardened" #687598, needs -fstack-check=specific support
 			GUSE+=" -default-stack-clash-protection -ssp" # SSP isn't supported for freestanding anyway
 			MULTILIB_USE="yes" #407275
