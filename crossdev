@@ -320,7 +320,8 @@ parse_target() {
 			# for that.
 			GUSE+=" zlib zstd"
 
-			MULTILIB_USE="yes" #407275
+			# We need multilib for openmp to be built w/ -mgomp
+			MULTILIB_USE="yes"
 			WITH_DEF_HEADERS="no"
 			;;
 
