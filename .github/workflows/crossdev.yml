@@ -83,19 +83,37 @@ jobs:
           - target: x86_64-unknown-linux-gnu
           - target: x86_64-unknown-linux-musl
         stage3:
-          - latest # `openrc` (glibc+GCC) is tagged as `latest`
-          - musl 
+          - tag: latest # `openrc` (glibc+GCC) is tagged as `latest`
+            toolchain: gcc
+          - tag: llvm
+            toolchain: llvm
+          - tag: musl
+            toolchain: gcc
+          - tag: musl-llvm
+            toolchain: llvm
       fail-fast: false
-    name: crossdev target=${{ matrix.target.target }} stage3=${{ matrix.stage3 }}
+    name: crossdev target=${{ matrix.target.target }} stage3=${{ matrix.stage3.tag }} toolchain=${{ matrix.stage3.toolchain }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Create cross environment
+        # crossdev doesn't support bootstraping GNU environments with LLVM.
+        #
+        # compiler-rt on musleabi targets fails with:
+        # `error: DMB is only supported on ARMv6+`
+        #
+        # LLVM doesn't support or1k target.
+        if: ${{ !(matrix.stage3.toolchain == 'llvm' && (contains(matrix.target.target, '-gnu') || contains(matrix.target.target, '-musleabi') || contains(matrix.target.target, 'or1k') )) }}
         env:
           CONTAINER_ENGINE: docker
+          LLVM: ${{ matrix.stage3.toolchain == 'llvm' && '1' || '0' }}
+          # FIXME: Remove once https://github.com/gentoo/gentoo/pull/39280 is
+          # merged.
+          OVERLAY_REPO: https://github.com/vadorovsky/gentoo
+          OVERLAY_BRANCH: cross-llvm
         run: |
-          ./scripts/container_test.sh \
-            --tag ${{ matrix.stage3 }} \
+          ./scripts/container_test.sh run \
+            --tag ${{ matrix.stage3.tag }} \
             --target ${{ matrix.target.target }} \
             ${{ matrix.target.args }}
