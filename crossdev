@@ -1775,12 +1775,12 @@ if ! ex_fast ; then
 
 	# stage 0: binutils
 	if [[ "${LLVM}" == "yes" ]] ; then
-		if ! portageq has_version / "sys-devel/llvm" ; then
+		if ! portageq has_version / "llvm-core/llvm" ; then
 			eerror "LLVM is not installed"
 			exit 1
 		fi
 
-		best_ver=$(portageq best_version "${EPREFIX}"/ sys-devel/llvm)
+		best_ver=$(portageq best_version "${EPREFIX}"/ llvm-core/llvm)
 		llvm_use=$(portageq metadata "${EPREFIX}"/ installed "${best_ver}" USE)
 
 		llvm_arch=""
