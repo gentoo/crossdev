@@ -892,7 +892,7 @@ GCAT="sys-devel"  ; GPKG="gcc"           ; GVER="" GUSE="" GENV="" GOVL="" GMASK
 KCAT="sys-kernel" ; KPKG="linux-headers" ; KVER="" KUSE="" KENV="" KOVL="" KMASK="" KFORCE=""
 LCAT="sys-libs"   ; LPKG="[none]"        ; LVER="" LUSE="" LENV="" LOVL="" LMASK="" LFORCE=""
 DCAT="dev-debug"  ; DPKG="gdb"           ; DVER="" DUSE="" DENV="" DOVL="" DMASK="" DFORCE=""
-RCAT="sys-libs"   ; RPKG="compiler-rt"   ; RVER="" RUSE="" RENV="" ROVL="" RMASK="" RFORCE=""
+RCAT="llvm-runtimes" ; RPKG="compiler-rt"   ; RVER="" RUSE="" RENV="" ROVL="" RMASK="" RFORCE=""
 CCAT="sys-devel"  ; CPKG="clang-crossdev-wrappers" ; CVER="" CUSE="" CENV="" COVL="" CMASK="" CFORCE=""
 XPKGS=() XVERS=() XUSES=() XENVS=() XOVLS=() XMASKS=() XFORCES=()
 DEFAULT_VER="[latest]"
