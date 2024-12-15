@@ -4,7 +4,6 @@
 include settings.mk
 
 all:
-	sed -i -e '/^CROSSDEV_VER=/s:.*:CROSSDEV_VER="$(PV)":g' crossdev
 
 install:
 	$(INSTALL_DIR) $(DESTDIR)$(PREFIX)/bin/
@@ -15,9 +14,11 @@ install:
 PV = $(shell test -e .git && git describe)
 P = crossdev-$(PV)
 COMP = xz
-dist: all
+dist:
+	sed -i -e 's:@CDEVPV@:$(PV):g' crossdev
 	git archive --prefix=$(P)/ HEAD > $(P).tar
 	-$(COMP) -f $(P).tar
 	du -b $(P).tar*
+	sed -i -e 's:$(PV):@CDEVPV@:g' crossdev
 
 .PHONY: all dist install
