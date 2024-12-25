@@ -308,6 +308,8 @@ parse_target() {
 			# openmp, unless doing standalone bare minimum testing.
 			# They also often want Fortran.
 			STAGE_DEFAULT=${STAGE_C_CPP}
+			# We can't force these on via GFORCE because they need
+			# to be disabled for stage1.
 			GUSE+=" cxx openmp fortran"
 			# https://gcc.gnu.org/legacy-ml/gcc/2018-03/msg00122.html
 			GMASK+=" ada d go graphite modula2 rust"
