@@ -1224,6 +1224,11 @@ einfo "Stage:                 ${STAGE} (${STAGE_DISP[${STAGE}]})"
 einfo "USE=multilib:          ${MULTILIB_USE}"
 [[ ${DEFAULT_ABI} != "${MULTILIB_ABIS}" ]] && def_out=" (default: ${DEFAULT_ABI})" || def_out=
 einfo "Target ABIs:           ${MULTILIB_ABIS}${def_out}"
+if [[ ${PROFILE} == embedded && ${KPKG} != "[none]" ]]; then
+ewarn "Target Profile:        ${PROFILE} (NOT RECOMMENDED, consider recreating with the --profile option)"
+else
+einfo "Target Profile:        ${PROFILE}"
+fi
 echo
 ex_fast || {
 is_s0 && {
