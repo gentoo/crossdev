@@ -448,7 +448,7 @@ parse_target() {
 			esac
 			;;
 	esac
-	if [[ $sanitizer_support = "no" ]]; then
+	if [[ ${sanitizer_support} = "no" ]]; then
 		GUSE+=" -sanitize"
 	fi
 
@@ -470,7 +470,7 @@ parse_target() {
 			esac
 			;;
 	esac
-	if [[ $vtv_support = "no" ]]; then
+	if [[ ${vtv_support} = "no" ]]; then
 		GUSE+=" -vtv"
 	fi
 
@@ -1443,7 +1443,8 @@ set_portage() {
 			force+=" multilib"
 			;;
 		*)
-			mask+=" multilib";;
+			mask+=" multilib"
+			;;
 	esac
 
 	set_use_mask ${pkg} "${mask}"
@@ -1576,7 +1577,7 @@ else
 	pkglist+=( B G D )
 fi
 for pkg in ${pkglist[@]}; do
-	set_portage $pkg
+	set_portage ${pkg}
 done
 
 for_each_extra_pkg set_portage X
