@@ -84,7 +84,7 @@ jobs:
           - target: x86_64-unknown-linux-musl
         stage3:
           - latest # `openrc` (glibc+GCC) is tagged as `latest`
-          - musl 
+          - musl
       fail-fast: false
     name: crossdev target=${{ matrix.target.target }} stage3=${{ matrix.stage3 }}
     runs-on: ubuntu-latest
