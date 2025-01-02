@@ -329,7 +329,7 @@ parse_target() {
 
 		# due to upstream lameness, build C/C++ at first glance
 		*-cygwin)
-			GUSE_DISABLE_STAGE_1+=" -nocxx cxx"
+			GUSE_DISABLE_STAGE_1+=" cxx"
 			;;
 
 		# these are the mingw64 targets that binutils seems to use
