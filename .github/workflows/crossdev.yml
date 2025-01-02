@@ -85,6 +85,8 @@ jobs:
           # Embedded or otherwise special targets
           - target: arm-none-eabi
             args: --skip-system
+          - target: avr
+            args: --skip-system
           - target: nvptx-none
             args: --skip-system
         stage3:
