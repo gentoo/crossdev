@@ -33,10 +33,8 @@ jobs:
           # - target: armv7-unknown-linux-gnueabihf
           - target: armv7-unknown-linux-musleabi
           - target: armv7-unknown-linux-musleabihf
-          # binutils fails to configure: `machine 'loongaarch64-unknown' not
-          # recognized`
-          # - target: loongaarch64-unknown-linux-gnu
-          # - target: loongaarch64-unknown-linux-musl
+          - target: loongarch64-unknown-linux-gnu
+          - target: loongarch64-unknown-linux-musl
           - target: m68k-unknown-linux-gnu
           - target: mips-unknown-linux-gnu
           - target: mips-unknown-linux-musl
