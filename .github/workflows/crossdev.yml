@@ -82,6 +82,11 @@ jobs:
           # - target: sh4eb-unknown-linux-musl
           - target: x86_64-unknown-linux-gnu
           - target: x86_64-unknown-linux-musl
+          # Embedded or otherwise special targets
+          - target: arm-none-eabi
+            args: --skip-system
+          - target: nvptx-none
+            args: --skip-system
         stage3:
           - latest # `openrc` (glibc+GCC) is tagged as `latest`
           - musl
