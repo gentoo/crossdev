@@ -267,7 +267,6 @@ parse_target() {
 			GUSE+=" -fortran -go" # doesn't work
 			MULTILIB_USE="yes" #377039
 			BUSE+=" cxx"
-			STAGE_DEFAULT=${STAGE_LIBC}
 			WITH_DEF_HEADERS="no"
 			;;
 
@@ -407,7 +406,6 @@ parse_target() {
 		*-newlib|*-elf|*-eabi|*-rtems*)
 			LPKG="newlib"
 			KPKG="[none]"
-			STAGE_DEFAULT=${STAGE_LIBC}
 			GMASK+=" default-stack-clash-protection hardened ssp"
 			GUSE+=" cxx -openmp" #489798
 			GUSE+=" -fortran" #589672, needs syscalls
