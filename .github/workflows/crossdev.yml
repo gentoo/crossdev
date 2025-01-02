@@ -33,6 +33,9 @@ jobs:
           # - target: armv7-unknown-linux-gnueabihf
           - target: armv7-unknown-linux-musleabi
           - target: armv7-unknown-linux-musleabihf
+          - target: hppa1.1-unknown-linux-gnu
+          - target: hppa2.0-unknown-linux-gnu
+          - target: hppa64-unknown-linux-gnu
           - target: loongarch64-unknown-linux-gnu
           - target: loongarch64-unknown-linux-musl
           - target: m68k-unknown-linux-gnu
