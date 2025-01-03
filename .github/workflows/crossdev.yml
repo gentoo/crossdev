@@ -28,12 +28,12 @@ jobs:
           - target: armeb-unknown-linux-gnueabihf
           - target: armeb-unknown-linux-musleabi
           - target: armeb-unknown-linux-musleabihf
-          # glibc fails to build: `attempt to use an ARM instruction on a
-          # Thumb-only processor`.
-          # - target: armv7-unknown-linux-gnueabi
-          # - target: armv7-unknown-linux-gnueabihf
           - target: armv7-unknown-linux-musleabi
           - target: armv7-unknown-linux-musleabihf
+          - target: armv6j-softfp-linux-gnueabi
+          - target: armv6j-unknown-linux-gnueabihf
+          - target: armv7a-softfp-linux-gnueabi
+          - target: armv7a-unknown-linux-gnueabihf
           - target: hppa1.1-unknown-linux-gnu
           - target: hppa2.0-unknown-linux-gnu
           - target: hppa64-unknown-linux-gnu
