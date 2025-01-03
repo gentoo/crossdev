@@ -36,6 +36,7 @@ jobs:
           - target: hppa1.1-unknown-linux-gnu
           - target: hppa2.0-unknown-linux-gnu
           - target: hppa64-unknown-linux-gnu
+            args: --skip-system
           - target: loongarch64-unknown-linux-gnu
           # musl ebuilds don't support loong. The target is supported upstream,
           # we need to fix and test our ebuilds.
