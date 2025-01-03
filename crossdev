@@ -21,7 +21,13 @@ EROOT=${ROOT%/}"${EPREFIX}"/
 : ${PORTAGE_CONFIGROOT:=${EROOT}}
 CONFIGROOT="${PORTAGE_CONFIGROOT}/etc/portage"
 
+# Prevent functions.sh from complaining about command line arguments like -C,
+# which has a different meaning for crossdev.
+declare -a ARGV=( "${@}" )
+set --
 source "${EPREFIX}"/lib/gentoo/functions.sh || exit 1
+set -- "${ARGV[@]}"
+
 esyslog() { :; }
 die_logs() {
 	echo
