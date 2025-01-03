@@ -19,6 +19,7 @@ jobs:
         target:
           - target: aarch64-unknown-linux-gnu
           - target: aarch64-unknown-linux-musl
+          - target: alpha-unknown-linux-gnu
           - target: arm-unknown-linux-gnueabi
           - target: arm-unknown-linux-gnueabihf
           - target: arm-unknown-linux-musleabi
@@ -27,12 +28,12 @@ jobs:
           - target: armeb-unknown-linux-gnueabihf
           - target: armeb-unknown-linux-musleabi
           - target: armeb-unknown-linux-musleabihf
-          # glibc fails to build: `attempt to use an ARM instruction on a
-          # Thumb-only processor`.
-          # - target: armv7-unknown-linux-gnueabi
-          # - target: armv7-unknown-linux-gnueabihf
           - target: armv7-unknown-linux-musleabi
           - target: armv7-unknown-linux-musleabihf
+          - target: armv6j-softfp-linux-gnueabi
+          - target: armv6j-unknown-linux-gnueabihf
+          - target: armv7a-softfp-linux-gnueabi
+          - target: armv7a-unknown-linux-gnueabihf
           - target: hppa1.1-unknown-linux-gnu
           - target: hppa2.0-unknown-linux-gnu
           - target: hppa64-unknown-linux-gnu
@@ -62,6 +63,7 @@ jobs:
           - target: powerpc-unknown-linux-musl
           - target: powerpc64-unknown-linux-gnu
           - target: powerpc64-unknown-linux-musl
+          - target: powerpc64le-unknown-linux-gnu
           - target: riscv32-unknown-linux-gnu
           # busybox fails to build: `‘SYS_settimeofday’ undeclared`.
           # - target: riscv32-unknown-linux-musl
@@ -70,7 +72,8 @@ jobs:
           # glibc fails to build: `no support for pre-v8 sparc`.
           # - target: sparc-unknown-linux-gnu
           - target: sparc64-unknown-linux-gnu
-          - target: s390x-unknown-linux-gnu
+          - target: s390-ibm-linux-gnu
+          - target: s390x-ibm-linux-gnu
           # musl ebuilds don't support s390x. The target is supported upstream,
           # we need to fix and test our ebuilds.
           # - target: s390x-unknown-linux-musl
@@ -92,6 +95,8 @@ jobs:
           - target: avr
             args: --skip-system
           - target: nvptx-none
+            args: --skip-system
+          - target: bpf-unknown-none
             args: --skip-system
         stage3:
           - latest # `openrc` (glibc+GCC) is tagged as `latest`
