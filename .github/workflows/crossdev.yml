@@ -19,6 +19,7 @@ jobs:
         target:
           - target: aarch64-unknown-linux-gnu
           - target: aarch64-unknown-linux-musl
+          - target: alpha-unknown-linux-gnu
           - target: arm-unknown-linux-gnueabi
           - target: arm-unknown-linux-gnueabihf
           - target: arm-unknown-linux-musleabi
