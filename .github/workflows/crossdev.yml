@@ -93,6 +93,8 @@ jobs:
             args: --skip-system
           - target: nvptx-none
             args: --skip-system
+          - target: bpf-unknown-none
+            args: --skip-system
         stage3:
           - latest # `openrc` (glibc+GCC) is tagged as `latest`
           - musl
