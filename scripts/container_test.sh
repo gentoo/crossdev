@@ -93,7 +93,8 @@ done
 	/bin/sleep inf
 
 run_in_container emerge-webrsync
-run_in_container emerge app-eselect/eselect-repository sys-apps/config-site
+run_in_container getuto
+run_in_container emerge --getbinpkg app-eselect/eselect-repository sys-apps/config-site
 run_in_container make install
 run_in_container eselect repository create crossdev
 run_in_container crossdev --show-fail-log --target "${TARGET}"
