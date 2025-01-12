@@ -98,7 +98,7 @@ External Tooling Options:
 
 Extra Fun (must be run after above stages):
     ${GOOD}--ex-only${NORMAL}                Skip the stage steps above
-    ${GOOD}--ex-gcc${NORMAL}                 Build extra gcc targets (gcj/ada/etc...)
+    ${GOOD}--ex-gcc${NORMAL}                 Build extra gcc targets (ada/d/fortran/etc...)
     ${GOOD}--ex-gdb${NORMAL}                 Build a cross gdb
     ${GOOD}--ex-pkg${NORMAL} pkg             Build extra packages (may be used multiple times)
 
