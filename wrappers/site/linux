@@ -22,7 +22,7 @@ gio_can_sniff=yes
 # everywhere, mark the test as yes.
 ac_cv_func_mmap_fixed_mapped=yes
 
-# coreutils. https://bugs.gentoo.org/show_bug.cgi?id=177061
+# coreutils. https://bugs.gentoo.org/177061
 fu_cv_sys_stat_statvfs=yes
 gl_cv_func_rename_trailing_dest_slash_bug=no
 gl_cv_func_rename_trailing_slash_bug=no
