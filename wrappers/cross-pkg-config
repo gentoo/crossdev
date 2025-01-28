@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2008-2022 Gentoo Authors
+# Copyright 2008-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 #
@@ -20,8 +20,13 @@ error() {
 	exit 1
 }
 
+REAL_PKG_CONFIG="${CBUILD}${CBUILD:+-}pkg-config"
+if ! command -v "${REAL_PKG_CONFIG}" >/dev/null; then
+	REAL_PKG_CONFIG=pkg-config
+fi
+
 # abort infinite loop due to misconfiguration
-[ "${0##*/}" = "pkg-config" ] && error "aborting infinite loop! (make sure to delete uClinux-dist/tools/pkg-config)"
+[ "${0##*/}" = "${REAL_PKG_CONFIG}" ] && error "aborting infinite loop! (make sure to delete uClinux-dist/tools/pkg-config)"
 
 #
 # Allow very basic checks.  This is not very sophisticated, but should get the
@@ -30,7 +35,7 @@ error() {
 
 case $1 in
 --about|--help|--version)
-  exec pkg-config "$@"
+  exec "${REAL_PKG_CONFIG}" "$@"
   ;;
 esac
 
@@ -132,7 +137,7 @@ PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR}${PKG_CONFIG_LIBDIR:+:}${PKG_CONFIG_ESYSR
 # Sanity check the output to catch common errors that do not
 # cause failures until much later on.
 #
-output=$(pkg-config "$@")
+output=$("${REAL_PKG_CONFIG}" "$@")
 ret=$?
 
 # We turn the output into a newline separate string of options, then use grep
@@ -145,7 +150,7 @@ bad_lines=$(
 )
 if [ -n "${bad_lines}" ] ; then
 	warn "### falling down so here is a dump state ######"
-	pkg-config --debug "$@" 1>&2
+	"${REAL_PKG_CONFIG}" --debug "$@" 1>&2
 	warn "### end of dump ###############################"
 	warn "### suspicious compile flags dumped here ######"
 	printf "%s\n" "${bad_lines}"
