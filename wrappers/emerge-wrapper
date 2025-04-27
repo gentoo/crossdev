@@ -66,7 +66,7 @@ cross_wrap_etc()
 	*)        emit_setup_warning "No LIBC is known for this target." ;;
 	esac
 
-	KERNEL="__KERNEL__"
+	KERNEL=""
 	case ${CHOST} in
 	*linux*)  KERNEL=linux ;;
 	*mingw*)  KERNEL=Winnt ;;
