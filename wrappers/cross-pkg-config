@@ -20,7 +20,9 @@ error() {
 	exit 1
 }
 
-REAL_PKG_CONFIG="${CBUILD}${CBUILD:+-}pkg-config"
+if [ -z "${REAL_PKG_CONFIG}" ]; then
+	REAL_PKG_CONFIG="@PKG_CONFIG@"
+fi
 if ! command -v "${REAL_PKG_CONFIG}" >/dev/null; then
 	REAL_PKG_CONFIG=pkg-config
 fi
