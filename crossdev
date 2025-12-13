@@ -311,15 +311,45 @@ parse_target() {
 			WITH_DEF_HEADERS="no"
 			;;
 
+		#
 		# Offload targets
-		nvptx*)
+		#
+
+		# nvptx
+		accel-nvptx*)
 			KPKG="[none]"
-			BPKG="nvptx-tools"
-			LPKG="newlib"
+			BPKG="[none]"
+			LPKG="[none]"
+
+			# TODO: Die if nvptx-none isn't available
+
 			# Offloading targets are only really useful with
 			# openmp, unless doing standalone bare minimum testing.
 			# They also often want Fortran.
 			STAGE_DEFAULT=${STAGE_C_CPP}
+
+			GUSE+=" cxx openmp fortran"
+			# https://gcc.gnu.org/legacy-ml/gcc/2018-03/msg00122.html
+			GMASK+=" ada d go graphite modula2 rust"
+
+			GMASK+=" default-stack-clash-protection hardened ssp"
+			GUSE+=" -hardened" #687598, needs -fstack-check=specific support
+			GUSE+=" -default-stack-clash-protection -ssp" # SSP isn't supported for freestanding anyway
+			# Offloading uses LTO to stream data, we need to make sure
+			# we support whatever compression the host compiler uses
+			# for that.
+			GUSE+=" zlib zstd"
+
+			# We need multilib for openmp to be built w/ -mgomp
+			MULTILIB_USE="yes"
+			WITH_DEF_HEADERS="no"
+			;;
+		nvptx*)
+			KPKG="[none]"
+			BPKG="nvptx-tools"
+			LPKG="newlib"
+
+			STAGE_DEFAULT=${STAGE_LIBC}
 			# We can't force these on via GFORCE because they need
 			# to be disabled for stage1.
 			GUSE+=" cxx openmp fortran"
@@ -523,7 +553,7 @@ parse_target() {
 	case ${CTARGET} in
 		# [1.]: no -fstack-protector flag support:
 		#       check as '$CC -fstack-protector -c -x c - </dev/null'
-		alpha*|avr*|hppa*|ia64*|nvptx*|mmix*|nios2*) ssp_support=no;;
+		alpha*|avr*|hppa*|ia64*|accel-nvptx*|nvptx*|mmix*|nios2*) ssp_support=no;;
 	esac
 	# Running a hardened profile on the host forces ssp #831165
 	if [[ ${ssp_support} == "no" ]]; then
@@ -1479,7 +1509,7 @@ set_portage() {
 			mask+=" -multilib"
 			force+=" multilib"
 			;;
-		nvptx*|*-newlib|*-elf|*-eabi)
+		accel-nvptx*|nvptx*|*-newlib|*-elf|*-eabi)
 			# nvptx: needs multilib because of https://gcc.gnu.org/legacy-ml/gcc-help/2020-01/msg00106.html.
 			mask+=" -multilib"
 			force+=" multilib"
