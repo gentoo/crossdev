@@ -1036,8 +1036,9 @@ done
 if [[ "${LLVM}" == "yes" ]] ; then
 	WITH_HEADERS="yes"
 	CROSSDEV_OVERLAY_CATEGORY_PREFIX="cross_llvm-"
-    # To avoid bug reports
-    [[ "${LPKG}" == "glibc" ]] && die "LLVM/Clang cannot currently compile glibc"
+
+	# To avoid bug reports
+	[[ "${LPKG}" == "glibc" ]] && die "LLVM/Clang cannot currently compile glibc"
 fi
 
 CROSSDEV_OVERLAY_CATEGORY="${CROSSDEV_OVERLAY_CATEGORY_PREFIX}${CTARGET}"
@@ -1460,7 +1461,7 @@ set_env() {
 
 	output=$(_set_portage_file ${pkg} package.env)
 	echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} ${CROSSDEV_OVERLAY_CATEGORY}/${pkg}.conf" >> ${output}
-    [[ "${LLVM}" == "yes" ]] && echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} ${CROSSDEV_OVERLAY_CATEGORY}/llvm.conf" >> ${output}
+	[[ "${LLVM}" == "yes" ]] && echo "${CROSSDEV_OVERLAY_CATEGORY}/${pkg} ${CROSSDEV_OVERLAY_CATEGORY}/llvm.conf" >> ${output}
 }
 set_portage() {
 	local l=$1
@@ -1658,31 +1659,31 @@ xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib
 ### step 2: set up the compat symlink of the default abi for non-multilib
 case ${CTARGET} in
 	riscv*)
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64/lp64
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64/lp64d
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64/lp64
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64/lp64d
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32/ilp32
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32/ilp32d
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32/ilp32
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32/ilp32d
-			;;&
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64/lp64
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64/lp64d
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64/lp64
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64/lp64d
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32/ilp32
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32/ilp32d
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32/ilp32
+		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32/ilp32d
+		;;&
 	riscv64*)
-			rmdir "${EPREFIX}"/usr/${CTARGET}/lib64/${DEFAULT_ABI}
-			ln -s . "${EPREFIX}"/usr/${CTARGET}/lib64/${DEFAULT_ABI}
-			rmdir "${EPREFIX}"/usr/${CTARGET}/usr/lib64/${DEFAULT_ABI}
-			ln -s . "${EPREFIX}"/usr/${CTARGET}/usr/lib64/${DEFAULT_ABI}
-			;;
+		rmdir "${EPREFIX}"/usr/${CTARGET}/lib64/${DEFAULT_ABI}
+		ln -s . "${EPREFIX}"/usr/${CTARGET}/lib64/${DEFAULT_ABI}
+		rmdir "${EPREFIX}"/usr/${CTARGET}/usr/lib64/${DEFAULT_ABI}
+		ln -s . "${EPREFIX}"/usr/${CTARGET}/usr/lib64/${DEFAULT_ABI}
+		;;
 	riscv32*)
-			rmdir "${EPREFIX}"/usr/${CTARGET}/lib32/${DEFAULT_ABI}
-			ln -s ../lib "${EPREFIX}"/usr/${CTARGET}/lib32/${DEFAULT_ABI}
-			rmdir "${EPREFIX}"/usr/${CTARGET}/usr/lib32/${DEFAULT_ABI}
-			ln -s ../lib "${EPREFIX}"/usr/${CTARGET}/usr/lib32/${DEFAULT_ABI}
-			;;
+		rmdir "${EPREFIX}"/usr/${CTARGET}/lib32/${DEFAULT_ABI}
+		ln -s ../lib "${EPREFIX}"/usr/${CTARGET}/lib32/${DEFAULT_ABI}
+		rmdir "${EPREFIX}"/usr/${CTARGET}/usr/lib32/${DEFAULT_ABI}
+		ln -s ../lib "${EPREFIX}"/usr/${CTARGET}/usr/lib32/${DEFAULT_ABI}
+		;;
 esac
 
 # HOSTCC is used by linux-headers to compile fixdeps program for CBUILD
