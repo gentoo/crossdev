@@ -110,10 +110,13 @@ Extra Fun (must be run after above stages):
 
 LLVM/Clang Specific Options (--llvm):
     ${GOOD}--r, --crt${NORMAL} ver           Specify version of compiler-rt to use
+    ${GOOD}--u, --libunwind${NORMAL} ver     Specify version of libunwind to use
+    ${GOOD}--a, --libcxxabi${NORMAL} ver     Specify version of libcxxabi to use
+    ${GOOD}--p, --libcxx${NORMAL} ver        Specify version of libcxx to use
     ${GOOD}--c, --ccw${NORMAL} ver           Specify version of clang-crossdev-wrapper to use
-    ${GOOD}--[rc]env${NORMAL} env            Specify env settings for compiler-rt/clang-crossdev-wrapper
-    ${GOOD}--[rc]cat${NORMAL} category       Use compiler-rt/clang-crossdev-wrapper package from category
-    ${GOOD}--[rc]pkg${NORMAL} pkg            Use compiler-rt/clang-crossdev-wrapper package with given name
+    ${GOOD}--[ruapc]env${NORMAL} env         Specify env settings for compiler-rt/libunwind/libcxxabi/libcxx/clang-crossdev-wrapper
+    ${GOOD}--[ruapc]cat${NORMAL} category    Use compiler-rt/libunwind/libcxxabi/libcxx/clang-crossdev-wrapper package from category
+    ${GOOD}--[ruapc]pkg${NORMAL} pkg         Use compiler-rt/libunwind/libcxxabi/libcxx/clang-crossdev-wrapper package with given name
     ${GOOD}-or, --ov-crt${NORMAL} path       Overlay for compiler-rt ebuilds [default: search]
     ${GOOD}-oc, --ov-ccw${NORMAL} path       Overlay for clang-crossdev-wrapper ebuilds [default: search]
 
