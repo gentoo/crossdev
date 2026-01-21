@@ -17,6 +17,7 @@ concurrency:
 jobs:
   crossdev:
     strategy:
+      max-parallel: 10
       matrix:
         # All targets which are known to be broken, are commented. Pull
         # requests fixing them welcome!
