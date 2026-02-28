@@ -727,7 +727,7 @@ uninstall() {
 		rm -r "${CROSSDEV_OVERLAY}"/${CROSSDEV_OVERLAY_CATEGORY}
 		# if we remove all the package in the category,
 		# might as well remove the category itself
-		sed -e "/${CROSSDEV_OVERLAY_CATEGORY}/d" \
+		sed -e "/^${CROSSDEV_OVERLAY_CATEGORY}$/d" \
 		    -i "${CROSSDEV_OVERLAY}"/profiles/categories
 	fi
 	# If profiles/categories is empty, see if we can remove the output overlay entirely
