@@ -419,7 +419,8 @@ parse_target() {
 			LPKG="dietlibc"
 			LCAT="dev-libs"
 			;;
-		*-gnu*)
+
+		*-linux*gnu*)
 			LPKG="glibc"
 			# gcc would not find -lpthread without static libraries while building
 			# its copy of libgomp.
@@ -459,6 +460,24 @@ parse_target() {
 			GUSE+=" -default-stack-clash-protection -ssp" # SSP isn't supported for freestanding anyway
 			MULTILIB_USE="yes" #407275
 			WITH_DEF_HEADERS="no"
+			;;
+
+		# GNU Hurd
+		*-gnu)
+			LPKG="glibc"
+
+			# GNU Mach first has to be built w/ headers-only
+			KPKG="gnumach"
+			# GNU MIG needs those initial GNU Mach headers
+			K2CAT="dev-util"
+			K2PKG="mig"
+			# We need GNU Hurd headers for glibc too
+			K3CAT="sys-kernel"
+			K3PKG="hurd"
+
+			# gcc would not find -lpthread without static libraries while building
+			# its copy of libgomp.
+			LUSE+=" static-libs"
 			;;
 
 		# Now for the BSDs ...
@@ -1645,7 +1664,7 @@ for f in package.{accept_keywords,env,mask,use} env/${CROSSDEV_OVERLAY_CATEGORY}
 	rm -f "${f}/${CROSSDEV_OVERLAY_CATEGORY}"
 done
 
-pkglist=( K L )
+pkglist=( K K2 K3 L )
 if [[ ${LLVM} == "yes" ]] ; then
 	pkglist+=( R C A P U )
 else
@@ -1924,9 +1943,34 @@ if ! ex_fast ; then
 	if is_s2 ; then
 		set_eopts_on_pkg_status ${KPKG} crosscompile_opts_headers-only headers-only
 
-		USE="${KUSE} ${USE}" \
-		CROSSCOMPILE_OPTS="" \
+		USE="${KUSE} ${USE} headers-only" \
+		CROSSCOMPILE_OPTS="headers-only" \
 			doemerge ${KPKG}
+
+		if [[ -n ${K2PKG} ]] ; then
+			# KPKG may need K2PKG to install everything, so
+			# build it as a dependency first.
+			set_eopts_on_pkg_status ${K2PKG} crosscompile_opts
+
+			USE="${KUSE} ${USE} headers-only" \
+			CROSSCOMPILE_OPTS="headers-only" \
+				doemerge ${K2PKG}
+
+			# Go again now we have it.
+			USE="${KUSE} ${USE}" \
+			CROSSCOMPILE_OPTS="" \
+				doemerge ${KPKG}
+		fi
+
+		if [[ -n ${K3PKG} ]] ; then
+			# LPKG may need K3PKG to install everything, so
+			# build it as a dependency first.
+			set_eopts_on_pkg_status ${K3PKG} crosscompile_opts_headers-only headers-only
+
+			USE="${KUSE} ${USE} headers-only" \
+			CROSSCOMPILE_OPTS="headers-only" \
+				doemerge ${K3PKG}
+		fi
 	fi
 
 	# stage3: full C library (headers/libs/etc...)
