@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2008-2023 Gentoo Authors
+# Copyright 2008-2026 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 if [[ $1 == "--help" || $1 == "-h" ]] ; then
@@ -70,6 +70,7 @@ cross_wrap_etc()
 	case ${CHOST} in
 	*linux*)  KERNEL=linux ;;
 	*mingw*)  KERNEL=Winnt ;;
+	*gnu)     KERNEL=Hurd ;;
 	*)        emit_setup_warning "No KERNEL is known for this target." ;;
 	esac
 	if [[ -n ${KERNEL} ]]; then
