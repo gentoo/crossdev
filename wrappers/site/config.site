@@ -30,6 +30,7 @@ config_site_names() {
 	*-linux-*)           sites="${sites} linux ${site_arch}-linux" ;;
 	*-darwin*)           sites="${sites} darwin ${site_arch}-darwin" ;;
 	mingw*|*-mingw*)     sites="${sites} mingw ${site_arch}-mingw" ;;
+	*-gnu)               sites="${sites} hurd ${site_arch}-hurd" ;;
 	esac
 
 	case ${CHOST} in
