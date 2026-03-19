@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2008-2025 Gentoo Authors
+# Copyright 2008-2026 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 #
@@ -105,11 +105,12 @@ PKG_CONFIG_ESYSROOT_DIR=${PKG_CONFIG_SYSROOT_DIR}${PREFIX}
 # https://github.com/pkgconf/pkgconf/issues/205
 export PKG_CONFIG_FDO_SYSROOT_RULES=1
 
-#
-# Some distributions pollute the pkg-config environment.
-# Time to pull a captain planet on them.
-#
-unset PKG_CONFIG_PATH
+# Don't trust PKG_CONFIG_PATH unless it is pointing within a Gentoo build
+# environment to find bundled dependencies.
+case ${PKG_CONFIG_PATH} in
+	"${WORKDIR:-unset}"/*) ;;
+	*) unset PKG_CONFIG_PATH ;;
+esac
 
 #
 # Try and figure out the appropriate libdir for this target.
@@ -144,11 +145,11 @@ ret=$?
 
 # We turn the output into a newline separate string of options, then use grep
 # to look for bad -Is and -Ls.  Bad -Is and -Ls are ones that point to things
-# outside the ${PKG_CONFIG_ESYSROOT_DIR}.
+# outside the ${PKG_CONFIG_ESYSROOT_DIR} or Gentoo's ${WORKDIR}.
 bad_lines=$(
-	printf "%s\n" ${output} |                # Put each flags on its own line.
-	grep '^-[LI]' |                          # Find all -I and -L lines.
-	grep -v "^..${PKG_CONFIG_ESYSROOT_DIR}"  # Find all things outside the sysroot.
+	printf "%s\n" ${output} | # Put each flag on its own line.
+	grep '^-[LI]' | # Find all -I and -L lines.
+	grep -v "^..${PKG_CONFIG_ESYSROOT_DIR}${WORKDIR:+\|^..${WORKDIR}}" # Find all things outside the sysroot or WORKDIR.
 )
 if [ -n "${bad_lines}" ] ; then
 	warn "### falling down so here is a dump state ######"
