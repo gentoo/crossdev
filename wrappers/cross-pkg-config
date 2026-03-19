@@ -68,38 +68,38 @@ fi
 
 if [ -n "${ESYSROOT+x}" ] ; then
 	# Gentoo EAPI 7+
-	: ${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}
+	: "${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}"
 	PREFIX=${ESYSROOT%/}
-	PREFIX=${PREFIX#${SYSROOT%/}}
+	PREFIX=${PREFIX#"${SYSROOT%/}"}
 elif [ -n "${ROOT+x}" ] ; then
 	# Gentoo EAPI 0-6
 	if [ -n "${SYSROOT%/}" ]; then
-		: ${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}
+		: "${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}"
 		PREFIX=${EPREFIX%/}
 	else
-		: ${PKG_CONFIG_SYSROOT_DIR=}
+		: "${PKG_CONFIG_SYSROOT_DIR=}"
 		PREFIX=${PORTAGE_OVERRIDE_EPREFIX%/}
 	fi
 elif [ -n "${SYSROOT+x}" ] ; then
 	# Generic
-	: ${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}
+	: "${PKG_CONFIG_SYSROOT_DIR=${SYSROOT}}"
 elif [ "@CROSS_PKG_CONFIG_INSTALLED@" = "installed" ] ; then
 	# Manual install
-	: ${PKG_CONFIG_SYSROOT_DIR="@CROSS_PKG_CONFIG_PATH@"}
+	: "${PKG_CONFIG_SYSROOT_DIR=@CROSS_PKG_CONFIG_PATH@}"
 elif [ -n "${STAGEDIR}" ] ; then
 	# uClinux-dist
-	: ${PKG_CONFIG_SYSROOT_DIR=${STAGEDIR}}
+	: "${PKG_CONFIG_SYSROOT_DIR=${STAGEDIR}}"
 	PKG_CONFIG_LIBDIR=${UCLINUX_PKG_CONFIG_LIBDIR}
 else
 	# /usr/<target>
-	: ${PKG_CONFIG_SYSROOT_DIR=/usr/${CHOST}}
+	: "${PKG_CONFIG_SYSROOT_DIR=/usr/${CHOST}}"
 
 	if [ -z "${CHOST}" ] || [ ! -d "${PKG_CONFIG_SYSROOT_DIR}" ] ; then
 		error "Need \$ROOT or \$STAGEDIR set first"
 	fi
 fi
 
-export PKG_CONFIG_SYSROOT_DIR=${PKG_CONFIG_SYSROOT_DIR%/}
+export PKG_CONFIG_SYSROOT_DIR="${PKG_CONFIG_SYSROOT_DIR%/}"
 PKG_CONFIG_ESYSROOT_DIR=${PKG_CONFIG_SYSROOT_DIR}${PREFIX}
 
 # https://github.com/pkgconf/pkgconf/issues/205
@@ -116,7 +116,7 @@ esac
 # Try and figure out the appropriate libdir for this target.
 # This logic matches Gentoo's get_libdir which uses $ABI.
 #
-: ${ABI:=${DEFAULT_ABI:-default}}
+: "${ABI:=${DEFAULT_ABI:-default}}"
 var="LIBDIR_${ABI}"
 eval libdir=\${${var}}
 if [ -z "${libdir}" ] ; then
@@ -126,7 +126,7 @@ if [ -z "${libdir}" ] ; then
 	# Chopping the basename isn't exactly correct, but it's good enough for now.
 	libdir=${libdir##*/}
 fi
-: ${libdir:=lib}
+: "${libdir:=lib}"
 export \
 	PKG_CONFIG_SYSTEM_LIBRARY_PATH="${PKG_CONFIG_ESYSROOT_DIR}/usr/${libdir}:${PKG_CONFIG_ESYSROOT_DIR}/${libdir}" \
 	PKG_CONFIG_SYSTEM_INCLUDE_PATH="${PKG_CONFIG_ESYSROOT_DIR}/usr/include"
