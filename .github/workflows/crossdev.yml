@@ -200,6 +200,12 @@ jobs:
             args: --skip-system
             gcc: true
             llvm: false
+          - target: i686-gnu
+            gcc: true
+            llvm: false
+          - target: x86_64-gnu
+            gcc: true
+            llvm: false
         stage3:
           - latest # glibc+GCC
           - llvm # glibc+LLVM and GCC as a fallback
