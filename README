@@ -57,6 +57,7 @@ executables or kernels if applies):
  hppa-unknown-linux-gnu
  hppa2.0-unknown-linux-gnu
  hppa64-unknown-linux-gnu
+ i686-gnu
  i686-pc-gnu
  i686-w64-mingw32
  ia64-unknown-linux-gnu
@@ -79,6 +80,7 @@ executables or kernels if applies):
  sparc-unknown-linux-gnu
  sparc64-unknown-linux-gnu
  vax-unknown-linux-gnu
+ x86_64-gnu
  x86_64-HEAD-linux-gnu
  x86_64-UNREG-linux-gnu
  x86_64-pc-linux-gnu
