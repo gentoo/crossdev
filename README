@@ -25,7 +25,7 @@ So you want to cross-compile a Gentoo package (say, busybox to s390x):
 
 Done!
 
-You can use qemu-user to run this binary:
+You can use `qemu-user` to run this binary:
 
   $ qemu-s390x -L /usr/s390x-unknown-linux-gnu/ /usr/s390x-unknown-linux-gnu/bin/busybox uname -m
   s390x
@@ -37,7 +37,7 @@ https://wiki.gentoo.org/wiki/Crossdev_qemu-static-user-chroot
 Supported platforms
 -------------------
 
-Cross-compilation is fairly well supported to linux targets.
+Cross-compilation is fairly well supported to Linux targets.
 Windows is not too broken either.
 
 Be prepared for rough corners. This doc will try to help you
@@ -96,8 +96,8 @@ How crossdev works (high-level overview)
 crossdev is a tiny shell wrapper around emerge tool. The wrapper
 overrides a few variables to aim emerge at another target.
 
-Crossdev leverages the following features of portage (and ::gentoo
-ebulds):
+Crossdev leverages the following features of Portage (and ::gentoo
+ebuilds):
 
 - ability to override ROOT=/usr/<target> to install cross-compiled
   packages into a new root on a filesystem to avoid cluttering host.
@@ -113,7 +113,7 @@ ebulds):
   it means running ./configure script using following options:
     ./configure --build=${CBUILD} --host=${CHOST} --target=${CTARGET} ...
 
-If toolchains were simple programs crossdev would be a one-liner script:
+If toolchains were simple programs, crossdev would be a one-liner script:
 
   ARCH=...    \
   CBUILD=...  \
@@ -216,11 +216,11 @@ Here we elaborate on each step outlined in previous section:
 
    These include symlinks are target-dependent. A few unusual examples:
 
-   - windows (mingw): /usr/x86_64-w64-mingw32/mingw -> usr
-   - hurd: /usr/i686-pc-gnu/include -> usr/include
+   - Windows (mingw): /usr/x86_64-w64-mingw32/mingw -> usr
+   - Hurd: /usr/i686-pc-gnu/include -> usr/include
    - DOS: /usr/i686-pc-gnu/dev/env/DJDIR/include -> ../../../usr/include
 
-   Side note: we could have omited symlink creation completely
+   Side note: we could have omitted symlink creation completely
    and build gcc with parameter:
      --with-native-system-header-dir=${EPREFIX}/usr/include
    That way ${SYSROOT} directory contents would be even more like normal
