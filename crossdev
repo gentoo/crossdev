@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 1999-2025 Gentoo Authors
+# Copyright 1999-2026 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 CROSSDEV_VER="@CDEVPV@"
@@ -1664,6 +1664,8 @@ for f in package.{accept_keywords,env,mask,use} env/${CROSSDEV_OVERLAY_CATEGORY}
 	rm -f "${f}/${CROSSDEV_OVERLAY_CATEGORY}"
 done
 
+# K2 and K3 are extra kernel packages for microkernels where there are
+# complex bootstrapping requirements.
 pkglist=( K K2 K3 L )
 if [[ ${LLVM} == "yes" ]] ; then
 	pkglist+=( R C A P U )
