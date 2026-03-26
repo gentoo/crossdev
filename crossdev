@@ -1911,9 +1911,7 @@ if ! ex_fast ; then
 		# first install headers if requested
 		if with_headers ; then
 			# install kernel headers (since the C library often uses them)
-			USE="${KUSE} ${USE} headers-only" \
-			CROSSCOMPILE_OPTS="headers-only" \
-				doemerge ${KPKG} ${KPKG}-quick
+			USE="${KUSE} ${USE} headers-only" doemerge ${KPKG} ${KPKG}-quick
 
 			if [[ -n ${LPKG} ]] ; then
 				# install C library headers
@@ -1921,7 +1919,6 @@ if ! ex_fast ; then
 				# a dependency on newer gcc versions that we don't
 				# care about at this point -- we aren't compiling yet
 				USE="${LUSE} ${USE} ${LUSE_DISABLE} headers-only" \
-				CROSSCOMPILE_OPTS="headers-only" \
 				EOPTS="${EOPTS} --nodeps" \
 					doemerge ${LPKG} ${LPKG}-headers
 			fi
@@ -1931,11 +1928,9 @@ if ! ex_fast ; then
 		if [[ "${LLVM}" == "yes" ]]; then
 			# Compile compiler-rt
 			USE="${RUSE} ${USE}" \
-			CROSSCOMPILE_OPTS="" \
 				doemerge ${RPKG}
 		else
 			USE="${GUSE} ${USE} ${GUSE_DISABLE_STAGE_1}" \
-			CROSSCOMPILE_OPTS="" \
 				doemerge ${GPKG} ${GPKG}-stage1
 		fi
 
@@ -1943,34 +1938,30 @@ if ! ex_fast ; then
 
 	# stage2: kernel headers
 	if is_s2 ; then
-		set_eopts_on_pkg_status ${KPKG} crosscompile_opts_headers-only headers-only
+		set_eopts_on_pkg_status ${KPKG} headers-only
 
 		USE="${KUSE} ${USE} headers-only" \
-		CROSSCOMPILE_OPTS="headers-only" \
 			doemerge ${KPKG}
 
 		if [[ -n ${K2PKG} ]] ; then
 			# KPKG may need K2PKG to install everything, so
 			# build it as a dependency first.
-			set_eopts_on_pkg_status ${K2PKG} crosscompile_opts
+			set_eopts_on_pkg_status ${K2PKG} headers-only
 
 			USE="${KUSE} ${USE} headers-only" \
-			CROSSCOMPILE_OPTS="headers-only" \
 				doemerge ${K2PKG}
 
 			# Go again now we have it.
 			USE="${KUSE} ${USE}" \
-			CROSSCOMPILE_OPTS="" \
 				doemerge ${KPKG}
 		fi
 
 		if [[ -n ${K3PKG} ]] ; then
 			# LPKG may need K3PKG to install everything, so
 			# build it as a dependency first.
-			set_eopts_on_pkg_status ${K3PKG} crosscompile_opts_headers-only headers-only
+			set_eopts_on_pkg_status ${K3PKG} headers-only
 
 			USE="${KUSE} ${USE} headers-only" \
-			CROSSCOMPILE_OPTS="headers-only" \
 				doemerge ${K3PKG}
 		fi
 	fi
@@ -1979,10 +1970,9 @@ if ! ex_fast ; then
 	if is_s3 ; then
 		[[ -z ${LPKG} ]] && die "Invalid target '${CTARGET}': unknown libc"
 
-		set_eopts_on_pkg_status ${LPKG} crosscompile_opts_headers-only headers-only
+		set_eopts_on_pkg_status ${LPKG} headers-only
 
 		USE="${LUSE} ${USE} ${LUSE_DISABLE}" \
-		CROSSCOMPILE_OPTS="" \
 			doemerge ${LPKG}
 	fi
 
