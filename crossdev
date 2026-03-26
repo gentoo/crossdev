@@ -1941,7 +1941,7 @@ if ! ex_fast ; then
 		set_eopts_on_pkg_status ${KPKG} headers-only
 
 		USE="${KUSE} ${USE} headers-only" \
-			doemerge ${KPKG}
+			doemerge ${KPKG} ${KPKG}-stage1
 
 		if [[ -n ${K2PKG} ]] ; then
 			# KPKG may need K2PKG to install everything, so
@@ -1949,11 +1949,11 @@ if ! ex_fast ; then
 			set_eopts_on_pkg_status ${K2PKG} headers-only
 
 			USE="${KUSE} ${USE} headers-only" \
-				doemerge ${K2PKG}
+				doemerge ${K2PKG} ${K2PKG}-stage1
 
 			# Go again now we have it.
 			USE="${KUSE} ${USE}" \
-				doemerge ${KPKG}
+				doemerge ${KPKG} ${KPKG}-stage2
 		fi
 
 		if [[ -n ${K3PKG} ]] ; then
@@ -1962,7 +1962,7 @@ if ! ex_fast ; then
 			set_eopts_on_pkg_status ${K3PKG} headers-only
 
 			USE="${KUSE} ${USE} headers-only" \
-				doemerge ${K3PKG}
+				doemerge ${K3PKG} ${K3PKG}-stage1
 		fi
 	fi
 
@@ -1978,13 +1978,13 @@ if ! ex_fast ; then
 		if [[ -n ${K2PKG} ]] ; then
 			set_eopts_on_pkg_status ${K2PKG} headers-only
 
-			USE="${KUSE} ${USE} -headers-only" doemerge ${K2PKG}
+			USE="${KUSE} ${USE} -headers-only" doemerge ${K2PKG} ${K2PKG}-stage2
 		fi
 
 		if [[ -n ${K3PKG} ]] ; then
 			set_eopts_on_pkg_status ${K3PKG} headers-only
 
-			USE="${KUSE} ${USE} -headers-only" doemerge ${K3PKG}
+			USE="${KUSE} ${USE} -headers-only" doemerge ${K3PKG} ${K3PKG}-stage2
 		fi
 	fi
 
