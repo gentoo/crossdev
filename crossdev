@@ -271,8 +271,7 @@ parse_target() {
 
 		avr*)
 			KPKG="[none]"
-			LCAT="dev-embedded"
-			LPKG="avr-libc"
+			LCAT="dev-embedded" LPKG="avr-libc"
 			GUSE+=" -openmp -fortran -go" # doesn't work
 			MULTILIB_USE="yes" #377039
 			BUSE+=" cxx"
@@ -380,8 +379,7 @@ parse_target() {
 		# these are the mingw64 targets that binutils seems to use
 		x86_64-*-mingw*|*-w64-mingw*)
 			KPKG="[none]";
-			LCAT="dev-util"
-			LPKG="mingw64-runtime"
+			LCAT="dev-util" LPKG="mingw64-runtime"
 			WITH_DEF_HEADERS="yes" # gcc can't bootstrap without headers: bug #693770
 			GMASK+=" default-stack-clash-protection hardened"
 			GUSE+=" -default-stack-clash-protection -hardened" # gcc ICEs as libssp/ssp.c:186:1: internal compiler error: in seh_emit_stackalloc
@@ -416,8 +414,7 @@ parse_target() {
 	case ${CTARGET} in
 		# Normal Linux host, just diff libc
 		*-dietlibc)
-			LPKG="dietlibc"
-			LCAT="dev-libs"
+			LPKG="dietlibc" LCAT="dev-libs"
 			;;
 
 		*-linux*gnu*)
@@ -444,8 +441,7 @@ parse_target() {
 
 		# Windows targets
 		*-cygwin)
-			LCAT="dev-libs"
-			LPKG="cygwin"
+			LCAT="dev-libs" LPKG="cygwin"
 			KPKG="[none]"
 			;;
 
@@ -469,11 +465,9 @@ parse_target() {
 			# GNU Mach first has to be built w/ headers-only
 			KPKG="gnumach"
 			# GNU MIG needs those initial GNU Mach headers
-			K2CAT="dev-util"
-			K2PKG="mig"
+			K2CAT="dev-util" K2PKG="mig"
 			# We need GNU Hurd headers for glibc too
-			K3CAT="sys-kernel"
-			K3PKG="hurd"
+			K3CAT="sys-kernel" K3PKG="hurd"
 
 			# gcc would not find -lpthread without static libraries while building
 			# its copy of libgomp.
