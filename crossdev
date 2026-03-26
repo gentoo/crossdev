@@ -1974,6 +1974,18 @@ if ! ex_fast ; then
 
 		USE="${LUSE} ${USE} ${LUSE_DISABLE}" \
 			doemerge ${LPKG}
+
+		if [[ -n ${K2PKG} ]] ; then
+			set_eopts_on_pkg_status ${K2PKG} headers-only
+
+			USE="${KUSE} ${USE} -headers-only" doemerge ${K2PKG}
+		fi
+
+		if [[ -n ${K3PKG} ]] ; then
+			set_eopts_on_pkg_status ${K3PKG} headers-only
+
+			USE="${KUSE} ${USE} -headers-only" doemerge ${K3PKG}
+		fi
 	fi
 
 	# stage4: full compiler (C/C++/etc...)
