@@ -1705,8 +1705,48 @@ LLVM="${LLVM}" emerge-wrapper --target ${CTARGET} --init || exit 1
 ### =/usr/lib/../lib64 when builds itself (see https://bugs.gentoo.org/652724)
 ###
 ### Thus we create non-symlinked layout early.
-xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib
-xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib
+if [[ ${CTARGET} == *-gnu* ]] ; then
+	# Identify if it is really Hurd or not
+	case ${CTARGET} in
+		*-linux*)
+			# Same as non-Hurd patch
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib
+			;;
+		i[3-7]86*-gnu*)
+			# Hurd is special as it defaults upstream to implicit inverse usr-merge
+			# (i.e. /usr -> /). If we don't do this here, then when we build
+			# cross glibc, startup files are in /usr/lib while libc.so is in
+			# /lib.
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/bin
+			ln -s usr/lib "${EPREFIX}"/usr/${CTARGET}/lib
+			ln -s usr/bin "${EPREFIX}"/usr/${CTARGET}/bin
+			ln -s usr/bin "${EPREFIX}"/usr/${CTARGET}/sbin
+			ln -s bin "${EPREFIX}"/usr/${CTARGET}/usr/sbin
+			;;
+		x86_64-gnu)
+			# Hurd is special as it defaults upstream to implicit inverse usr-merge
+			# (i.e. /usr -> /). If we don't do this here, then when we build
+			# cross glibc, startup files are in /usr/lib64 while libc.so is in
+			# /lib64.
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib{,64}
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/bin
+			ln -s usr/lib "${EPREFIX}"/usr/${CTARGET}/lib
+			ln -s usr/lib64 "${EPREFIX}"/usr/${CTARGET}/lib64
+			ln -s usr/bin "${EPREFIX}"/usr/${CTARGET}/bin
+			ln -s usr/bin "${EPREFIX}"/usr/${CTARGET}/sbin
+			ln -s bin "${EPREFIX}"/usr/${CTARGET}/usr/sbin
+			;;
+		*)
+			die "Unknown Hurd target, please file a bug"
+			;;
+	esac
+else
+	xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib
+	xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib
+fi
+
 ###
 ### We need some special riscv sauce here similar as in baselayout. Ugly.
 ### step 1: set up all multilib libdirs
