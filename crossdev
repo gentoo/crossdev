@@ -733,6 +733,14 @@ uninstall() {
 
 	setup_portage_vars
 
+	for hchost in "${HCHOSTS[@]}"; do
+		if [[ ${hchost} == "${CTARGET}" ]] ; then
+			eerror "Refusing to delete a cross-compiler using the same"
+			eerror "target name as your host utils."
+			exit 1
+		fi
+	done
+
 	ewarn "Uninstalling target '${CTARGET}' ..."
 
 	# clean out portage config files
