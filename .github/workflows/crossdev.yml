@@ -203,9 +203,11 @@ jobs:
           - target: i686-gnu
             gcc: true
             llvm: false
+            profile: default/hurd/x86/23.0/i686
           - target: x86_64-gnu
             gcc: true
             llvm: false
+            profile: default/hurd/amd64/23.0
         stage3:
           - latest # glibc+GCC
           - llvm # glibc+LLVM and GCC as a fallback
