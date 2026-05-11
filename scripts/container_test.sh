@@ -83,6 +83,10 @@ while [[ $# -gt 0 ]]; do
 			TARGET="$2"
 			shift 2
 			;;
+		--profile)
+			PROFILE="$2"
+			shift 2
+			;;
 		*)
 			echo "Unknown option: $1"
 			print_help
@@ -111,5 +115,6 @@ run_in_container make install
 run_in_container eselect repository create crossdev
 run_in_container crossdev --show-fail-log "${EXTRA_ARGS[@]}" --target "${TARGET}"
 if [[ "${EMERGE_SYSTEM}" -eq 1 ]]; then
+	[[ -v PROFILE ]] && PORTAGE_CONFIGROOT="/usr/${TARGET}" run_in_container "eselect" profile set "${PROFILE}"
 	run_in_container "${TARGET}-emerge" @system
 fi
