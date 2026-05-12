@@ -115,6 +115,6 @@ run_in_container make install
 run_in_container eselect repository create crossdev
 run_in_container crossdev --show-fail-log "${EXTRA_ARGS[@]}" --target "${TARGET}"
 if [[ "${EMERGE_SYSTEM}" -eq 1 ]]; then
-	[[ -v PROFILE ]] && PORTAGE_CONFIGROOT="/usr/${TARGET}" run_in_container "eselect" profile set "${PROFILE}"
+	[[ -v PROFILE ]] && PORTAGE_CONFIGROOT="/usr/${TARGET}" run_in_container "eselect" profile set --force "${PROFILE}"
 	run_in_container "${TARGET}-emerge" @system
 fi
