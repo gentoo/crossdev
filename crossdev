@@ -273,7 +273,7 @@ parse_target() {
 			KPKG="[none]"
 			LCAT="dev-embedded" LPKG="avr-libc"
 			GUSE+=" -openmp -fortran -go" # doesn't work
-			MULTILIB_USE="yes" #377039
+			MULTILIB_USE="yes" # avr requires multilib, that provides libgcc for all sub-architectures #378387, #377039
 			BUSE+=" cxx"
 			WITH_DEF_HEADERS="no"
 			;;
@@ -342,7 +342,8 @@ parse_target() {
 			# for that.
 			GUSE+=" zlib zstd"
 
-			# We need multilib for openmp to be built w/ -mgomp
+			# We need multilib for openmp to be built w/ -mgomp 
+			# https://gcc.gnu.org/legacy-ml/gcc-help/2020-01/msg00106.html
 			MULTILIB_USE="yes"
 			WITH_DEF_HEADERS="no"
 			;;
@@ -367,6 +368,7 @@ parse_target() {
 			GUSE+=" zlib zstd"
 
 			# We need multilib for openmp to be built w/ -mgomp
+			# https://gcc.gnu.org/legacy-ml/gcc-help/2020-01/msg00106.html
 			MULTILIB_USE="yes"
 			WITH_DEF_HEADERS="no"
 			;;
@@ -446,7 +448,7 @@ parse_target() {
 			;;
 
 		# Bare metal targets
-		*-newlib|*-elf|*-eabi|*-rtems*)
+		*-newlib|*-elf|*-eabi*|*-rtems*)
 			LPKG="newlib"
 			KPKG="[none]"
 			GMASK+=" default-stack-clash-protection hardened ssp"
@@ -454,7 +456,9 @@ parse_target() {
 			GUSE+=" -fortran" #589672, needs syscalls
 			GUSE+=" -hardened" #687598, needs -fstack-check=specific support
 			GUSE+=" -default-stack-clash-protection -ssp" # SSP isn't supported for freestanding anyway
-			MULTILIB_USE="yes" #407275
+			
+			[[ "$CTARGET" != armv*-eabi[hs]f ]] \
+				&& MULTILIB_USE="yes" #868636, #407275
 			WITH_DEF_HEADERS="no"
 			;;
 
@@ -546,7 +550,7 @@ parse_target() {
 		mingw*|*-mingw*) pie_support=no
 			;;
 		# Many bare-metal targets don't work with pie as-is
-		*-elf|*-eabi)
+		*-elf|*-eabi*)
 			# mips can't generate freestanding PIC:
 			#   cc1: error: position-independent code requires ‘-mabicalls’
 			# arm firmware packages don't expect pie-by-default:
@@ -1518,22 +1522,12 @@ set_portage() {
 
 	[[ ${pkg} == "[none]" ]] && return 0
 
-	case ${CTARGET} in
-		# avr requires multilib, that provides
-		# libgcc for all sub-architectures #378387
-		avr*)
-			mask+=" -multilib"
-			force+=" multilib"
-			;;
-		accel-nvptx*|nvptx*|*-newlib|*-elf|*-eabi)
-			# nvptx: needs multilib because of https://gcc.gnu.org/legacy-ml/gcc-help/2020-01/msg00106.html.
-			mask+=" -multilib"
-			force+=" multilib"
-			;;
-		*)
-			mask+=" multilib"
-			;;
-	esac
+	if [[ ${MULTILIB_USE} == "yes" ]]; then
+		mask+=" -multilib"
+		force+=" multilib"
+	else
+		mask+=" multilib"
+	fi
 
 	set_use_mask ${pkg} "${mask}"
 	set_use_force ${pkg} "${force}"
@@ -1825,6 +1819,7 @@ doemerge() {
 
 	[[ ${pn} == "[none]" ]] && return 0
 
+	# MULTILIB_USE could be overriden at runtime
 	set_use ${pn} ${USE} $( [[ ${MULTILIB_USE} == "no" ]] && echo - )multilib
 
 	[[ ${INIT_TARGET_ONLY} == "yes" ]] && return 0
