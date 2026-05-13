@@ -188,6 +188,22 @@ jobs:
             args: --skip-system
             gcc: true
             llvm: false
+          - target: armv4-none-eabisf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv5tej-none-eabisf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv6j-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7a-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
           - target: avr
             args: --skip-system
             gcc: true
