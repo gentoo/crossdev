@@ -47,7 +47,7 @@ remove_container() {
 
 run_in_container() {
 	echo "+ $@"
-	"${CONTAINER_ENGINE}" exec "${CONTAINER_NAME}" "$@"
+	"${CONTAINER_ENGINE}" exec ${_CONTAINER_ARGS:+${_CONTAINER_ARGS}} "${CONTAINER_NAME}" "$@"
 }
 
 CONTAINER_ENGINE=${CONTAINER_ENGINE:-$(detect_container_engine)}
@@ -115,6 +115,6 @@ run_in_container make install
 run_in_container eselect repository create crossdev
 run_in_container crossdev --show-fail-log "${EXTRA_ARGS[@]}" --target "${TARGET}"
 if [[ "${EMERGE_SYSTEM}" -eq 1 ]]; then
-	[[ -v PROFILE ]] && PORTAGE_CONFIGROOT="/usr/${TARGET}" run_in_container "eselect" profile set --force "${PROFILE}"
+	[[ -v PROFILE ]] && _CONTAINER_ARGS="--env PORTAGE_CONFIGROOT=/usr/${TARGET}" run_in_container "eselect" profile set --force "${PROFILE}"
 	run_in_container "${TARGET}-emerge" @system
 fi
