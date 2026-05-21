@@ -1764,28 +1764,20 @@ fi
 ### step 2: set up the compat symlink of the default abi for non-multilib
 case ${CTARGET} in
 	riscv*)
-		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64
-		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64/lp64
-		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib64/lp64d
 		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64
 		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64/lp64
 		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib64/lp64d
-		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32
-		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32/ilp32
-		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib32/ilp32d
 		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32
 		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32/ilp32
 		xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib32/ilp32d
+		ln -s usr/lib64 "${EPREFIX}"/usr/${CTARGET}/lib64
+		ln -s usr/lib32 "${EPREFIX}"/usr/${CTARGET}/lib32
 		;;&
 	riscv64*)
-		rmdir "${EPREFIX}"/usr/${CTARGET}/lib64/${DEFAULT_ABI}
-		ln -s . "${EPREFIX}"/usr/${CTARGET}/lib64/${DEFAULT_ABI}
 		rmdir "${EPREFIX}"/usr/${CTARGET}/usr/lib64/${DEFAULT_ABI}
 		ln -s . "${EPREFIX}"/usr/${CTARGET}/usr/lib64/${DEFAULT_ABI}
 		;;
 	riscv32*)
-		rmdir "${EPREFIX}"/usr/${CTARGET}/lib32/${DEFAULT_ABI}
-		ln -s ../lib "${EPREFIX}"/usr/${CTARGET}/lib32/${DEFAULT_ABI}
 		rmdir "${EPREFIX}"/usr/${CTARGET}/usr/lib32/${DEFAULT_ABI}
 		ln -s ../lib "${EPREFIX}"/usr/${CTARGET}/usr/lib32/${DEFAULT_ABI}
 		;;
