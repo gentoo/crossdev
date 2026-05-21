@@ -1713,9 +1713,12 @@ if [[ ${CTARGET} == *-gnu* ]] ; then
 	# Identify if it is really Hurd or not
 	case ${CTARGET} in
 		*-linux*)
-			# Same as non-Hurd patch
-			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/lib
 			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/lib
+			xmkdir -p "${EPREFIX}"/usr/${CTARGET}/usr/bin
+			ln -s usr/lib "${EPREFIX}"/usr/${CTARGET}/lib
+			ln -s usr/bin "${EPREFIX}"/usr/${CTARGET}/bin
+			ln -s usr/bin "${EPREFIX}"/usr/${CTARGET}/sbin
+			ln -s bin "${EPREFIX}"/usr/${CTARGET}/usr/sbin
 			;;
 		i[3-7]86*-gnu*)
 			# Hurd is special as it defaults upstream to implicit inverse usr-merge
