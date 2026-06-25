@@ -10,6 +10,7 @@ Options:
   --skip-system         Skip emerging the @system set after setting up crossdev.
   --tag <tag>           Specify the container tag to use. Default is 'latest'.
   --target <target>     Specify the target architecture for crossdev. Required.
+  --profile <profile>   Specify the Portage profile for crossdev. Default is 'embedded'.
   -h, --help            Show this help message and exit.
 
 Environment Variables:
@@ -57,6 +58,7 @@ CONTAINER_TAG="latest"
 EMERGE_SYSTEM=1
 USE_LLVM=0
 TOPDIR=$(git rev-parse --show-toplevel)
+unset PROFILE
 
 remove_container || true
 trap "remove_container" EXIT
@@ -71,6 +73,10 @@ while [[ $# -gt 0 ]]; do
 			USE_LLVM=1
 			shift 1
 			;;
+		--profile)
+			PROFILE="$2"
+			shift 2
+			;;
 		--skip-system)
 			EMERGE_SYSTEM=0
 			shift 1
@@ -81,10 +87,6 @@ while [[ $# -gt 0 ]]; do
 			;;
 		--target)
 			TARGET="$2"
-			shift 2
-			;;
-		--profile)
-			PROFILE="$2"
 			shift 2
 			;;
 		*)
@@ -113,7 +115,7 @@ run_in_container getuto
 run_in_container emerge --getbinpkg app-eselect/eselect-repository sys-apps/config-site
 run_in_container make install
 run_in_container eselect repository create crossdev
-run_in_container crossdev --show-fail-log "${EXTRA_ARGS[@]}" --target "${TARGET}"
+run_in_container crossdev --show-fail-log "${EXTRA_ARGS[@]}" --target "${TARGET}" ${PROFILE+--profile "${PROFILE}"}
 if [[ "${EMERGE_SYSTEM}" -eq 1 ]]; then
 	[[ -v PROFILE ]] && _CONTAINER_ARGS="--env PORTAGE_CONFIGROOT=/usr/${TARGET}" run_in_container "eselect" profile set --force "${PROFILE}"
 	run_in_container "${TARGET}-emerge" @system

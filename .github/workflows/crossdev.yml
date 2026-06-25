@@ -146,14 +146,17 @@ jobs:
           - target: riscv32-unknown-linux-gnu
             gcc: true
             llvm: false
-          # busybox fails to build: `‘SYS_settimeofday’ undeclared`.
+            args: --profile default/linux/riscv/23.0/rv32/ilp32
+          # busybox fails to build: `’SYS_settimeofday’ undeclared`.
           # - target: riscv32-unknown-linux-musl
           - target: riscv64-unknown-linux-gnu
             gcc: true
             llvm: false
+            args: --profile default/linux/riscv/23.0/rv64/lp64
           - target: riscv64-unknown-linux-musl
             gcc: true
             llvm: true
+            args: --profile default/linux/riscv/23.0/rv64/lp64d/musl
           # glibc fails to build: `no support for pre-v8 sparc`.
           # - target: sparc-unknown-linux-gnu
           - target: sparc64-unknown-linux-gnu
