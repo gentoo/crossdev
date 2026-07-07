@@ -1919,35 +1919,14 @@ if ! ex_fast ; then
 
 	# stage 0: binutils
 	if [[ "${LLVM}" == "yes" ]] ; then
-		if ! portageq has_version / "llvm-core/llvm" ; then
-			eerror "LLVM is not installed"
-			exit 1
+
+		CC=${CC:-clang}
+		if ! ${CC} -target ${CTARGET} -mcpu=help &> /dev/null; then
+			case $? in
+				1) die "Target architecture not supported by installed LLVM toolchain" ;;
+				*) die "LLVM is not installed" ;;
+			esac
 		fi
-
-		best_ver=$(portageq best_version "${EPREFIX}"/ llvm-core/llvm)
-		llvm_use=$(portageq metadata "${EPREFIX}"/ installed "${best_ver}" USE)
-
-		llvm_arch=""
-		case ${CTARGET} in
-			x86*) llvm_arch="X86" ;;
-			arm*) llvm_arch="ARM" ;;
-			aarch64*) llvm_arch="AArch64" ;;
-			riscv*) llvm_arch="RISCV" ;;
-			mips*) llvm_arch="Mips" ;;
-			loongarch*) llvm_arch="LoongArch" ;;
-			powerpc*) llvm_arch="PowerPC" ;;
-			sparc*) llvm_arch="Sparc" ;;
-		esac
-
-		supported_arch=0
-		for flag in ${llvm_use} ; do
-			if [[ ${flag} == llvm_targets_* ]] ; then
-				target=${flag#llvm_targets_}
-				[[ ${llvm_arch} == ${target} ]] && supported_arch=1
-			fi
-		done
-
-		[[ ${supported_arch} -eq 0 ]] && die "Target architecture not supported by installed LLVM toolchain"
 
 		USE="${CUSE}" doemerge ${CPKG}
 	else
