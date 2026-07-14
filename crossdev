@@ -1929,9 +1929,9 @@ if ! ex_fast ; then
 
 		llvm_arch=""
 		case ${CTARGET} in
-			x86*) llvm_arch="X86" ;;
+			i?86*|x86*) llvm_arch="X86" ;;
+			arm64*|aarch64*) llvm_arch="AArch64" ;;
 			arm*) llvm_arch="ARM" ;;
-			aarch64*) llvm_arch="AArch64" ;;
 			riscv*) llvm_arch="RISCV" ;;
 			mips*) llvm_arch="Mips" ;;
 			loongarch*) llvm_arch="LoongArch" ;;
