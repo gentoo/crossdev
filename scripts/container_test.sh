@@ -6,6 +6,7 @@ print_help() {
 	echo "Usage: $0 [OPTIONS]
 
 Options:
+  --env                 Specify env settings for binutils/gdb/gcc/kernel/libc. 
   --llvm                Use LLVM/Clang as a cross compiler
   --skip-system         Skip emerging the @system set after setting up crossdev.
   --tag <tag>           Specify the container tag to use. Default is 'latest'.
@@ -67,6 +68,10 @@ while [[ $# -gt 0 ]]; do
 			print_help
 			exit 0
 			;;
+		--env)
+			ENV_SETTINGS="$2"
+			shift 2
+			;;
 		--llvm)
 			USE_LLVM=1
 			shift 1
@@ -98,6 +103,9 @@ done
 EXTRA_ARGS=()
 if [[ "${USE_LLVM}" -eq 1 ]]; then
 	EXTRA_ARGS+="--llvm"
+fi
+if [[ -v ENV_SETTINGS ]]; then
+	EXTRA_ARGS+=("--env" "${ENV_SETTINGS}")
 fi
 
 "${CONTAINER_ENGINE}" run -d \

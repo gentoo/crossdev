@@ -189,6 +189,218 @@ jobs:
             args: --skip-system
             gcc: true
             llvm: false
+          # Cortex-M / ARMv6-M through ARMv8.1-M non-multilib targets
+          - target: armv6m-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv6sm-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7em-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7em-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7em-softfp-none-eabi
+            args: --skip-system --env 'EXTRA_ECONF="--with-fpu=fpv4-sp-d16"'
+            gcc: true
+            llvm: false
+          - target: armv7em-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7em-none-eabihf
+            args: --skip-system --env 'EXTRA_ECONF="--with-fpu=fpv4-sp-d16"'
+            gcc: true
+            llvm: false
+          - target: armv7m-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8m.base-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8m.main-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8m.main-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8m.main-softfp-none-eabi
+            args: --skip-system --env 'EXTRA_ECONF="--with-fpu=fpv5-sp-d16"'
+            gcc: true
+            llvm: false
+          - target: armv8m.main-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8m.main-none-eabihf
+            args: --skip-system --env 'EXTRA_ECONF="--with-fpu=fpv5-sp-d16"'
+            gcc: true
+            llvm: false
+          - target: armv8.1m.main+mve-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8.1m.main+pacbti-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8.1m.main+pacbti+fp-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8.1m.main+pacbti+fp-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8.1m.main+pacbti+fp.dp-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8.1m.main+pacbti+fp.dp-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8.1m.main+pacbti+mve-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          # Cortex-A / ARMv7-A, ARMv7-R, ARMv8-A non-multilib targets
+          - target: armv7a-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7a-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7a-softfp-none-eabi
+            args: --skip-system --env 'EXTRA_ECONF="--with-fpu=neon-vfpv3"'
+            gcc: true
+            llvm: false
+          - target: armv7a-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7a-none-eabihf
+            args: --skip-system --env 'EXTRA_ECONF="--with-fpu=neon-vfpv3"'
+            gcc: true
+            llvm: false
+          - target: armv7r-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7r-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7r-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7ve-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7ve-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7ve-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8a-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8a-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv8a-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          # Generic ARMv4 through ARMv7 non-multilib targets
+          - target: arm-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv4-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv4t-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv5t-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv5te-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv5te-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv5te-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv6-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv6-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv6-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv6j-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv6t2-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv6t2-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv6t2-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7-softfloat-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7-softfp-none-eabi
+            args: --skip-system
+            gcc: true
+            llvm: false
+          - target: armv7-none-eabihf
+            args: --skip-system
+            gcc: true
+            llvm: false
+          # Embedded or otherwise special targets
           - target: avr
             args: --skip-system
             gcc: true
